@@ -214,11 +214,66 @@ PlayerTab:CreateSection("التحليق (Fly)")
 
 -- الطيران
 
-PlayerTab:CreateButton({
-   Name = "تشغيل سكربت الطيران (المشفر)",
-   Callback = function()
-      -- وضع الكود المشفر هنا ليتم استدعاؤه عند الضغط على الزر
-      loadstring(game:HttpGet("\104\116\116\112\115\58\47\47\103\105\115\116\46\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\114\97\119\47\54\53\101\53\100\48\102\97\53\54\51\100\53\54\54\54\54\54\102\51\97\53\98\53\53\54\52\102\100\102\53\101\47\102\108\121"))()
+local Flying = false
+local FlySpeed = 50
+local player = game.Players.LocalPlayer
+
+PlayerTab:CreateSection("نظام الطيران V2")
+
+PlayerTab:CreateToggle({
+   Name = "تفعيل الطيران",
+   CurrentValue = false,
+   Callback = function(Value)
+      Flying = Value
+      local char = player.Character or player.CharacterAdded:Wait()
+      local root = char:WaitForChild("HumanoidRootPart")
+      
+      if Flying then
+         -- إنشاء القوى الفيزيائية داخلياً لضمان العمل
+         local bv = Instance.new("BodyVelocity", root)
+         bv.Name = "EliteFlyBV"
+         bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+         bv.Velocity = Vector3.new(0, 0.1, 0)
+         
+         local bg = Instance.new("BodyGyro", root)
+         bg.Name = "EliteFlyBG"
+         bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+         bg.P = 15000
+         
+         task.spawn(function()
+            while Flying and root and char.Parent do
+               local hum = char:FindFirstChild("Humanoid")
+               local cam = workspace.CurrentCamera
+               
+               if hum and hum.MoveDirection.Magnitude > 0 then
+                  -- الطيران باتجاه الكاميرا عند تحريك زر المشي
+                  bv.Velocity = cam.CFrame.LookVector * FlySpeed
+               else
+                  -- الثبات في المكان عند ترك الزر
+                  bv.Velocity = Vector3.new(0, 0.1, 0)
+               end
+               
+               bg.CFrame = cam.CFrame
+               task.wait()
+            end
+            if bv then bv:Destroy() end
+            if bg then bg:Destroy() end
+         end)
+      else
+         -- تنظيف عند الإغلاق
+         if root:FindFirstChild("EliteFlyBV") then root.EliteFlyBV:Destroy() end
+         if root:FindFirstChild("EliteFlyBG") then root.EliteFlyBG:Destroy() end
+      end
+   end,
+})
+
+PlayerTab:CreateSlider({
+   Name = "سرعة الطيران",
+   Range = {10, 500},
+   Increment = 10,
+   CurrentValue = 50,
+   Callback = function(Value)
+      FlySpeed = Value
    end,
 })
 
