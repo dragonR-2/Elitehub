@@ -218,59 +218,46 @@ local Flying = false
 local FlySpeed = 50
 local player = game.Players.LocalPlayer
 
-PlayerTab:CreateSection("التحليق عبر أداة التحكم (جوال)")
+PlayerTab:CreateSection("الطيران")
 
 PlayerTab:CreateToggle({
-   Name = "تفعيل الطيران الذكي",
+   Name = "تفعيل الطيران",
    CurrentValue = false,
    Callback = function(Value)
       Flying = Value
-      local character = player.Character or player.CharacterAdded:Wait()
-      local root = character:WaitForChild("HumanoidRootPart")
-      local hum = character:WaitForChild("Humanoid")
+      local char = player.Character or player.CharacterAdded:Wait()
+      local root = char:WaitForChild("HumanoidRootPart")
+      local hum = char:WaitForChild("Humanoid")
 
       if Flying then
-         -- إنشاء القوى الفيزيائية
-         local bv = Instance.new("BodyVelocity")
-         bv.Name = "EliteFlyBV"
+         local bv = Instance.new("BodyVelocity", root)
          bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-         bv.Velocity = Vector3.new(0, 0.1, 0)
-         bv.Parent = root
          
-         local bg = Instance.new("BodyGyro")
-         bg.Name = "EliteFlyBG"
+         local bg = Instance.new("BodyGyro", root)
          bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
-         bg.P = 15000
-         bg.Parent = root
-         
+
          task.spawn(function()
-            while Flying and character and root do
-               -- السحر هنا: نأخذ اتجاه زر المشي ونضربه في اتجاه الكاميرا
-               local cameraCFrame = workspace.CurrentCamera.CFrame
-               local moveDirection = hum.MoveDirection -- هذا هو زر المشي (الأنالوج)
-               
-               if moveDirection.Magnitude > 0 then
-                  -- تحويل حركة زر المشي لتتبع اتجاه الكاميرا (طيران ثلاثي الأبعاد)
-                  bv.Velocity = cameraCFrame:VectorToWorldSpace(Vector3.new(moveDirection.X, 0, -moveDirection.Z).Unit * 1.5) * FlySpeed
-               else
-                  -- تثبيت في الهواء عند ترك الزر
-                  bv.Velocity = Vector3.new(0, 0.1, 0)
-               end
-               
-               bg.CFrame = cameraCFrame
+            while Flying and root do
+               -- الطيران يتبع اتجاه الكاميرا وزر المشي
+               bv.Velocity = workspace.CurrentCamera.CFrame.LookVector * (hum.MoveDirection.Magnitude > 0 and FlySpeed or 0)
+               bg.CFrame = workspace.CurrentCamera.CFrame
                task.wait()
             end
-            -- تنظيف عند الإغلاق
-            if root:FindFirstChild("EliteFlyBV") then root.EliteFlyBV:Destroy() end
-            if root:FindFirstChild("EliteFlyBG") then root.EliteFlyBG:Destroy() end
+            bv:Destroy()
+            bg:Destroy()
          end)
-      else
-         -- التأكد من الحذف عند إطفاء الزر
-         if root:FindFirstChild("EliteFlyBV") then root.EliteFlyBV:Destroy() end
-         if root:FindFirstChild("EliteFlyBG") then root.EliteFlyBG:Destroy() end
       end
    end,
 })
+
+PlayerTab:CreateSlider({
+   Name = "سرعة الطيران",
+   Range = {10, 300},
+   Increment = 10,
+   CurrentValue = 50,
+   Callback = function(v) FlySpeed = v end,
+})
+
 
 PlayerTab:CreateSlider({
    Name = "سرعة الطيران",
