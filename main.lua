@@ -19,6 +19,28 @@ local VisualsTab = Window:CreateTab("الرؤية", 4483362458)
 -- [[ التبويب الرئيسي ]]
 MainTab:CreateSection("أدوات التحكم")
 
+MainTab:CreateSection("تخصيص المظهر")
+
+MainTab:CreateDropdown({
+   Name = "تغيير لون الواجهة",
+   Options = {"Default","Ocean","Green","Red","Dark"},
+   CurrentOption = "Default",
+   Callback = function(Option)
+      if Option == "Default" then
+         Rayfield:SetTheme("Default")
+      elseif Option == "Ocean" then
+         Rayfield:SetTheme("Ocean")
+      elseif Option == "Green" then
+         Rayfield:SetTheme("Green")
+      elseif Option == "Red" then
+         Rayfield:SetTheme("Serenity")
+      elseif Option == "Dark" then
+         Rayfield:SetTheme("Blox")
+      end
+   end,
+})
+
+
 MainTab:CreateToggle({
    Name = "النقر التلقائي (Auto Clicker)",
    CurrentValue = false,
