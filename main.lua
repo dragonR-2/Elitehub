@@ -214,32 +214,82 @@ PlayerTab:CreateSection("التحليق (Fly)")
 
 -- الطيران
 
-PlayerTab:CreateToggle({
-   Name = "تفعيل الطيران",
-   CurrentValue = false,
-   Flag = "FlyToggle",
-   Callback = function(Value)
-      Flying = Value
-      local player = game.Players.LocalPlayer
-      local character = player.Character or player.CharacterAdded:Wait()
-      local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+local player = game.Players.LocalPlayer
+local mouse = player:GetMouse()
+local flying = false
+local speed = 50
 
-      if Flying then
-         task.spawn(function()
-            local bv = Instance.new("BodyVelocity")
-            bv.Velocity = Vector3.new(0,0,0)
-            bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-            bv.Parent = humanoidRootPart
-            
-            while Flying do
-               bv.Velocity = workspace.CurrentCamera.CFrame.LookVector * FlySpeed
-               task.wait()
-            end
-            bv:Destroy()
-         end)
+PlayerTab:CreateToggle({
+   Name = "طيران احترافي (V2)",
+   CurrentValue = false,
+   Callback = function(v)
+      flying = v
+      if not v then 
+         if player.Character and player.Character:FindFirstChild("Humanoid") then
+            player.Character.Humanoid.PlatformStand = false
+         end
+         return 
       end
+      
+      -- محرك الطيران الاحترافي
+      task.spawn(function()
+         local char = player.Character
+         local root = char:WaitForChild("HumanoidRootPart")
+         local hum = char:WaitForChild("Humanoid")
+         
+         -- منع اللاعب من السقوط أو الحركة الطبيعية
+         hum.PlatformStand = true
+         
+         local bg = Instance.new("BodyGyro", root)
+         bg.P = 9e4
+         bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+         bg.CFrame = root.CFrame
+         
+         local bv = Instance.new("BodyVelocity", root)
+         bv.Velocity = Vector3.new(0, 0, 0)
+         bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+         
+         while flying and char and root do
+            bv.Velocity = Vector3.new(0, 0, 0)
+            
+            -- حساب الاتجاهات بناءً على ضغط المفاتيح والكاميرا
+            local look = workspace.CurrentCamera.CFrame
+            local moveDir = Vector3.new(0,0,0)
+            
+            -- تحكم بسيط (يعمل مع أغلب المحاكيات)
+            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.W) then
+               moveDir = moveDir + look.LookVector
+            end
+            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.S) then
+               moveDir = moveDir - look.LookVector
+            end
+            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.A) then
+               moveDir = moveDir - look.RightVector
+            end
+            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.D) then
+               moveDir = moveDir + look.RightVector
+            end
+            
+            bv.Velocity = moveDir * speed
+            bg.CFrame = look -- جعل اللاعب يواجه دائماً اتجاه الكاميرا
+            task.wait()
+         end
+         
+         bg:Destroy()
+         bv:Destroy()
+         hum.PlatformStand = false
+      end)
    end,
 })
+
+PlayerTab:CreateSlider({
+   Name = "سرعة الطيران",
+   Range = {10, 500},
+   Increment = 10,
+   CurrentValue = 50,
+   Callback = function(v) speed = v end,
+})
+
 
 PlayerTab:CreateSlider({
    Name = "سرعة الطيران",
