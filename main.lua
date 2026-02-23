@@ -24,11 +24,17 @@ local StatsSection = MainTab:CreateSection("حالة الجهاز")
 local LabelFPS = MainTab:CreateLabel("FPS: جاري الحساب...")
 local LabelPing = MainTab:CreateLabel("Ping: جاري الحساب...")
 
--- تحديث العدادات تلقائياً
+-- محرك التحديث (طريقة مضمونة)
 task.spawn(function()
-    while task.wait(1) do
-        local fps = math.floor(workspace:GetRealTimeInventoryAndStatistics().EstimatedFps)
+    local RunService = game:GetService("RunService")
+    while task.wait(0.5) do
+        -- حساب الـ FPS
+        local fps = math.floor(1 / RunService.RenderStepped:Wait())
+        
+        -- حساب الـ Ping (الطريقة الرسمية من إحصائيات الشبكة)
         local ping = math.floor(game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue())
+        
+        -- تحديث النصوص في السكربت
         LabelFPS:Set("FPS: " .. fps)
         LabelPing:Set("Ping: " .. ping .. "ms")
     end
