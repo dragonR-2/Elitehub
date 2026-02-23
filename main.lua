@@ -207,14 +207,52 @@ PlayerTab:CreateToggle({
    end,
 })
 
+local Flying = false
+local FlySpeed = 16
+
+PlayerTab:CreateSection("التحليق (Fly)")
+
+-- الطيران
+
 PlayerTab:CreateToggle({
-   Name = "طيران CFrame 🚀",
+   Name = "تفعيل الطيران",
    CurrentValue = false,
-   Flag = "Fly",
+   Flag = "FlyToggle",
    Callback = function(Value)
-      _G.FlyEnabled = Value
+      Flying = Value
+      local player = game.Players.LocalPlayer
+      local character = player.Character or player.CharacterAdded:Wait()
+      local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+      if Flying then
+         task.spawn(function()
+            local bv = Instance.new("BodyVelocity")
+            bv.Velocity = Vector3.new(0,0,0)
+            bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+            bv.Parent = humanoidRootPart
+            
+            while Flying do
+               bv.Velocity = workspace.CurrentCamera.CFrame.LookVector * FlySpeed
+               task.wait()
+            end
+            bv:Destroy()
+         end)
+      end
    end,
 })
+
+PlayerTab:CreateSlider({
+   Name = "سرعة الطيران",
+   Range = {16, 300},
+   Increment = 10,
+   Suffix = "Speed",
+   CurrentValue = 50,
+   Flag = "FlySpeed",
+   Callback = function(Value)
+      FlySpeed = Value
+   end,
+})
+
 
 PlayerTab:CreateToggle({
    Name = "تفعيل الضربة البعيدة (Hitbox)",
