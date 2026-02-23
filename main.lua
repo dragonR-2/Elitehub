@@ -19,26 +19,20 @@ local VisualsTab = Window:CreateTab("الرؤية", 4483362458)
 -- [[ التبويب الرئيسي ]]
 MainTab:CreateSection("أدوات التحكم")
 
-MainTab:CreateSection("تخصيص المظهر")
+local StatsSection = MainTab:CreateSection("حالة الجهاز")
 
-MainTab:CreateDropdown({
-   Name = "تغيير لون الواجهة",
-   Options = {"Default","Ocean","Green","Red","Dark"},
-   CurrentOption = "Default",
-   Callback = function(Option)
-      if Option == "Default" then
-         Rayfield:SetTheme("Default")
-      elseif Option == "Ocean" then
-         Rayfield:SetTheme("Ocean")
-      elseif Option == "Green" then
-         Rayfield:SetTheme("Green")
-      elseif Option == "Red" then
-         Rayfield:SetTheme("Serenity")
-      elseif Option == "Dark" then
-         Rayfield:SetTheme("Blox")
-      end
-   end,
-})
+local LabelFPS = MainTab:CreateLabel("FPS: جاري الحساب...")
+local LabelPing = MainTab:CreateLabel("Ping: جاري الحساب...")
+
+-- تحديث العدادات تلقائياً
+task.spawn(function()
+    while task.wait(1) do
+        local fps = math.floor(workspace:GetRealTimeInventoryAndStatistics().EstimatedFps)
+        local ping = math.floor(game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue())
+        LabelFPS:Set("FPS: " .. fps)
+        LabelPing:Set("Ping: " .. ping .. "ms")
+    end
+end)
 
 
 MainTab:CreateToggle({
