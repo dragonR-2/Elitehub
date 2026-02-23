@@ -1,5 +1,16 @@
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+-- نظام الترحيب الشخصي
+local playerName = game.Players.LocalPlayer.Name
+Rayfield:Notify({
+   Title = "Elite Hub Universal",
+   Content = "أهلاً بك يا " .. playerName .. "! تم تحميل النسخة الأصلية بنجاح.",
+   Duration = 6,
+   Image = 4483362458,
+})
 
+-- كود لإظهار عدد اللاعبين في السيرفر (ميزة إضافية)
+print("مرحباً بك في Elite Hub. السيرفر الحالي يحتوي على: " .. #game.Players:GetPlayers() .. " لاعبين.")
+
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 local Window = Rayfield:CreateWindow({
    Name = "Elite Hub | Universal",
    LoadingTitle = "جاري تحميل السكربت...",
