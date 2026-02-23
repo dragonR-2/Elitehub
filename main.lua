@@ -258,40 +258,6 @@ PlayerTab:CreateSlider({
    Callback = function(v) FlySpeed = v end,
 })
 
-
-PlayerTab:CreateSlider({
-   Name = "سرعة الطيران",
-   Range = {10, 500},
-   Increment = 10,
-   CurrentValue = 50,
-   Callback = function(Value)
-      FlySpeed = Value
-   end,
-})
-
-
-PlayerTab:CreateSlider({
-   Name = "سرعة الطيران",
-   Range = {10, 500},
-   Increment = 10,
-   CurrentValue = 50,
-   Callback = function(v) speed = v end,
-})
-
-
-PlayerTab:CreateSlider({
-   Name = "سرعة الطيران",
-   Range = {16, 300},
-   Increment = 10,
-   Suffix = "Speed",
-   CurrentValue = 50,
-   Flag = "FlySpeed",
-   Callback = function(Value)
-      FlySpeed = Value
-   end,
-})
-
-
 PlayerTab:CreateToggle({
    Name = "تفعيل الضربة البعيدة (Hitbox)",
    CurrentValue = false,
