@@ -214,73 +214,74 @@ PlayerTab:CreateSection("التحليق (Fly)")
 
 -- الطيران
 
+local Flying = false
+local FlySpeed = 50
 local player = game.Players.LocalPlayer
-local mouse = player:GetMouse()
-local flying = false
-local speed = 50
+
+PlayerTab:CreateSection("التحليق عبر أداة التحكم (جوال)")
 
 PlayerTab:CreateToggle({
-   Name = "طيران احترافي (V2)",
+   Name = "تفعيل الطيران الذكي",
    CurrentValue = false,
-   Callback = function(v)
-      flying = v
-      if not v then 
-         if player.Character and player.Character:FindFirstChild("Humanoid") then
-            player.Character.Humanoid.PlatformStand = false
-         end
-         return 
+   Callback = function(Value)
+      Flying = Value
+      local character = player.Character or player.CharacterAdded:Wait()
+      local root = character:WaitForChild("HumanoidRootPart")
+      local hum = character:WaitForChild("Humanoid")
+
+      if Flying then
+         -- إنشاء القوى الفيزيائية
+         local bv = Instance.new("BodyVelocity")
+         bv.Name = "EliteFlyBV"
+         bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+         bv.Velocity = Vector3.new(0, 0.1, 0)
+         bv.Parent = root
+         
+         local bg = Instance.new("BodyGyro")
+         bg.Name = "EliteFlyBG"
+         bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+         bg.P = 15000
+         bg.Parent = root
+         
+         task.spawn(function()
+            while Flying and character and root do
+               -- السحر هنا: نأخذ اتجاه زر المشي ونضربه في اتجاه الكاميرا
+               local cameraCFrame = workspace.CurrentCamera.CFrame
+               local moveDirection = hum.MoveDirection -- هذا هو زر المشي (الأنالوج)
+               
+               if moveDirection.Magnitude > 0 then
+                  -- تحويل حركة زر المشي لتتبع اتجاه الكاميرا (طيران ثلاثي الأبعاد)
+                  bv.Velocity = cameraCFrame:VectorToWorldSpace(Vector3.new(moveDirection.X, 0, -moveDirection.Z).Unit * 1.5) * FlySpeed
+               else
+                  -- تثبيت في الهواء عند ترك الزر
+                  bv.Velocity = Vector3.new(0, 0.1, 0)
+               end
+               
+               bg.CFrame = cameraCFrame
+               task.wait()
+            end
+            -- تنظيف عند الإغلاق
+            if root:FindFirstChild("EliteFlyBV") then root.EliteFlyBV:Destroy() end
+            if root:FindFirstChild("EliteFlyBG") then root.EliteFlyBG:Destroy() end
+         end)
+      else
+         -- التأكد من الحذف عند إطفاء الزر
+         if root:FindFirstChild("EliteFlyBV") then root.EliteFlyBV:Destroy() end
+         if root:FindFirstChild("EliteFlyBG") then root.EliteFlyBG:Destroy() end
       end
-      
-      -- محرك الطيران الاحترافي
-      task.spawn(function()
-         local char = player.Character
-         local root = char:WaitForChild("HumanoidRootPart")
-         local hum = char:WaitForChild("Humanoid")
-         
-         -- منع اللاعب من السقوط أو الحركة الطبيعية
-         hum.PlatformStand = true
-         
-         local bg = Instance.new("BodyGyro", root)
-         bg.P = 9e4
-         bg.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
-         bg.CFrame = root.CFrame
-         
-         local bv = Instance.new("BodyVelocity", root)
-         bv.Velocity = Vector3.new(0, 0, 0)
-         bv.MaxForce = Vector3.new(9e9, 9e9, 9e9)
-         
-         while flying and char and root do
-            bv.Velocity = Vector3.new(0, 0, 0)
-            
-            -- حساب الاتجاهات بناءً على ضغط المفاتيح والكاميرا
-            local look = workspace.CurrentCamera.CFrame
-            local moveDir = Vector3.new(0,0,0)
-            
-            -- تحكم بسيط (يعمل مع أغلب المحاكيات)
-            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.W) then
-               moveDir = moveDir + look.LookVector
-            end
-            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.S) then
-               moveDir = moveDir - look.LookVector
-            end
-            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.A) then
-               moveDir = moveDir - look.RightVector
-            end
-            if game:GetService("UserInputService"):IsKeyDown(Enum.KeyCode.D) then
-               moveDir = moveDir + look.RightVector
-            end
-            
-            bv.Velocity = moveDir * speed
-            bg.CFrame = look -- جعل اللاعب يواجه دائماً اتجاه الكاميرا
-            task.wait()
-         end
-         
-         bg:Destroy()
-         bv:Destroy()
-         hum.PlatformStand = false
-      end)
    end,
 })
+
+PlayerTab:CreateSlider({
+   Name = "سرعة الطيران",
+   Range = {10, 500},
+   Increment = 10,
+   CurrentValue = 50,
+   Callback = function(Value)
+      FlySpeed = Value
+   end,
+})
+
 
 PlayerTab:CreateSlider({
    Name = "سرعة الطيران",
