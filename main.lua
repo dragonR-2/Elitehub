@@ -1,13 +1,10 @@
 
 local PandaAuth = loadstring(game:HttpGet("https://raw.githubusercontent.com/Panda-Development/PandaAuth/main/lib/PandaAuth.lua"))()
-
 if not PandaAuth:Authenticate("5b0f91fe-b5b5-4623-9be2-86e24f32fed3") then
-    game.Players.LocalPlayer:Kick("Key Required! Get it here: https://new.pandadevelopment.net/getkey?service=elitehub-v1")
     return
 end
 
--- كودك القديم يبدأ من هنا تحت...
-
+--ma niga $$$$$
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
