@@ -2,7 +2,7 @@
 local PandaAuth = loadstring(game:HttpGet("https://raw.githubusercontent.com/Panda-Development/PandaAuth/main/lib/PandaAuth.lua"))()
 
 -- 2. ضع الـ API Key الخاص بك هنا (الذي نسخته من الموقع)
-local ServiceID = "ضع_الـ_API_KEY_الخاص_بك_هنا"
+local ServiceID = 5b0f91fe-b5b5-4623-9be2-86e24f32fed3
 
 -- 3. عملية التحقق (قبل تشغيل السكربت)
 if PandaAuth:Authenticate(ServiceID) then
