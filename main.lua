@@ -1,3 +1,51 @@
+-- 1. تحميل مكتبة التحقق من Panda Auth
+local PandaAuth = loadstring(game:HttpGet("https://raw.githubusercontent.com/Panda-Development/PandaAuth/main/lib/PandaAuth.lua"))()
+
+-- 2. ضع الـ API Key الخاص بك هنا (الذي نسخته من الموقع)
+local ServiceID = "ضع_الـ_API_KEY_الخاص_بك_هنا"
+
+-- 3. عملية التحقق (قبل تشغيل السكربت)
+if PandaAuth:Authenticate(ServiceID) then
+
+    -- [بداية السكربت الأصلي الخاص بك]
+    local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+    local Window = Rayfield:CreateWindow({
+       Name = "Elitehub | Version 1.0",
+       LoadingTitle = "Elitehub Loading...",
+       LoadingSubtitle = "by DragonR",
+       ConfigurationSaving = {
+          Enabled = true,
+          FolderName = "ElitehubConfig",
+          FileName = "Elitehub"
+       },
+       Discord = {
+          Enabled = true,
+          Invite = "discord.gg/YourLink", -- ضع رابط الديسكورد هنا
+          Remember Joins = true
+       },
+       KeySystem = false, -- اجعلها false لأننا نستخدم نظام Panda الخارجي للربح
+    })
+
+    -- هنا تضع باقي التبويب (Tabs) والأزرار الخاصة بك كما هي
+    local MainTab = Window:CreateTab("🏠 Main", 4483362458)
+    local PlayerTab = Window:CreateTab("👤 Player", 4483362458)
+
+    -- باقي الأزرار (WalkSpeed, JumpPower... إلخ) تضعها هنا بالأسفل
+
+    Rayfield:Notify({
+       Title = "Success",
+       Content = "Welcome to Elitehub!",
+       Duration = 5,
+       Image = 4483362458,
+    })
+
+else
+    -- إذا لم يمتلك المستخدم مفتاحاً أو كان المفتاح خاطئاً
+    game.Players.LocalPlayer:Kick("❌ Elitehub Error: Key Required! \nGet your key here: https://new.pandadevelopment.net/getkey?service=elitehub-v1")
+end
+
+--😍😍😍😍😍😍😍😍😍
 
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
