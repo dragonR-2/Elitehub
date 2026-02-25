@@ -1,16 +1,4 @@
 
-local PandaAuth = loadstring(game:HttpGet("https://raw.githubusercontent.com/Panda-Development/PandaAuth/main/lib/PandaAuth.lua"))()
-
--- هذا السطر سيفتح نافذة للمستخدم ليضع المفتاح أو يضغط Get Key
-if not PandaAuth:Authenticate("5b0f91fe-b5b5-4623-9be2-86e24f32fed3") then
-    return -- إذا أغلق النافذة أو لم يضع المفتاح، السكربت سيتوقف ولن يفتح
-end
-
--- كودك الأصلي يبدأ من هنا...
-
-
---ma niga $$$$$
-
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
