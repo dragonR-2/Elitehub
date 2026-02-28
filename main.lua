@@ -175,6 +175,41 @@ MainTab:CreateButton({
 -- [[ تبويب اللاعب ]]
 PlayerTab:CreateSection("تطويرات الشخصية")
 
+MainTab:CreateButton({
+   Name = "Bring All Tools (Grab Everything)",
+   Callback = function()
+      local player = game.Players.LocalPlayer
+      local character = player.Character or player.CharacterAdded:Wait()
+      local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+      
+      -- البحث في كل الـ Workspace عن الأدوات
+      for _, v in pairs(game.Workspace:GetDescendants()) do
+         -- التأكد أن العنصر هو أداة (Tool) أو يحتوي على مقبض (Handle) يمكن لمسه
+         if v:IsA("Tool") or (v:IsA("Part") and v.Name == "Handle" and v.Parent:IsA("Model")) then
+            
+            -- جلب الأداة إلى موقع اللاعب
+            if v:IsA("Tool") then
+               -- إذا كانت أداة كاملة، نضعها في حقيبة اللاعب (Backpack)
+               v.Handle.CFrame = humanoidRootPart.CFrame
+            else
+               -- إذا كان مجرد مقبض داخل مودل، نجلب المودل كاملاً
+               v.CFrame = humanoidRootPart.CFrame
+            end
+            
+         end
+      end
+      
+      -- تنبيه بسيط داخل السكربت (Rayfield Notify)
+      Rayfield:Notify({
+         Title = "Elitehub Success",
+         Content = "تم محاولة جلب جميع الأدوات المتاحة!",
+         Duration = 3,
+         Image = 4483345998,
+      })
+   end,
+})
+
+
 PlayerTab:CreateSlider({
    Name = "سرعة المشي",
    Range = {16, 300},
