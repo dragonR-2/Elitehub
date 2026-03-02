@@ -1,98 +1,158 @@
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Knit = require(ReplicatedStorage.Packages.Knit)
-local PianoController = Knit.GetController("PianoController")
+--// ================================
+--// DELTA ADVANCED INTERCEPTOR + EXTERNAL TOGGLE
+--// ================================
 
--- متغيرات التحكم
-local Playing = false
-local CurrentText = ""
-local WaitTime = 0.18
+local MAX_LOG_SIZE = 500000
+local logs = ""
 
--- المترجم الشامل (لجميع النوتات 1-88)
-local FullMap = {
-    ["1"]=22, ["!"]=23, ["2"]=24, ["@"]=25, ["3"]=26, ["4"]=27, ["$"]=28, ["5"]=29, ["%"]=30, ["6"]=31, ["^"]=32, ["7"]=33, 
-    ["8"]=34, ["*"]=35, ["9"]=36, ["("]=37, ["0"]=38, ["q"]=39, ["Q"]=40, ["w"]=41, ["W"]=42, ["e"]=43, ["E"]=44, ["r"]=45, 
-    ["R"]=46, ["t"]=47, ["T"]=48, ["y"]=49, ["Y"]=50, ["u"]=51, ["U"]=52, ["i"]=53, ["I"]=54, ["o"]=55, ["O"]=56, ["p"]=57, 
-    ["P"]=58, ["a"]=59, ["A"]=60, ["s"]=61, ["S"]=62, ["d"]=63, ["D"]=64, ["f"]=65, ["F"]=66, ["g"]=67, ["G"]=68, ["h"]=69, 
-    ["H"]=70, ["j"]=71, ["J"]=72, ["k"]=73, ["K"]=74, ["l"]=75, ["L"]=76, ["z"]=77, ["Z"]=78, ["x"]=79, ["X"]=80, ["c"]=81, 
-    ["C"]=82, ["v"]=83, ["V"]=84, ["b"]=85, ["B"]=86, ["n"]=87, ["m"]=88
-}
+--// UI
+local gui = Instance.new("ScreenGui", game.CoreGui)
+gui.Name = "DEBUG_MONITOR"
+gui.DisplayOrder = 999
 
-local Window = Rayfield:CreateWindow({
-   Name = "Elite Piano Hub 🎹",
-   LoadingTitle = "جاري تفعيل محرك النفس الموسيقي...",
-})
+-- الزر الخارجي (الذي لا يختفي)
+local openBtn = Instance.new("TextButton", gui)
+openBtn.Size = UDim2.new(0, 100, 0, 35)
+openBtn.Position = UDim2.new(0, 10, 0, 10)
+openBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+openBtn.Text = "Show/Hide"
+openBtn.TextColor3 = Color3.new(1,1,1)
+openBtn.ZIndex = 20
+openBtn.Draggable = true -- سحبه في أي مكان
 
-local Tab = Window:CreateTab("Master Player", 4483362458)
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0.7,0,0.7,0)
+frame.Position = UDim2.new(0.15,0,0.15,0)
+frame.BackgroundColor3 = Color3.fromRGB(15,15,15)
+frame.ZIndex = 10
+frame.Visible = true -- يبدأ ظاهراً
 
-Tab:CreateInput({
-   Name = "صق النوتات هنا",
-   PlaceholderText = "انسخ Sheet من جوجل وضعه هنا...",
-   Callback = function(Text)
-      CurrentText = Text
-   end,
-})
+-- تشغيل الزر
+openBtn.MouseButton1Click:Connect(function()
+    frame.Visible = not frame.Visible
+end)
 
--- زر التشغيل مع تقنية (Humanize & Sustain)
-Tab:CreateButton({
-   Name = "▶️ بدء العزف (بشري)",
-   Callback = function()
-      if Playing or CurrentText == "" then return end
-      Playing = true
-      
-      task.spawn(function()
-          local i = 1
-          while i <= #CurrentText and Playing do
-              local char = CurrentText:sub(i,i)
-              
-              -- تقنية الصوت العسلي: قوة ضغط متغيرة (Velocity)
-              local vol = 0.7 + (math.random(-8, 8) / 100)
-              
-              if char == "[" then -- معالجة الأوتار (Chords)
-                  local chord = {}
-                  i = i + 1
-                  while i <= #CurrentText and CurrentText:sub(i,i) ~= "]" do
-                      local c = CurrentText:sub(i,i)
-                      if FullMap[c] then table.insert(chord, FullMap[c]) end
-                      i = i + 1
-                  end
-                  for _, n in ipairs(chord) do PianoController:PressClientKey(n, n, nil, nil, vol) end
-                  task.wait(WaitTime)
-                  -- ترك النوتة ترن قليلاً قبل الإغلاق (Sustain)
-                  task.delay(0.12, function()
-                      for _, n in ipairs(chord) do PianoController:ReleaseClientKey(n) end
-                  end)
-              elseif FullMap[char] then
-                  local n = FullMap[char]
-                  PianoController:PressClientKey(n, n, nil, nil, vol)
-                  -- تأخير بشري بسيط لجعل الإيقاع "يتنفس"
-                  task.wait(WaitTime + (math.random(-15, 15) / 1000))
-                  task.delay(0.12, function() PianoController:ReleaseClientKey(n) end)
-              elseif char == " " then
-                  task.wait(WaitTime * 2.5) -- النفس بين الجمل الموسيقية
-              end
-              i = i + 1
-              task.wait()
-          end
-          Playing = false
-      end)
-   end,
-})
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1,0,0,30)
+title.BackgroundColor3 = Color3.fromRGB(25,25,25)
+title.Text = "Delta Network & Loader Monitor"
+title.TextColor3 = Color3.new(1,1,1)
+title.TextSize = 16
 
-Tab:CreateButton({
-   Name = "⏹️ إيقاف فوري",
-   Callback = function() Playing = false end,
-})
+local box = Instance.new("TextBox", frame)
+box.Position = UDim2.new(0,5,0,35)
+box.Size = UDim2.new(1,-10,1,-75)
+box.MultiLine = true
+box.TextWrapped = false
+box.TextXAlignment = Enum.TextXAlignment.Left
+box.TextYAlignment = Enum.TextYAlignment.Top
+box.TextSize = 14
+box.TextColor3 = Color3.new(1,1,1)
+box.BackgroundColor3 = Color3.fromRGB(20,20,20)
+box.ClearTextOnFocus = false
+box.TextEditable = true
+box.Text = ""
 
-Tab:CreateButton({
-   Name = "🗑️ مسح النص",
-   Callback = function() CurrentText = "" end,
-})
+local clearBtn = Instance.new("TextButton", frame)
+clearBtn.Position = UDim2.new(0,5,1,-35)
+clearBtn.Size = UDim2.new(0.3,-10,0,30)
+clearBtn.Text = "Clear"
+clearBtn.BackgroundColor3 = Color3.fromRGB(40,40,40)
+clearBtn.TextColor3 = Color3.new(1,1,1)
 
-Tab:CreateSlider({
-   Name = "سرعة الإيقاع (Tempo)",
-   Range = {0.05, 0.5},
-   Increment = 0.01,
-   CurrentValue = 0.18,
-   Callback = function(V) WaitTime = V end,
-})
+local copyBtn = Instance.new("TextButton", frame)
+copyBtn.Position = UDim2.new(0.35,0,1,-35)
+copyBtn.Size = UDim2.new(0.3,-10,0,30)
+copyBtn.Text = "Copy All"
+copyBtn.BackgroundColor3 = Color3.fromRGB(40,40,40)
+copyBtn.TextColor3 = Color3.new(1,1,1)
+
+local hideBtn = Instance.new("TextButton", frame)
+hideBtn.Position = UDim2.new(0.7,5,1,-35)
+hideBtn.Size = UDim2.new(0.3,-10,0,30)
+hideBtn.Text = "Close Frame" -- يغلق الإطار فقط
+hideBtn.BackgroundColor3 = Color3.fromRGB(40,40,40)
+hideBtn.TextColor3 = Color3.new(1,1,1)
+
+--// Logging
+local function addLog(text)
+    text = tostring(text)
+    if #text > 10000 then
+        text = string.sub(text,1,10000) .. "\n... [TRUNCATED]"
+    end
+    logs = logs .. "\n\n" .. text
+    if #logs > MAX_LOG_SIZE then
+        logs = string.sub(logs, -MAX_LOG_SIZE)
+    end
+    box.Text = logs
+end
+
+clearBtn.MouseButton1Click:Connect(function()
+    logs = ""
+    box.Text = ""
+end)
+
+copyBtn.MouseButton1Click:Connect(function()
+    if setclipboard then
+        setclipboard(logs)
+        addLog(">>> Copied to clipboard")
+    else
+        addLog("Clipboard not supported.")
+    end
+end)
+
+hideBtn.MouseButton1Click:Connect(function()
+    frame.Visible = false
+end)
+
+--// ================================
+--// HOOKS (الأكواد الأصلية كما هي)
+--// ================================
+
+-- load
+if load then
+    local oldLoad = load
+    hookfunction(load, function(str,...)
+        addLog("LOAD CALLED:\n"..str)
+        return oldLoad(str,...)
+    end)
+end
+
+-- loadstring
+if loadstring then
+    local oldLoadString = loadstring
+    hookfunction(loadstring, function(str,...)
+        addLog("LOADSTRING:\n"..str)
+        return oldLoadString(str,...)
+    end)
+end
+
+-- request
+if request then
+    local oldRequest = request
+    getgenv().request = function(tbl)
+        addLog("REQUEST URL:\n"..tostring(tbl.Url))
+        local res = oldRequest(tbl)
+        if res and res.Body then
+            addLog("RESPONSE BODY:\n"..res.Body)
+        end
+        return res
+    end
+end
+
+-- HttpGet via __namecall
+local mt = getrawmetatable(game)
+if mt then
+    setreadonly(mt,false)
+    local old = mt.__namecall
+    mt.__namecall = newcclosure(function(self,...)
+        local method = getnamecallmethod()
+        if method == "HttpGet" or method == "HttpGetAsync" then
+            addLog("HTTP CALL:\n"..tostring(...))
+        end
+        return old(self,...)
+    end)
+    setreadonly(mt,true)
+end
+
+addLog(">>> Monitor Loaded Successfully")
