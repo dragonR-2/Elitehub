@@ -3,11 +3,12 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Knit = require(ReplicatedStorage.Packages.Knit)
 local PianoController = Knit.GetController("PianoController")
 
--- المتغيرات الأساسية (خارج الـ Callbacks لتعمل الأزرار)
+-- متغيرات التحكم
 local Playing = false
-local CurrentText = "" 
-local WaitTime = 0.15
+local CurrentText = ""
+local WaitTime = 0.18
 
+-- المترجم الشامل (لجميع النوتات 1-88)
 local FullMap = {
     ["1"]=22, ["!"]=23, ["2"]=24, ["@"]=25, ["3"]=26, ["4"]=27, ["$"]=28, ["5"]=29, ["%"]=30, ["6"]=31, ["^"]=32, ["7"]=33, 
     ["8"]=34, ["*"]=35, ["9"]=36, ["("]=37, ["0"]=38, ["q"]=39, ["Q"]=40, ["w"]=41, ["W"]=42, ["e"]=43, ["E"]=44, ["r"]=45, 
@@ -18,35 +19,36 @@ local FullMap = {
 }
 
 local Window = Rayfield:CreateWindow({
-   Name = "Elite Piano Controller 🎹",
-   LoadingTitle = "جاري الربط مع محرك اللعبة...",
+   Name = "Elite Piano Hub 🎹",
+   LoadingTitle = "جاري تفعيل محرك النفس الموسيقي...",
 })
 
-local Tab = Window:CreateTab("Player Control", 4483362458)
+local Tab = Window:CreateTab("Master Player", 4483362458)
 
--- 1. صندوق الإدخال (يحفظ النص فقط ولا يعزف)
-local InputField = Tab:CreateInput({
-   Name = "أدخل النوتات هنا",
-   PlaceholderText = "صق أحرف المعزوفة...",
-   RemoveTextAfterFocusLost = false,
+Tab:CreateInput({
+   Name = "صق النوتات هنا",
+   PlaceholderText = "انسخ Sheet من جوجل وضعه هنا...",
    Callback = function(Text)
-      CurrentText = Text -- حفظ النص في المتغير فقط
+      CurrentText = Text
    end,
 })
 
--- 2. زر التشغيل (Play) - الآن هو المسؤول الوحيد عن العزف
+-- زر التشغيل مع تقنية (Humanize & Sustain)
 Tab:CreateButton({
-   Name = "▶️ بدء العزف",
+   Name = "▶️ بدء العزف (بشري)",
    Callback = function()
       if Playing or CurrentText == "" then return end
       Playing = true
       
-      task.spawn(function() -- تشغيل في خلفية منفصلة لكي لا يعلق السكربت
+      task.spawn(function()
           local i = 1
           while i <= #CurrentText and Playing do
               local char = CurrentText:sub(i,i)
               
-              if char == "[" then
+              -- تقنية الصوت العسلي: قوة ضغط متغيرة (Velocity)
+              local vol = 0.7 + (math.random(-8, 8) / 100)
+              
+              if char == "[" then -- معالجة الأوتار (Chords)
                   local chord = {}
                   i = i + 1
                   while i <= #CurrentText and CurrentText:sub(i,i) ~= "]" do
@@ -54,51 +56,43 @@ Tab:CreateButton({
                       if FullMap[c] then table.insert(chord, FullMap[c]) end
                       i = i + 1
                   end
-                  for _, note in ipairs(chord) do
-                      PianoController:PressClientKey(note, note, nil, nil, 0.7)
-                  end
+                  for _, n in ipairs(chord) do PianoController:PressClientKey(n, n, nil, nil, vol) end
                   task.wait(WaitTime)
-                  for _, note in ipairs(chord) do PianoController:ReleaseClientKey(note) end
+                  -- ترك النوتة ترن قليلاً قبل الإغلاق (Sustain)
+                  task.delay(0.12, function()
+                      for _, n in ipairs(chord) do PianoController:ReleaseClientKey(n) end
+                  end)
               elseif FullMap[char] then
-                  local note = FullMap[char]
-                  PianoController:PressClientKey(note, note, nil, nil, 0.7)
-                  task.wait(WaitTime)
-                  PianoController:ReleaseClientKey(note)
-              elseif char == " " then -- معالجة المسافات لتعطي وقتاً إضافياً
-                  task.wait(WaitTime)
+                  local n = FullMap[char]
+                  PianoController:PressClientKey(n, n, nil, nil, vol)
+                  -- تأخير بشري بسيط لجعل الإيقاع "يتنفس"
+                  task.wait(WaitTime + (math.random(-15, 15) / 1000))
+                  task.delay(0.12, function() PianoController:ReleaseClientKey(n) end)
+              elseif char == " " then
+                  task.wait(WaitTime * 2.5) -- النفس بين الجمل الموسيقية
               end
               i = i + 1
+              task.wait()
           end
           Playing = false
       end)
    end,
 })
 
--- 3. زر الإيقاف الفوري
 Tab:CreateButton({
-   Name = "⏹️ إيقاف العزف",
-   Callback = function()
-      Playing = false
-   end,
+   Name = "⏹️ إيقاف فوري",
+   Callback = function() Playing = false end,
 })
 
--- 4. زر حذف النص (Clear)
 Tab:CreateButton({
-   Name = "🗑️ مسح الصندوق",
-   Callback = function()
-      CurrentText = ""
-      -- ملاحظة: لمسح النص من واجهة Rayfield بصرياً، يجب إعادة كتابته يدوياً
-      Rayfield:Notify({Title = "تم الحذف", Content = "يمكنك الآن لصق معزوفة جديدة", Duration = 2})
-   end,
+   Name = "🗑️ مسح النص",
+   Callback = function() CurrentText = "" end,
 })
 
--- 5. التحكم في السرعة
 Tab:CreateSlider({
-   Name = "سرعة الإيقاع",
-   Range = {0.05, 0.6},
+   Name = "سرعة الإيقاع (Tempo)",
+   Range = {0.05, 0.5},
    Increment = 0.01,
-   CurrentValue = 0.15,
-   Callback = function(Value)
-      WaitTime = Value
-   end,
+   CurrentValue = 0.18,
+   Callback = function(V) WaitTime = V end,
 })
