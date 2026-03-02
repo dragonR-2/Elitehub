@@ -54,3 +54,42 @@ Tab:CreateInput({
       end
    end,
 })
+
+
+Tab:CreateButton({
+   Name = "▶️ تشغيل المعزوفة",
+   Callback = function()
+      if Playing then return end -- منع التشغيل المزدوج
+      Playing = true
+      
+      local i = 1
+      while i <= #InputText and Playing do
+          local char = InputText:sub(i,i)
+          -- (هنا نضع نفس منطق المترجم الشامل الذي برمجناه سابقاً)
+          -- تأكد من إضافة 'and Playing' في حلقة while لضمان التوقف الفوري
+          i = i + 1
+          task.wait() 
+      end
+      Playing = false
+   end,
+})
+
+
+Tab:CreateButton({
+   Name = "⏹️ إيقاف مؤقت",
+   Callback = function()
+      Playing = false -- كسر حلقة التشغيل فوراً
+      Rayfield:Notify({Title = "توقف", Content = "تم إيقاف العزف بنجاح", Duration = 2})
+   end,
+})
+
+
+Tab:CreateButton({
+   Name = "🗑️ مسح النص",
+   Callback = function()
+      InputText = "" -- مسح المتغير
+      -- ملاحظة: Rayfield لا يدعم مسح نص الـ Input برمجياً بشكل مباشر في بعض النسخ
+      -- لكننا قمنا بصفر القيمة التي يقرأ منها المحرك
+      Rayfield:Notify({Title = "تم المسح", Content = "صندوق النوتات أصبح فارغاً الآن", Duration = 2})
+   end,
+})
