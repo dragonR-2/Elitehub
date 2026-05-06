@@ -1,3 +1,8 @@
+-- =======================================================
+-- Tactical Hub UI Library v1.0.0 (Clean)
+-- بدون أي أزرار أو إعدادات مسبقة – أنت من تبني المحتوى
+-- =======================================================
+
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
@@ -11,7 +16,7 @@ local Colors = {
     Background = Color3.fromRGB(12, 12, 12),
     Panel = Color3.fromRGB(18, 18, 18),
     Stroke = Color3.fromRGB(35, 35, 35),
-    Accent = Color3.fromRGB(180, 40, 40),
+    Accent = Color3.fromRGB(180, 40, 40), 
     Text = Color3.fromRGB(220, 220, 220),
     TextDark = Color3.fromRGB(150, 150, 150)
 }
@@ -22,6 +27,7 @@ gui.ResetOnSpawn = false
 gui.Parent = targetParent
 gui.IgnoreGuiInset = true
 
+-- أيقونة مصغرة
 local minimizedIcon = Instance.new("Frame")
 minimizedIcon.Size = UDim2.new(0, 0, 0, 0)
 minimizedIcon.Position = UDim2.new(0.5, 0, 0.5, 0)
@@ -32,7 +38,7 @@ minimizedIcon.Visible = false
 minimizedIcon.Parent = gui
 
 local minCorner = Instance.new("UICorner")
-minCorner.CornerRadius = UDim.new(0, 10)
+minCorner.CornerRadius = UDim.new(0, 10) 
 minCorner.Parent = minimizedIcon
 
 local minStroke = Instance.new("UIStroke")
@@ -74,13 +80,14 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
+-- النافذة الرئيسية
 local window = Instance.new("Frame")
 window.Size = UDim2.new(0, 450, 0, 360)
 window.Position = UDim2.new(0.5, 0, 0.5, 0)
 window.AnchorPoint = Vector2.new(0.5, 0.5)
 window.BackgroundColor3 = Colors.Background
 window.BorderSizePixel = 0
-window.ClipsDescendants = true
+window.ClipsDescendants = true 
 window.Parent = gui
 
 window.Size = UDim2.new(0, 0, 0, 0)
@@ -171,8 +178,7 @@ minBtn.MouseButton1Click:Connect(function()
     shrinkWin.Completed:Wait()
     window.Visible = false
     minimizedIcon.Visible = true
-    local expandIcon = TweenService:Create(minimizedIcon, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 42, 0, 42)})
-    expandIcon:Play()
+    TweenService:Create(minimizedIcon, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 42, 0, 42)}):Play()
 end)
 
 minClickBtn.MouseButton1Click:Connect(function()
@@ -183,8 +189,7 @@ minClickBtn.MouseButton1Click:Connect(function()
     minimizedIcon.Visible = false
     isMinimized = false
     window.Visible = true
-    local expandWin = TweenService:Create(window, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 450, 0, 360)})
-    expandWin:Play()
+    TweenService:Create(window, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 450, 0, 360)}):Play()
 end)
 
 for _, btn in pairs({closeBtn, minBtn}) do
@@ -217,12 +222,23 @@ UserInputService.InputChanged:Connect(function(input)
     end
 end)
 
+-- اللوحة اليسرى
 local leftPanel = Instance.new("Frame")
 leftPanel.Size = UDim2.new(0, 120, 1, -40)
 leftPanel.Position = UDim2.new(0, 0, 0, 40)
 leftPanel.BackgroundColor3 = Colors.Panel
 leftPanel.BorderSizePixel = 0
 leftPanel.Parent = window
+
+local leftCorner = Instance.new("UICorner")
+leftCorner.CornerRadius = UDim.new(0, 8)
+leftCorner.Parent = leftPanel
+
+local leftFix = Instance.new("Frame")
+leftFix.Size = UDim2.new(1, 0, 0, 8)
+leftFix.BackgroundColor3 = Colors.Panel
+leftFix.BorderSizePixel = 0
+leftFix.Parent = leftPanel
 
 local tabScroll = Instance.new("ScrollingFrame")
 tabScroll.Size = UDim2.new(1, 0, 1, -10)
@@ -244,6 +260,7 @@ rightPanel.Position = UDim2.new(0, 120, 0, 40)
 rightPanel.BackgroundTransparency = 1
 rightPanel.Parent = window
 
+local Tabs = {}
 local activeTabBtn = nil
 local activeContent = nil
 
@@ -280,6 +297,10 @@ local function CreateTab(name)
     contentLayout.Padding = UDim.new(0, 8)
     contentLayout.Parent = contentScroll
 
+    contentLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        contentScroll.CanvasSize = UDim2.new(0, 0, 0, contentLayout.AbsoluteContentSize.Y + 20)
+    end)
+
     tabBtn.MouseButton1Click:Connect(function()
         if activeTabBtn == tabBtn then return end
         if activeTabBtn then
@@ -305,7 +326,7 @@ local function CreateTab(name)
         toggleCorner.Parent = toggleFrame
 
         local label = Instance.new("TextLabel")
-        label.Size = UDim2.new(1, -70, 1, 0)
+        label.Size = UDim2.new(1, -80, 1, 0)
         label.Position = UDim2.new(0, 15, 0, 0)
         label.BackgroundTransparency = 1
         label.Text = toggleName
@@ -316,14 +337,29 @@ local function CreateTab(name)
         label.Parent = toggleFrame
 
         local switchBg = Instance.new("Frame")
-        switchBg.Size = UDim2.new(0, 36, 0, 18)
-        switchBg.Position = UDim2.new(1, -50, 0.5, -9)
+        switchBg.Size = UDim2.new(0, 44, 0, 18)
+        switchBg.Position = UDim2.new(1, -55, 0.5, -9)
         switchBg.BackgroundColor3 = default and Colors.Accent or Colors.Background
         switchBg.Parent = toggleFrame
 
         local switchCorner = Instance.new("UICorner")
         switchCorner.CornerRadius = UDim.new(1, 0)
         switchCorner.Parent = switchBg
+
+        local statusLabel = Instance.new("TextLabel")
+        statusLabel.Size = UDim2.new(1, 0, 1, 0)
+        statusLabel.BackgroundTransparency = 1
+        statusLabel.Text = default and "ON" or "OFF"
+        statusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        statusLabel.Font = Enum.Font.GothamBold
+        statusLabel.TextSize = 9
+        statusLabel.TextXAlignment = default and Enum.TextXAlignment.Left or Enum.TextXAlignment.Right
+        statusLabel.Parent = switchBg
+
+        local padding = Instance.new("UIPadding")
+        padding.PaddingLeft = UDim.new(0, 5)
+        padding.PaddingRight = UDim.new(0, 5)
+        padding.Parent = statusLabel
 
         local knob = Instance.new("Frame")
         knob.Size = UDim2.new(0, 12, 0, 12)
@@ -344,6 +380,8 @@ local function CreateTab(name)
         local state = default
         btn.MouseButton1Click:Connect(function()
             state = not state
+            statusLabel.Text = state and "ON" or "OFF"
+            statusLabel.TextXAlignment = state and Enum.TextXAlignment.Left or Enum.TextXAlignment.Right
             TweenService:Create(switchBg, TweenInfo.new(0.2), {BackgroundColor3 = state and Colors.Accent or Colors.Background}):Play()
             TweenService:Create(knob, TweenInfo.new(0.2), {Position = state and UDim2.new(1, -15, 0.5, -6) or UDim2.new(0, 3, 0.5, -6)}):Play()
             pcall(callback, state)
@@ -383,154 +421,163 @@ local function CreateTab(name)
         end)
     end
 
-    -- Dropdown (Accordion) element
     local function AddDropdown(title, options, defaultIndex, callback)
-        -- Main container frame
-        local container = Instance.new("Frame")
-        container.BackgroundTransparency = 1
-        container.Size = UDim2.new(1, 0, 0, 42) -- initial height (button only)
-        container.Parent = contentScroll
+        local isExpanded = false
+        local toggleState = false
+        local currentValue = options[defaultIndex] or options[1]
+        local currentIndex = defaultIndex
+        local optionHeight = 32
+        local mainHeight = 42
+        local totalHeight = mainHeight + (#options * optionHeight)
 
-        -- Main button (always visible)
-        local mainBtn = Instance.new("Frame")
-        mainBtn.Size = UDim2.new(1, 0, 0, 42)
-        mainBtn.BackgroundColor3 = Colors.Panel
-        mainBtn.Parent = container
+        local dropContainer = Instance.new("Frame")
+        dropContainer.Size = UDim2.new(1, 0, 0, mainHeight)
+        dropContainer.BackgroundColor3 = Colors.Panel
+        dropContainer.ClipsDescendants = true
+        dropContainer.Parent = contentScroll
 
-        local mainCorner = Instance.new("UICorner")
-        mainCorner.CornerRadius = UDim.new(0, 6)
-        mainCorner.Parent = mainBtn
+        local dropCorner = Instance.new("UICorner")
+        dropCorner.CornerRadius = UDim.new(0, 6)
+        dropCorner.Parent = dropContainer
 
-        local mainLabel = Instance.new("TextLabel")
-        mainLabel.Size = UDim2.new(1, -20, 1, 0)
-        mainLabel.Position = UDim2.new(0, 15, 0, 0)
-        mainLabel.BackgroundTransparency = 1
-        mainLabel.Text = title .. ": " .. options[defaultIndex or 1]
-        mainLabel.TextColor3 = Colors.Text
-        mainLabel.Font = Enum.Font.GothamSemibold
-        mainLabel.TextSize = 12
-        mainLabel.TextXAlignment = Enum.TextXAlignment.Left
-        mainLabel.Parent = mainBtn
+        local mainBtnFrame = Instance.new("Frame")
+        mainBtnFrame.Size = UDim2.new(1, 0, 0, mainHeight)
+        mainBtnFrame.BackgroundTransparency = 1
+        mainBtnFrame.Parent = dropContainer
+
+        local label = Instance.new("TextLabel")
+        label.Size = UDim2.new(1, -95, 1, 0)
+        label.Position = UDim2.new(0, 15, 0, 0)
+        label.BackgroundTransparency = 1
+        label.Text = title .. ": " .. tostring(currentValue)
+        label.TextColor3 = Colors.Text
+        label.Font = Enum.Font.GothamSemibold
+        label.TextSize = 12
+        label.TextXAlignment = Enum.TextXAlignment.Left
+        label.Parent = mainBtnFrame
 
         local arrow = Instance.new("TextLabel")
-        arrow.Size = UDim2.new(0, 20, 1, 0)
-        arrow.Position = UDim2.new(1, -25, 0, 0)
+        arrow.Size = UDim2.new(0, 20, 0, 20)
+        arrow.Position = UDim2.new(1, -30, 0.5, -10)
         arrow.BackgroundTransparency = 1
         arrow.Text = "▼"
         arrow.TextColor3 = Colors.TextDark
         arrow.Font = Enum.Font.GothamBold
         arrow.TextSize = 12
-        arrow.Parent = mainBtn
+        arrow.Parent = mainBtnFrame
 
-        local clickBtn = Instance.new("TextButton")
-        clickBtn.Size = UDim2.new(1, 0, 1, 0)
-        clickBtn.BackgroundTransparency = 1
-        clickBtn.Text = ""
-        clickBtn.Parent = mainBtn
+        local switchBg = Instance.new("Frame")
+        switchBg.Size = UDim2.new(0, 44, 0, 18)
+        switchBg.Position = UDim2.new(1, -85, 0.5, -9)
+        switchBg.BackgroundColor3 = Colors.Background
+        switchBg.ZIndex = 2
+        switchBg.Parent = mainBtnFrame
 
-        -- Options panel (initially hidden, height 0)
-        local optionsPanel = Instance.new("Frame")
-        optionsPanel.BackgroundColor3 = Colors.Panel
-        optionsPanel.BackgroundTransparency = 1
-        optionsPanel.Size = UDim2.new(1, 0, 0, 0)
-        optionsPanel.ClipsDescendants = true
-        optionsPanel.Parent = container
+        local switchCorner = Instance.new("UICorner")
+        switchCorner.CornerRadius = UDim.new(1, 0)
+        switchCorner.Parent = switchBg
+
+        local statusLabel = Instance.new("TextLabel")
+        statusLabel.Size = UDim2.new(1, 0, 1, 0)
+        statusLabel.BackgroundTransparency = 1
+        statusLabel.Text = "OFF"
+        statusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        statusLabel.Font = Enum.Font.GothamBold
+        statusLabel.TextSize = 9
+        statusLabel.TextXAlignment = Enum.TextXAlignment.Right
+        statusLabel.ZIndex = 2
+        statusLabel.Parent = switchBg
+
+        local padding = Instance.new("UIPadding")
+        padding.PaddingLeft = UDim.new(0, 5)
+        padding.PaddingRight = UDim.new(0, 5)
+        padding.Parent = statusLabel
+
+        local knob = Instance.new("Frame")
+        knob.Size = UDim2.new(0, 12, 0, 12)
+        knob.Position = UDim2.new(0, 3, 0.5, -6)
+        knob.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        knob.ZIndex = 2
+        knob.Parent = switchBg
+
+        local knobCorner = Instance.new("UICorner")
+        knobCorner.CornerRadius = UDim.new(1, 0)
+        knobCorner.Parent = knob
+
+        local toggleBtn = Instance.new("TextButton")
+        toggleBtn.Size = UDim2.new(1, 0, 1, 0)
+        toggleBtn.BackgroundTransparency = 1
+        toggleBtn.Text = ""
+        toggleBtn.ZIndex = 3
+        toggleBtn.Parent = switchBg
+
+        toggleBtn.MouseButton1Click:Connect(function()
+            toggleState = not toggleState
+            statusLabel.Text = toggleState and "ON" or "OFF"
+            statusLabel.TextXAlignment = toggleState and Enum.TextXAlignment.Left or Enum.TextXAlignment.Right
+            TweenService:Create(switchBg, TweenInfo.new(0.2), {BackgroundColor3 = toggleState and Colors.Accent or Colors.Background}):Play()
+            TweenService:Create(knob, TweenInfo.new(0.2), {Position = toggleState and UDim2.new(1, -15, 0.5, -6) or UDim2.new(0, 3, 0.5, -6)}):Play()
+            pcall(callback, currentValue, currentIndex, toggleState)
+        end)
+
+        local expandBtn = Instance.new("TextButton")
+        expandBtn.Size = UDim2.new(1, 0, 1, 0)
+        expandBtn.BackgroundTransparency = 1
+        expandBtn.Text = ""
+        expandBtn.ZIndex = 1
+        expandBtn.Parent = mainBtnFrame
+
+        local optionsFrame = Instance.new("Frame")
+        optionsFrame.Size = UDim2.new(1, 0, 0, #options * optionHeight)
+        optionsFrame.Position = UDim2.new(0, 0, 0, mainHeight)
+        optionsFrame.BackgroundTransparency = 1
+        optionsFrame.Parent = dropContainer
 
         local optionsLayout = Instance.new("UIListLayout")
         optionsLayout.SortOrder = Enum.SortOrder.LayoutOrder
-        optionsLayout.Padding = UDim.new(0, 4)
-        optionsLayout.Parent = optionsPanel
+        optionsLayout.Parent = optionsFrame
 
-        local optionButtons = {}
-        local selectedIndex = defaultIndex or 1
-        local expanded = false
-
-        -- Create option buttons
-        for idx, opt in ipairs(options) do
-            local optBtn = Instance.new("Frame")
-            optBtn.Size = UDim2.new(1, 0, 0, 32)
+        local optionBtns = {}
+        for i, opt in ipairs(options) do
+            local optBtn = Instance.new("TextButton")
+            optBtn.Size = UDim2.new(1, 0, 0, optionHeight)
             optBtn.BackgroundColor3 = Colors.Background
-            optBtn.Parent = optionsPanel
-
-            local optCorner = Instance.new("UICorner")
-            optCorner.CornerRadius = UDim.new(0, 6)
-            optCorner.Parent = optBtn
-
-            local optLabel = Instance.new("TextLabel")
-            optLabel.Size = UDim2.new(1, -20, 1, 0)
-            optLabel.Position = UDim2.new(0, 15, 0, 0)
-            optLabel.BackgroundTransparency = 1
-            optLabel.Text = opt
-            optLabel.TextColor3 = (idx == selectedIndex) and Colors.Accent or Colors.Text
-            optLabel.Font = Enum.Font.Gotham
-            optLabel.TextSize = 12
-            optLabel.TextXAlignment = Enum.TextXAlignment.Left
-            optLabel.Parent = optBtn
-
-            local optClick = Instance.new("TextButton")
-            optClick.Size = UDim2.new(1, 0, 1, 0)
-            optClick.BackgroundTransparency = 1
-            optClick.Text = ""
-            optClick.Parent = optBtn
-
-            optClick.MouseButton1Click:Connect(function()
-                if selectedIndex == idx then
-                    if expanded then
-                        -- collapse without changing selection
-                        expanded = false
-                        TweenService:Create(arrow, TweenInfo.new(0.2), {Text = "▼"}):Play()
-                        TweenService:Create(optionsPanel, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {Size = UDim2.new(1, 0, 0, 0)}):Play()
-                        task.wait(0.25)
-                        container.Size = UDim2.new(1, 0, 0, 42)
-                    end
-                    return
-                end
-                selectedIndex = idx
-                mainLabel.Text = title .. ": " .. opt
-                for i, btnFrame in ipairs(optionButtons) do
-                    local lbl = btnFrame:FindFirstChildWhichIsA("TextLabel")
-                    if lbl then
-                        lbl.TextColor3 = (i == idx) and Colors.Accent or Colors.Text
-                    end
-                end
-                pcall(callback, opt, idx)
-                -- collapse after selection
-                if expanded then
-                    expanded = false
-                    TweenService:Create(arrow, TweenInfo.new(0.2), {Text = "▼"}):Play()
-                    TweenService:Create(optionsPanel, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {Size = UDim2.new(1, 0, 0, 0)}):Play()
-                    task.wait(0.25)
-                    container.Size = UDim2.new(1, 0, 0, 42)
-                end
-            end)
+            optBtn.Text = "  " .. tostring(opt)
+            optBtn.TextColor3 = (i == defaultIndex) and Colors.Accent or Colors.TextDark
+            optBtn.Font = Enum.Font.GothamSemibold
+            optBtn.TextSize = 11
+            optBtn.TextXAlignment = Enum.TextXAlignment.Left
+            optBtn.BorderSizePixel = 0
+            optBtn.Parent = optionsFrame
+            table.insert(optionBtns, optBtn)
 
             optBtn.MouseEnter:Connect(function()
-                TweenService:Create(optBtn, TweenInfo.new(0.1), {BackgroundColor3 = Colors.Stroke}):Play()
+                TweenService:Create(optBtn, TweenInfo.new(0.15), {BackgroundColor3 = Colors.Stroke}):Play()
             end)
             optBtn.MouseLeave:Connect(function()
-                TweenService:Create(optBtn, TweenInfo.new(0.1), {BackgroundColor3 = Colors.Background}):Play()
+                TweenService:Create(optBtn, TweenInfo.new(0.15), {BackgroundColor3 = Colors.Background}):Play()
             end)
 
-            table.insert(optionButtons, optBtn)
+            optBtn.MouseButton1Click:Connect(function()
+                currentValue = opt
+                currentIndex = i
+                label.Text = title .. ": " .. tostring(opt)
+                for j, btn in ipairs(optionBtns) do
+                    btn.TextColor3 = (j == i) and Colors.Accent or Colors.TextDark
+                end
+                isExpanded = false
+                TweenService:Create(dropContainer, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(1, 0, 0, mainHeight)}):Play()
+                TweenService:Create(arrow, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Rotation = 0}):Play()
+                pcall(callback, currentValue, currentIndex, toggleState)
+            end)
         end
 
-        -- Toggle expand/collapse on main button click
-        clickBtn.MouseButton1Click:Connect(function()
-            expanded = not expanded
-            if expanded then
-                -- Calculate total height of options
-                local totalHeight = #options * 36 -- 32 + 4 padding
-                TweenService:Create(arrow, TweenInfo.new(0.2), {Text = "▲"}):Play()
-                -- First expand container height to accommodate options
-                container.Size = UDim2.new(1, 0, 0, 42 + totalHeight)
-                -- then show options panel with height tween
-                TweenService:Create(optionsPanel, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {Size = UDim2.new(1, 0, 0, totalHeight)}):Play()
-            else
-                TweenService:Create(arrow, TweenInfo.new(0.2), {Text = "▼"}):Play()
-                TweenService:Create(optionsPanel, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {Size = UDim2.new(1, 0, 0, 0)}):Play()
-                task.wait(0.25)
-                container.Size = UDim2.new(1, 0, 0, 42)
-            end
+        expandBtn.MouseButton1Click:Connect(function()
+            isExpanded = not isExpanded
+            local targetHeight = isExpanded and totalHeight or mainHeight
+            local targetRot = isExpanded and 180 or 0
+            TweenService:Create(dropContainer, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(1, 0, 0, targetHeight)}):Play()
+            TweenService:Create(arrow, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Rotation = targetRot}):Play()
         end)
     end
 
@@ -546,6 +593,8 @@ local function CreateTab(name)
     return { AddToggle = AddToggle, AddButton = AddButton, AddDropdown = AddDropdown }
 end
 
-print("RTM Library v1.0.0 Loaded Successfully.")
+-- =======================================================
+-- لا توجد أزرار أو أقسام مسبقة هنا – يمكنك أنت إضافتها
+-- =======================================================
 
-return { CreateTab = CreateTab }
+print("TacticalHub UI Library (Clean) loaded. Use CreateTab() to build your own interface.")
