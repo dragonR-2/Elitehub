@@ -383,6 +383,157 @@ local function CreateTab(name)
         end)
     end
 
+    -- Dropdown (Accordion) element
+    local function AddDropdown(title, options, defaultIndex, callback)
+        -- Main container frame
+        local container = Instance.new("Frame")
+        container.BackgroundTransparency = 1
+        container.Size = UDim2.new(1, 0, 0, 42) -- initial height (button only)
+        container.Parent = contentScroll
+
+        -- Main button (always visible)
+        local mainBtn = Instance.new("Frame")
+        mainBtn.Size = UDim2.new(1, 0, 0, 42)
+        mainBtn.BackgroundColor3 = Colors.Panel
+        mainBtn.Parent = container
+
+        local mainCorner = Instance.new("UICorner")
+        mainCorner.CornerRadius = UDim.new(0, 6)
+        mainCorner.Parent = mainBtn
+
+        local mainLabel = Instance.new("TextLabel")
+        mainLabel.Size = UDim2.new(1, -20, 1, 0)
+        mainLabel.Position = UDim2.new(0, 15, 0, 0)
+        mainLabel.BackgroundTransparency = 1
+        mainLabel.Text = title .. ": " .. options[defaultIndex or 1]
+        mainLabel.TextColor3 = Colors.Text
+        mainLabel.Font = Enum.Font.GothamSemibold
+        mainLabel.TextSize = 12
+        mainLabel.TextXAlignment = Enum.TextXAlignment.Left
+        mainLabel.Parent = mainBtn
+
+        local arrow = Instance.new("TextLabel")
+        arrow.Size = UDim2.new(0, 20, 1, 0)
+        arrow.Position = UDim2.new(1, -25, 0, 0)
+        arrow.BackgroundTransparency = 1
+        arrow.Text = "▼"
+        arrow.TextColor3 = Colors.TextDark
+        arrow.Font = Enum.Font.GothamBold
+        arrow.TextSize = 12
+        arrow.Parent = mainBtn
+
+        local clickBtn = Instance.new("TextButton")
+        clickBtn.Size = UDim2.new(1, 0, 1, 0)
+        clickBtn.BackgroundTransparency = 1
+        clickBtn.Text = ""
+        clickBtn.Parent = mainBtn
+
+        -- Options panel (initially hidden, height 0)
+        local optionsPanel = Instance.new("Frame")
+        optionsPanel.BackgroundColor3 = Colors.Panel
+        optionsPanel.BackgroundTransparency = 1
+        optionsPanel.Size = UDim2.new(1, 0, 0, 0)
+        optionsPanel.ClipsDescendants = true
+        optionsPanel.Parent = container
+
+        local optionsLayout = Instance.new("UIListLayout")
+        optionsLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        optionsLayout.Padding = UDim.new(0, 4)
+        optionsLayout.Parent = optionsPanel
+
+        local optionButtons = {}
+        local selectedIndex = defaultIndex or 1
+        local expanded = false
+
+        -- Create option buttons
+        for idx, opt in ipairs(options) do
+            local optBtn = Instance.new("Frame")
+            optBtn.Size = UDim2.new(1, 0, 0, 32)
+            optBtn.BackgroundColor3 = Colors.Background
+            optBtn.Parent = optionsPanel
+
+            local optCorner = Instance.new("UICorner")
+            optCorner.CornerRadius = UDim.new(0, 6)
+            optCorner.Parent = optBtn
+
+            local optLabel = Instance.new("TextLabel")
+            optLabel.Size = UDim2.new(1, -20, 1, 0)
+            optLabel.Position = UDim2.new(0, 15, 0, 0)
+            optLabel.BackgroundTransparency = 1
+            optLabel.Text = opt
+            optLabel.TextColor3 = (idx == selectedIndex) and Colors.Accent or Colors.Text
+            optLabel.Font = Enum.Font.Gotham
+            optLabel.TextSize = 12
+            optLabel.TextXAlignment = Enum.TextXAlignment.Left
+            optLabel.Parent = optBtn
+
+            local optClick = Instance.new("TextButton")
+            optClick.Size = UDim2.new(1, 0, 1, 0)
+            optClick.BackgroundTransparency = 1
+            optClick.Text = ""
+            optClick.Parent = optBtn
+
+            optClick.MouseButton1Click:Connect(function()
+                if selectedIndex == idx then
+                    if expanded then
+                        -- collapse without changing selection
+                        expanded = false
+                        TweenService:Create(arrow, TweenInfo.new(0.2), {Text = "▼"}):Play()
+                        TweenService:Create(optionsPanel, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {Size = UDim2.new(1, 0, 0, 0)}):Play()
+                        task.wait(0.25)
+                        container.Size = UDim2.new(1, 0, 0, 42)
+                    end
+                    return
+                end
+                selectedIndex = idx
+                mainLabel.Text = title .. ": " .. opt
+                for i, btnFrame in ipairs(optionButtons) do
+                    local lbl = btnFrame:FindFirstChildWhichIsA("TextLabel")
+                    if lbl then
+                        lbl.TextColor3 = (i == idx) and Colors.Accent or Colors.Text
+                    end
+                end
+                pcall(callback, opt, idx)
+                -- collapse after selection
+                if expanded then
+                    expanded = false
+                    TweenService:Create(arrow, TweenInfo.new(0.2), {Text = "▼"}):Play()
+                    TweenService:Create(optionsPanel, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {Size = UDim2.new(1, 0, 0, 0)}):Play()
+                    task.wait(0.25)
+                    container.Size = UDim2.new(1, 0, 0, 42)
+                end
+            end)
+
+            optBtn.MouseEnter:Connect(function()
+                TweenService:Create(optBtn, TweenInfo.new(0.1), {BackgroundColor3 = Colors.Stroke}):Play()
+            end)
+            optBtn.MouseLeave:Connect(function()
+                TweenService:Create(optBtn, TweenInfo.new(0.1), {BackgroundColor3 = Colors.Background}):Play()
+            end)
+
+            table.insert(optionButtons, optBtn)
+        end
+
+        -- Toggle expand/collapse on main button click
+        clickBtn.MouseButton1Click:Connect(function()
+            expanded = not expanded
+            if expanded then
+                -- Calculate total height of options
+                local totalHeight = #options * 36 -- 32 + 4 padding
+                TweenService:Create(arrow, TweenInfo.new(0.2), {Text = "▲"}):Play()
+                -- First expand container height to accommodate options
+                container.Size = UDim2.new(1, 0, 0, 42 + totalHeight)
+                -- then show options panel with height tween
+                TweenService:Create(optionsPanel, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {Size = UDim2.new(1, 0, 0, totalHeight)}):Play()
+            else
+                TweenService:Create(arrow, TweenInfo.new(0.2), {Text = "▼"}):Play()
+                TweenService:Create(optionsPanel, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {Size = UDim2.new(1, 0, 0, 0)}):Play()
+                task.wait(0.25)
+                container.Size = UDim2.new(1, 0, 0, 42)
+            end
+        end)
+    end
+
     if not activeTabBtn then
         tabBtn.BackgroundColor3 = Colors.Accent
         tabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -392,7 +543,7 @@ local function CreateTab(name)
         activeContent = contentScroll
     end
 
-    return { AddToggle = AddToggle, AddButton = AddButton }
+    return { AddToggle = AddToggle, AddButton = AddButton, AddDropdown = AddDropdown }
 end
 
 print("RTM Library v1.0.0 Loaded Successfully.")
