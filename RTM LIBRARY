@@ -1,6 +1,6 @@
 -- =======================================================
--- Tactical Hub UI Library v1.0.0 (Clean)
--- بدون أي أزرار أو إعدادات مسبقة – أنت من تبني المحتوى
+-- Tactical Hub UI Library v1.0.0 (Clean) - FIXED
+-- الآن تعيد CreateTab وتضيفها للبيئة العامة
 -- =======================================================
 
 local TweenService = game:GetService("TweenService")
@@ -260,7 +260,6 @@ rightPanel.Position = UDim2.new(0, 120, 0, 40)
 rightPanel.BackgroundTransparency = 1
 rightPanel.Parent = window
 
-local Tabs = {}
 local activeTabBtn = nil
 local activeContent = nil
 
@@ -593,8 +592,9 @@ local function CreateTab(name)
     return { AddToggle = AddToggle, AddButton = AddButton, AddDropdown = AddDropdown }
 end
 
--- =======================================================
--- لا توجد أزرار أو أقسام مسبقة هنا – يمكنك أنت إضافتها
--- =======================================================
+-- نجعل CreateTab متاحة عالمياً (للمكتبات القديمة)
+_G.CreateTab = CreateTab
+getgenv().CreateTab = CreateTab
 
-print("TacticalHub UI Library (Clean) loaded. Use CreateTab() to build your own interface.")
+-- وأخيراً نعيد الواجهة كجدول (مثل ما توقعه المستخدم)
+return { CreateTab = CreateTab }
