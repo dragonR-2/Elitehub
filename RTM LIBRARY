@@ -1,6 +1,5 @@
 -- =======================================================
--- Tactical Hub UI Library v1.0.0 (Clean) - FIXED
--- الآن تعيد CreateTab وتضيفها للبيئة العامة
+-- Tactical Hub UI Library v1.0.0 (Clean) - FIXED (إغلاق كامل)
 -- =======================================================
 
 local TweenService = game:GetService("TweenService")
@@ -141,6 +140,9 @@ versionLabel.TextSize = 10
 versionLabel.TextXAlignment = Enum.TextXAlignment.Right
 versionLabel.Parent = titleBar
 
+-- =======================================================
+-- زر الإغلاق المعدل (يقوم بتنظيف المتغيرات العامة)
+-- =======================================================
 local closeBtn = Instance.new("TextButton")
 closeBtn.Size = UDim2.new(0, 40, 1, 0)
 closeBtn.Position = UDim2.new(1, -40, 0, 0)
@@ -152,11 +154,40 @@ closeBtn.TextSize = 14
 closeBtn.Parent = titleBar
 
 closeBtn.MouseButton1Click:Connect(function()
+    -- تعطيل كافة الميزات من خلال المتغيرات العامة (إن كانت موجودة)
+    if _G.ESP_Settings then
+        _G.ESP_Settings.ShowEnemies = false
+        _G.ESP_Settings.ShowTeam = false
+        _G.ESP_Settings.ShowEnemyTracers = false
+        _G.ESP_Settings.ShowPredictionDot = false
+    end
+    if _G.AmmoESP then
+        _G.AmmoESP.Enabled = false
+    end
+    if _G.PlayerDrawings then
+        for _, esp in pairs(_G.PlayerDrawings) do
+            if esp.Box then esp.Box.Visible = false end
+            if esp.HealthBg then esp.HealthBg.Visible = false end
+            if esp.HealthFill then esp.HealthFill.Visible = false end
+            for _, line in pairs(esp.Skeleton or {}) do
+                line.Visible = false
+            end
+        end
+    end
+    if _G.PredGui then
+        pcall(function() _G.PredGui:Destroy() end)
+    end
+    if _G.toggleClearVision then
+        _G.toggleClearVision(false)
+    end
+    
+    -- إغلاق النافذة
     local closeTween = TweenService:Create(window, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)})
     closeTween:Play()
     closeTween.Completed:Wait()
     gui:Destroy()
 end)
+-- =======================================================
 
 local minBtn = Instance.new("TextButton")
 minBtn.Size = UDim2.new(0, 40, 1, 0)
@@ -592,9 +623,8 @@ local function CreateTab(name)
     return { AddToggle = AddToggle, AddButton = AddButton, AddDropdown = AddDropdown }
 end
 
--- نجعل CreateTab متاحة عالمياً (للمكتبات القديمة)
+-- نجعل CreateTab متاحة عالمياً
 _G.CreateTab = CreateTab
 getgenv().CreateTab = CreateTab
 
--- وأخيراً نعيد الواجهة كجدول (مثل ما توقعه المستخدم)
 return { CreateTab = CreateTab }
