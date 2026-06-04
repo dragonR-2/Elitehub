@@ -529,37 +529,4 @@ function CommanderLib:CreateWindow(config)
     return WindowObj
 end
 
--- ============================================================
--- [ 🚀 كيفية الاستخدام: تجربة الواجهة المكتملة ]
--- ============================================================
-
-local Window = CommanderLib:CreateWindow({
-    Title = "99 NIGHTS • COMMANDER HUB"
-})
-
-local BringTab = Window:MakeTab("Bring Items")
-
-BringTab:AddSection("⚙️ Testing Notification")
-
-BringTab:AddButton({
-    Name = "📢 Send Test Notification",
-    Callback = function()
-        Window:Notify({
-            Title = "Commander Hub",
-            Content = "System fully loaded with no errors!",
-            Duration = 3 -- سيبقى لـ 3 ثواني ثم يختفي
-        })
-    end
-})
-
-BringTab:AddToggle({
-    Name = "Test Toggle",
-    Default = false,
-    Callback = function(State)
-        Window:Notify({
-            Title = "Toggle Alert",
-            Content = "You just turned it: " .. (State and "ON" or "OFF"),
-            Duration = 2
-        })
-    end
-})
+return CommanderLib
