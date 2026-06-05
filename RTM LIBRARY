@@ -160,18 +160,16 @@ function CommanderLib:CreateWindow(config)
     PillBtn.TextColor3 = Theme.TextLight
     PillBtn.TextSize = 12
     PillBtn.Font = Enum.Font.GothamBold
-    PillBtn.Visible = false -- مخفية لأن الواجهة مفتوحة أساساً
+    PillBtn.Visible = false
     PillBtn.AutoButtonColor = false
 
-    -- جعلها دائرية بالكامل (شكل الحبة)
     Instance.new("UICorner", PillBtn).CornerRadius = UDim.new(1, 0) 
     local PillStroke = Instance.new("UIStroke", PillBtn)
     PillStroke.Color = Theme.Accent
     PillStroke.Thickness = 1.5
 
-    MakeDraggable(PillBtn, PillBtn) -- تفعيل السحب لحبة الدواء
+    MakeDraggable(PillBtn, PillBtn)
 
-    -- برمجة أزرار الإخفاء والإظهار
     MinBtn.MouseButton1Click:Connect(function() 
         PlayClick()
         CreateTween(MainFrame, {Size = UDim2.new(0, 550, 0, 0)}, 0.2).Completed:Connect(function()
@@ -231,7 +229,7 @@ function CommanderLib:CreateWindow(config)
 
         local NotifFrame = Instance.new("Frame", NotifHolder)
         NotifFrame.Size = UDim2.new(1, 0, 1, 0)
-        NotifFrame.Position = UDim2.new(1, 0, 0, 0) -- تبدأ من خارج الشاشة يميناً
+        NotifFrame.Position = UDim2.new(1, 0, 0, 0)
         NotifFrame.BackgroundColor3 = Theme.ElementBg
         Instance.new("UICorner", NotifFrame).CornerRadius = UDim.new(0, 6)
         
@@ -260,10 +258,8 @@ function CommanderLib:CreateWindow(config)
         NDesc.TextXAlignment = Enum.TextXAlignment.Left
         NDesc.TextWrapped = true
 
-        -- أنيميشن الدخول (انزلاق من اليمين لليسار)
         CreateTween(NotifFrame, {Position = UDim2.new(0, 0, 0, 0)}, 0.3)
 
-        -- أنيميشن الخروج بعد الوقت المحدد
         task.delay(duration, function()
             local fadeOut = CreateTween(NotifFrame, {Position = UDim2.new(1, 10, 0, 0)}, 0.3)
             fadeOut.Completed:Connect(function()
@@ -394,6 +390,9 @@ function CommanderLib:CreateWindow(config)
             end)
         end
 
+        -- ============================================================
+        -- [ 🔧 دالة AddSlider المصححة (تعمل على الكمبيوتر والهاتف) ]
+        -- ============================================================
         function TabObj:AddSlider(config)
             local frame = Instance.new("Frame", TabContent)
             frame.Size = UDim2.new(1, -10, 0, 55)
@@ -414,7 +413,6 @@ function CommanderLib:CreateWindow(config)
             valLabel.Size = UDim2.new(0, 50, 0, 25)
             valLabel.Position = UDim2.new(1, -60, 0, 5)
             valLabel.BackgroundTransparency = 1
-            valLabel.Text = tostring(config.Default or config.Min)
             valLabel.TextColor3 = Theme.Accent
             valLabel.TextSize = 13
             valLabel.Font = Enum.Font.GothamBold
@@ -424,39 +422,73 @@ function CommanderLib:CreateWindow(config)
             bg.Size = UDim2.new(1, -20, 0, 6)
             bg.Position = UDim2.new(0, 10, 0, 35)
             bg.BackgroundColor3 = Theme.MainBg
+            bg.AutoButtonColor = false
             Instance.new("UICorner", bg).CornerRadius = UDim.new(0, 3)
 
             local fill = Instance.new("Frame", bg)
-            fill.Size = UDim2.new((config.Default - config.Min) / (config.Max - config.Min), 0, 1, 0)
             fill.BackgroundColor3 = Theme.Accent
             Instance.new("UICorner", fill).CornerRadius = UDim.new(0, 3)
 
+            local minVal = config.Min or 0
+            local maxVal = config.Max or 100
+            local defaultVal = config.Default or minVal
+            
+            -- تحديث واجهة الشريط والقيمة النصية
+            local function updateSliderUI(value)
+                local clamped = math.clamp(value, minVal, maxVal)
+                local percent = (clamped - minVal) / (maxVal - minVal)
+                fill.Size = UDim2.new(percent, 0, 1, 0)
+                valLabel.Text = tostring(clamped)
+                if config.Callback then
+                    config.Callback(clamped)
+                end
+            end
+
+            -- بدأ السحب أو النقر
             local dragging = false
-            local function update(input)
-                local pos = math.clamp(input.Position.X - bg.AbsolutePosition.X, 0, bg.AbsoluteSize.X)
-                local pct = pos / bg.AbsoluteSize.X
-                local val = math.floor(config.Min + (config.Max - config.Min) * pct)
-                fill.Size = UDim2.new(pct, 0, 1, 0)
-                valLabel.Text = tostring(val)
-                if config.Callback then config.Callback(val) end
+            local function onInputProcessed(input)
+                if not bg or not bg.Parent then return end
+                -- حساب القيمة بناءً على موضع المؤشر/الإصبع داخل bg
+                local relativeX = math.clamp(input.Position.X - bg.AbsolutePosition.X, 0, bg.AbsoluteSize.X)
+                local percent = relativeX / bg.AbsoluteSize.X
+                local newValue = minVal + (maxVal - minVal) * percent
+                newValue = math.floor(newValue + 0.5) -- تقريب
+                updateSliderUI(newValue)
             end
 
             bg.InputBegan:Connect(function(input)
                 if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    dragging = true
                     PlayClick()
-                    dragging = true; update(input)
+                    onInputProcessed(input)
                 end
             end)
-            UserInputService.InputEnded:Connect(function(input)
+
+            bg.InputEnded:Connect(function(input)
                 if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
                     dragging = false
                 end
             end)
-            UserInputService.InputChanged:Connect(function(input)
-                if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-                    update(input)
+
+            bg.InputChanged:Connect(function(input)
+                if (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) and dragging then
+                    onInputProcessed(input)
                 end
             end)
+
+            -- تطبيق القيمة الافتراضية
+            updateSliderUI(defaultVal)
+
+            -- تحديث الحجم المطلق للـ bg عند تغير حجم الإطار (هام للهواتف بعد التمرير)
+            local function refreshFill()
+                if bg and bg.AbsoluteSize.X > 0 then
+                    local currentVal = tonumber(valLabel.Text) or defaultVal
+                    local percent = (currentVal - minVal) / (maxVal - minVal)
+                    fill.Size = UDim2.new(percent, 0, 1, 0)
+                end
+            end
+            bg:GetPropertyChangedSignal("AbsoluteSize"):Connect(refreshFill)
+            frame:GetPropertyChangedSignal("AbsoluteSize"):Connect(refreshFill)
         end
 
         function TabObj:AddDropdown(config)
