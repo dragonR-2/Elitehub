@@ -1,5 +1,7 @@
 -- ==========================================
--- Aurora UI Library (Fixed & Optimized)
+-- Aurora UI Engine (Pure Module)
+-- Modern Glassmorphism UI for Mobile & PC
+-- Version: 1.0.0 (Optimized)
 -- ==========================================
 
 local TweenService = game:GetService("TweenService")
@@ -26,7 +28,7 @@ local uiParent = gethui and gethui() or CoreGui
 if not uiParent then uiParent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui") end
 
 -- ==========================================
--- 1. كلاس النافذة الرئيسية (Window)
+-- 1. Window Class
 -- ==========================================
 local Aurora = {}
 Aurora.__index = Aurora
@@ -37,7 +39,7 @@ function Aurora.new(config)
     
     self.GUI = Create("ScreenGui", { Name = "Aurora_" .. math.random(1000,9999), Parent = uiParent, ResetOnSpawn = false, DisplayOrder = 9999 })
     
-    -- الزر العائم (💎)
+    -- Floating Button (💎)
     self.FloatingBtn = Create("TextButton", {
         Name = "FloatingToggle", Size = UDim2.new(0, 45, 0, 45), Position = UDim2.new(0, 20, 0.5, -22),
         BackgroundColor3 = Theme.Glass, BackgroundTransparency = 1, Text = "💎", TextSize = 20,
@@ -46,7 +48,7 @@ function Aurora.new(config)
     Create("UICorner", { CornerRadius = UDim.new(1, 0), Parent = self.FloatingBtn })
     local floatStroke = Create("UIStroke", { Color = Theme.Accent, Thickness = 2, Transparency = 1, Parent = self.FloatingBtn })
     
-    -- النافذة الرئيسية
+    -- Main Frame
     self.MainFrame = Create("Frame", {
         Name = "MainFrame", Size = UDim2.new(0, 500, 0, 350), AnchorPoint = Vector2.new(0.5, 0.5),
         Position = UDim2.new(0.5, 0, 0.5, 0), BackgroundColor3 = Theme.Background, BackgroundTransparency = 0.1, Parent = self.GUI
@@ -56,7 +58,7 @@ function Aurora.new(config)
     
     self.UIContent = Create("CanvasGroup", { Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, GroupTransparency = 0, Parent = self.MainFrame })
     
-    -- شريط العنوان
+    -- Title Bar
     self.TitleBar = Create("Frame", { Size = UDim2.new(1, 0, 0, 40), BackgroundColor3 = Theme.Glass, Parent = self.UIContent })
     Create("UICorner", { CornerRadius = UDim.new(0, 10), Parent = self.TitleBar })
     Create("UIStroke", { Color = Theme.Stroke, Thickness = 1, Parent = self.TitleBar })
@@ -68,10 +70,11 @@ function Aurora.new(config)
     
     local MinBtn = Create("TextButton", {Size = UDim2.new(0, 25, 0, 25), Position = UDim2.new(1, -65, 0.5, -12), BackgroundColor3 = Theme.Stroke, Text = "-", TextColor3 = Theme.Text, Font = Enum.Font.GothamBold, TextSize = 16, Parent = self.TitleBar})
     Create("UICorner", { CornerRadius = UDim.new(0, 6), Parent = MinBtn })
+    
     local CloseBtn = Create("TextButton", {Size = UDim2.new(0, 25, 0, 25), Position = UDim2.new(1, -30, 0.5, -12), BackgroundColor3 = Theme.Danger, Text = "X", TextColor3 = Theme.Text, Font = Enum.Font.GothamBold, TextSize = 12, Parent = self.TitleBar})
     Create("UICorner", { CornerRadius = UDim.new(0, 6), Parent = CloseBtn })
     
-    -- التبويبات
+    -- Tabs & Content
     self.TabContainer = Create("Frame", {Size = UDim2.new(0, 130, 1, -40), Position = UDim2.new(0, 0, 0, 40), BackgroundColor3 = Theme.Background, BackgroundTransparency = 0.5, Parent = self.UIContent})
     Create("UIListLayout", { Padding = UDim.new(0, 5), Parent = self.TabContainer })
     Create("UIPadding", { PaddingTop = UDim.new(0, 10), PaddingLeft = UDim.new(0, 10), Parent = self.TabContainer })
@@ -79,7 +82,7 @@ function Aurora.new(config)
     self.ContentContainer = Create("Frame", {Size = UDim2.new(1, -140, 1, -50), Position = UDim2.new(0, 140, 0, 45), BackgroundColor3 = Theme.Glass, BackgroundTransparency = 0.5, Parent = self.UIContent})
     Create("UICorner", { CornerRadius = UDim.new(0, 8), Parent = self.ContentContainer })
     
-    -- سحب النافذة
+    -- Window Dragging
     local dragging, dragInput, dragStart, startPos
     table.insert(self.Connections, self.TitleBar.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -97,7 +100,7 @@ function Aurora.new(config)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end
     end))
     
-    -- سحب الزر العائم
+    -- Floating Button Dragging
     local fDragging, fDragInput, fDragStart, fStartPos, fMoved
     table.insert(self.Connections, self.FloatingBtn.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -116,7 +119,7 @@ function Aurora.new(config)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then fDragging = false end
     end))
     
-    -- أنيميشن الإخفاء
+    -- Minimize Logic
     MinBtn.MouseButton1Click:Connect(function()
         local fadeOut = TweenService:Create(self.UIContent, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {GroupTransparency = 1})
         fadeOut:Play()
@@ -138,7 +141,7 @@ function Aurora.new(config)
         TweenService:Create(self.UIContent, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {GroupTransparency = 0}):Play()
     end)
     
-    -- زر الإغلاق
+    -- Close Logic
     CloseBtn.MouseButton1Click:Connect(function()
         for _, conn in ipairs(self.Connections) do pcall(function() conn:Disconnect() end) end
         self.GUI:Destroy()
@@ -157,11 +160,10 @@ function Aurora:CreateTab(name)
     Tab.Button = Create("TextButton", {Size = UDim2.new(1, -10, 0, 30), BackgroundColor3 = Theme.Glass, BackgroundTransparency = 0.5, Text = "  " .. name, TextColor3 = Theme.SubText, Font = Enum.Font.GothamSemibold, TextSize = 12, TextXAlignment = Enum.TextXAlignment.Left, Parent = self.TabContainer})
     Create("UICorner", { CornerRadius = UDim.new(0, 6), Parent = Tab.Button })
     
-    -- إصلاح التمرير (Scrolling Fix)
     Tab.Page = Create("ScrollingFrame", {
         Size = UDim2.new(1, -20, 1, -20), Position = UDim2.new(0, 10, 0, 10), BackgroundTransparency = 1,
         ScrollBarThickness = 2, ScrollBarImageColor3 = Theme.Accent, Visible = false, Parent = self.ContentContainer,
-        AutomaticCanvasSize = Enum.AutomaticSize.Y, CanvasSize = UDim2.new(0, 0, 0, 0) -- تمدد تلقائي
+        AutomaticCanvasSize = Enum.AutomaticSize.Y, CanvasSize = UDim2.new(0, 0, 0, 0)
     })
     Create("UIListLayout", { Padding = UDim.new(0, 8), Parent = Tab.Page })
     
@@ -185,7 +187,7 @@ function Aurora:CreateTab(name)
 end
 
 -- ==========================================
--- 2. محرك العناصر (Fixed Elements Engine)
+-- 2. Dynamic Elements Engine
 -- ==========================================
 Aurora.TabMethods = {}
 
@@ -233,13 +235,10 @@ function Aurora.TabMethods:CreateToggle(name, default, callback)
     end)
 end
 
--- 3. CreateSlider (تم الإصلاح: منع تسريب الذاكرة + توسيع اللمس)
+-- 3. CreateSlider
 function Aurora.TabMethods:CreateSlider(name, min, max, default, callback)
     local Container = CreateBaseContainer(self.Page, name, 50)
-    -- شريط الشفافية الخلفي (Hitbox) لتوسيع مساحة اللمس على الهواتف
-    local Hitbox = Create("TextButton", {
-        Size = UDim2.new(1, -10, 1, 0), BackgroundTransparency = 1, Text = "", Parent = Container
-    })
+    local Hitbox = Create("TextButton", {Size = UDim2.new(1, -10, 1, 0), BackgroundTransparency = 1, Text = "", Parent = Container})
     
     local Track = Create("Frame", {Size = UDim2.new(1, -20, 0, 4), Position = UDim2.new(0, 10, 0, 35), BackgroundColor3 = Theme.Stroke, Parent = Container})
     Create("UICorner", { CornerRadius = UDim.new(1, 0), Parent = Track })
@@ -257,7 +256,6 @@ function Aurora.TabMethods:CreateSlider(name, min, max, default, callback)
         if callback then callback(value) end
     end
     
-    -- بدء السحب من الحاوية كاملة (Hitbox)
     Hitbox.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
@@ -265,7 +263,6 @@ function Aurora.TabMethods:CreateSlider(name, min, max, default, callback)
         end
     end)
     
-    -- إصلاح تسريب الذاكرة: إضافة Connections إلى self.Connections
     table.insert(self.Connections, UserInputService.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = false
@@ -279,7 +276,7 @@ function Aurora.TabMethods:CreateSlider(name, min, max, default, callback)
     end))
 end
 
--- 4. CreateDropdown (تم الإصلاح: تمدد الحاوية عند الفتح)
+-- 4. CreateDropdown
 function Aurora.TabMethods:CreateDropdown(name, options, default, callback)
     local Container = CreateBaseContainer(self.Page, name, 40)
     local Selected = default or options[1]
@@ -345,7 +342,7 @@ function Aurora.TabMethods:CreateKeybind(name, defaultKey, callback)
     end))
 end
 
--- 7. CreateColorpicker (تم الإصلاح: تمدد الحاوية عند الفتح)
+-- 7. CreateColorpicker
 function Aurora.TabMethods:CreateColorpicker(name, defaultColor, callback)
     local Container = CreateBaseContainer(self.Page, name, 40)
     local color = defaultColor or Color3.fromRGB(255,255,255)
@@ -381,7 +378,7 @@ function Aurora.TabMethods:CreateColorpicker(name, defaultColor, callback)
     end)
 end
 
--- 8. CreateSection / CreateLabel
+-- 8. CreateSection
 function Aurora.TabMethods:CreateSection(title)
     local Container = Create("Frame", {Size = UDim2.new(1, -10, 0, 25), BackgroundColor3 = Theme.Background, BackgroundTransparency = 1, Parent = self.Page})
     Create("TextLabel", {Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, Text = "  " .. title, TextColor3 = Theme.Accent, Font = Enum.Font.GothamBold, TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left, Parent = Container})
@@ -397,53 +394,4 @@ function Aurora.TabMethods:CreateParagraph(text)
     Container.AutomaticSize = Enum.AutomaticSize.Y
 end
 
--- ==========================================
--- 3. أمثلة تطبيقية شاملة لجميع العناصر التسعة
--- ==========================================
-local Window = Aurora.new({ Title = "Aurora Hub | Fixed & Optimized" })
-
-local MainTab = Window:CreateTab("Main Features")
-
--- 1. Section
-MainTab:CreateSection("Player Modifications")
-
--- 2. Toggle
-MainTab:CreateToggle("Noclip", false, function(state)
-    print("Noclip:", state)
-end)
-
--- 3. Slider (جرّب سحبه من أي مكان في الإطار)
-MainTab:CreateSlider("WalkSpeed", 16, 200, 16, function(value)
-    print("Speed set to:", value)
-end)
-
--- 4. Button
-MainTab:CreateButton("Kill All NPCs", function()
-    print("Killing NPCs...")
-end)
-
--- 5. Section
-MainTab:CreateSection("Visuals & ESP")
-
--- 6. Colorpicker (جرّب فتحه، سيتمدد الإطار)
-MainTab:CreateColorpicker("ESP Color", Color3.fromRGB(0, 255, 0), function(color)
-    print("ESP Color changed")
-end)
-
--- 7. Dropdown (جرّب فتحه، سيتمدد الإطار)
-MainTab:CreateDropdown("Tracer Style", {"Bottom", "Center", "Top"}, "Bottom", function(selected)
-    print("Tracer:", selected)
-end)
-
--- 8. Input
-MainTab:CreateInput("Custom Teleport ID", "Enter ID...", function(text, enterPressed)
-    if enterPressed then print("Teleporting to:", text) end
-end)
-
--- 9. Keybind
-MainTab:CreateKeybind("Toggle UI", Enum.KeyCode.RightShift, function()
-    print("Keybind pressed!")
-end)
-
--- 10. Paragraph
-MainTab:CreateParagraph("This is a paragraph. You can write instructions or script info here. It will automatically resize to fit the text. Created with Aurora UI Engine.")
+return Aurora
