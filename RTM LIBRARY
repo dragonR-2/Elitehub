@@ -1,7 +1,7 @@
 -- ==========================================
 -- Aurora UI Engine (Pure Module)
 -- Modern Glassmorphism UI for Mobile & PC
--- Version: 1.1.0 (Cleanup Engine)
+-- Version: 1.2.0 (Exit Confirmation)
 -- ==========================================
 
 local TweenService = game:GetService("TweenService")
@@ -144,9 +144,82 @@ function Aurora.new(config)
         TweenService:Create(self.UIContent, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {GroupTransparency = 0}):Play()
     end)
     
-    -- Close Logic 🔥 (التدمير الشامل)
-    CloseBtn.MouseButton1Click:Connect(function()
+    -- ==========================================
+    -- Exit Confirmation Modal (🔥 v1.2)
+    -- ==========================================
+    local exitTitle    = config.ExitTitle    or "Exit Confirmation"
+    local exitMessage  = config.ExitMessage  or "Are you sure you want to close Elite Hub? All active features will be terminated."
+
+    -- طبقة التعتيم (تحجب الضغطات عن الواجهة أثناء التأكيد)
+    local confirmOverlay = Create("Frame", {
+        Name = "ExitOverlay", Size = UDim2.new(1, 0, 1, 0),
+        BackgroundColor3 = Theme.Background, BackgroundTransparency = 1,
+        Visible = false, Active = true, ZIndex = 50, Parent = self.GUI
+    })
+
+    -- نافذة التأكيد (CanvasGroup لأنيميشن Fade موحد)
+    local confirmDialog = Create("CanvasGroup", {
+        Name = "ExitDialog", Size = UDim2.new(0, 290, 0, 175), AnchorPoint = Vector2.new(0.5, 0.5),
+        Position = UDim2.new(0.5, 0, 0.5, 0), BackgroundColor3 = Theme.Glass,
+        GroupTransparency = 1, ZIndex = 60, Parent = confirmOverlay
+    })
+    Create("UICorner", { CornerRadius = UDim.new(0, 10), Parent = confirmDialog })
+    Create("UIStroke", { Color = Theme.Stroke, Thickness = 1.5, Transparency = 0.3, Parent = confirmDialog })
+    local confirmScale = Create("UIScale", { Scale = 0.9, Parent = confirmDialog })
+
+    Create("TextLabel", {
+        Size = UDim2.new(1, -24, 0, 24), Position = UDim2.new(0, 14, 0, 12),
+        BackgroundTransparency = 1, Text = exitTitle,
+        TextColor3 = Theme.Accent, Font = Enum.Font.GothamBold, TextSize = 15,
+        TextXAlignment = Enum.TextXAlignment.Left, Parent = confirmDialog
+    })
+
+    Create("TextLabel", {
+        Size = UDim2.new(1, -28, 0, 64), Position = UDim2.new(0, 14, 0, 40),
+        BackgroundTransparency = 1, Text = exitMessage,
+        TextColor3 = Theme.SubText, Font = Enum.Font.Gotham, TextSize = 12, TextWrapped = true,
+        TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Top, Parent = confirmDialog
+    })
+
+    local YesBtn = Create("TextButton", {
+        Size = UDim2.new(0, 118, 0, 32), Position = UDim2.new(0, 14, 1, -44),
+        BackgroundColor3 = Theme.Danger, Text = "Yes", TextColor3 = Theme.Text,
+        Font = Enum.Font.GothamBold, TextSize = 13, Parent = confirmDialog
+    })
+    Create("UICorner", { CornerRadius = UDim.new(0, 6), Parent = YesBtn })
+    Create("UIStroke", { Color = Theme.Danger, Thickness = 1, Transparency = 0.4, Parent = YesBtn })
+
+    local NoBtn = Create("TextButton", {
+        Size = UDim2.new(0, 118, 0, 32), Position = UDim2.new(1, -132, 1, -44),
+        BackgroundColor3 = Theme.Stroke, Text = "No", TextColor3 = Theme.Text,
+        Font = Enum.Font.GothamBold, TextSize = 13, Parent = confirmDialog
+    })
+    Create("UICorner", { CornerRadius = UDim.new(0, 6), Parent = NoBtn })
+    Create("UIStroke", { Color = Theme.Stroke, Thickness = 1, Transparency = 0.4, Parent = NoBtn })
+
+    -- [Yes] → تنفيذ التدمير الشامل (Cleanup Engine v1.1)
+    YesBtn.MouseButton1Click:Connect(function()
         self:Destroy()
+    end)
+
+    -- [No] → إخفاء ناعم فقط، لا يُمس أي شيء يعمل في الخلفية
+    NoBtn.MouseButton1Click:Connect(function()
+        local t1 = TweenService:Create(confirmOverlay, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 1})
+        local t2 = TweenService:Create(confirmDialog,  TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {GroupTransparency = 1})
+        local t3 = TweenService:Create(confirmScale,   TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Scale = 0.9})
+        t1:Play(); t2:Play(); t3:Play()
+        t2.Completed:Once(function()
+            confirmOverlay.Visible = false
+        end)
+    end)
+    
+    -- Close Logic 🔥 (فتح نافذة التأكيد بدل التدمير الفوري)
+    CloseBtn.MouseButton1Click:Connect(function()
+        if self.Destroyed then return end
+        confirmOverlay.Visible = true
+        TweenService:Create(confirmOverlay, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 0.35}):Play()
+        TweenService:Create(confirmDialog,  TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {GroupTransparency = 0}):Play()
+        TweenService:Create(confirmScale,   TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Scale = 1}):Play()
     end)
     
     self.Tabs = {}
