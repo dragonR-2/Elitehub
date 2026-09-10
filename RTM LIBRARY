@@ -1,13 +1,7 @@
--- ==========================================
--- Aurora UI Engine (Pure Module)
--- Modern Glassmorphism UI for Mobile & PC
--- Version: 1.2.3 (Exit Confirmation - BLUR FIX)
--- ==========================================
-
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
-local Lighting = game:GetService("Lighting") -- تم إضافة خدمة الإضاءة للتشويش
+local Lighting = game:GetService("Lighting")
 
 local Theme = {
     Background = Color3.fromRGB(15, 15, 20),
@@ -28,22 +22,18 @@ end
 local uiParent = gethui and gethui() or CoreGui
 if not uiParent then uiParent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui") end
 
--- ==========================================
--- 1. Window Class
--- ==========================================
 local Aurora = {}
 Aurora.__index = Aurora
 
 function Aurora.new(config)
     local self = setmetatable({}, Aurora)
     self.Connections = {}
-    self.Cleanups   = {}   
-    self.Threads    = {}   
-    self.Destroyed  = false
+    self.Cleanups = {}
+    self.Threads = {}
+    self.Destroyed = false
 
     self.GUI = Create("ScreenGui", { Name = "Aurora_" .. math.random(1000,9999), Parent = uiParent, ResetOnSpawn = false, DisplayOrder = 9999 })
-    
-    -- Floating Button (💎)
+
     self.FloatingBtn = Create("TextButton", {
         Name = "FloatingToggle", Size = UDim2.new(0, 45, 0, 45), Position = UDim2.new(0, 20, 0.5, -22),
         BackgroundColor3 = Theme.Glass, BackgroundTransparency = 1, Text = "💎", TextSize = 20,
@@ -51,18 +41,16 @@ function Aurora.new(config)
     })
     Create("UICorner", { CornerRadius = UDim.new(1, 0), Parent = self.FloatingBtn })
     local floatStroke = Create("UIStroke", { Color = Theme.Accent, Thickness = 2, Transparency = 1, Parent = self.FloatingBtn })
-    
-    -- Main Frame
+
     self.MainFrame = Create("Frame", {
         Name = "MainFrame", Size = UDim2.new(0, 500, 0, 350), AnchorPoint = Vector2.new(0.5, 0.5),
         Position = UDim2.new(0.5, 0, 0.5, 0), BackgroundColor3 = Theme.Background, BackgroundTransparency = 0.1, Parent = self.GUI
     })
     Create("UICorner", { CornerRadius = UDim.new(0, 10), Parent = self.MainFrame })
     Create("UIStroke", { Color = Theme.Stroke, Thickness = 1.5, Transparency = 0.5, Parent = self.MainFrame })
-    
+
     self.UIContent = Create("CanvasGroup", { Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, GroupTransparency = 0, Parent = self.MainFrame })
-    
-    -- Title Bar
+
     self.TitleBar = Create("Frame", { Size = UDim2.new(1, 0, 0, 40), BackgroundColor3 = Theme.Glass, Parent = self.UIContent })
     Create("UICorner", { CornerRadius = UDim.new(0, 10), Parent = self.TitleBar })
     Create("UIStroke", { Color = Theme.Stroke, Thickness = 1, Parent = self.TitleBar })
@@ -71,22 +59,20 @@ function Aurora.new(config)
         Text = config.Title or "Aurora UI", TextColor3 = Theme.Accent, Font = Enum.Font.GothamBold,
         TextSize = 14, TextXAlignment = Enum.TextXAlignment.Left, Parent = self.TitleBar
     })
-    
+
     local MinBtn = Create("TextButton", {Size = UDim2.new(0, 25, 0, 25), Position = UDim2.new(1, -65, 0.5, -12), BackgroundColor3 = Theme.Stroke, Text = "-", TextColor3 = Theme.Text, Font = Enum.Font.GothamBold, TextSize = 16, Parent = self.TitleBar})
     Create("UICorner", { CornerRadius = UDim.new(0, 6), Parent = MinBtn })
-    
+
     local CloseBtn = Create("TextButton", {Size = UDim2.new(0, 25, 0, 25), Position = UDim2.new(1, -30, 0.5, -12), BackgroundColor3 = Theme.Danger, Text = "X", TextColor3 = Theme.Text, Font = Enum.Font.GothamBold, TextSize = 12, Parent = self.TitleBar})
     Create("UICorner", { CornerRadius = UDim.new(0, 6), Parent = CloseBtn })
-    
-    -- Tabs & Content
+
     self.TabContainer = Create("Frame", {Size = UDim2.new(0, 130, 1, -40), Position = UDim2.new(0, 0, 0, 40), BackgroundColor3 = Theme.Background, BackgroundTransparency = 0.5, Parent = self.UIContent})
     Create("UIListLayout", { Padding = UDim.new(0, 5), Parent = self.TabContainer })
     Create("UIPadding", { PaddingTop = UDim.new(0, 10), PaddingLeft = UDim.new(0, 10), Parent = self.TabContainer })
-    
+
     self.ContentContainer = Create("Frame", {Size = UDim2.new(1, -140, 1, -50), Position = UDim2.new(0, 140, 0, 45), BackgroundColor3 = Theme.Glass, BackgroundTransparency = 0.5, Parent = self.UIContent})
     Create("UICorner", { CornerRadius = UDim.new(0, 8), Parent = self.ContentContainer })
-    
-    -- Window Dragging
+
     local dragging, dragInput, dragStart, startPos
     table.insert(self.Connections, self.TitleBar.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -103,8 +89,7 @@ function Aurora.new(config)
     table.insert(self.Connections, UserInputService.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end
     end))
-    
-    -- Floating Button Dragging
+
     local fDragging, fDragInput, fDragStart, fStartPos, fMoved
     table.insert(self.Connections, self.FloatingBtn.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -122,8 +107,7 @@ function Aurora.new(config)
     table.insert(self.Connections, UserInputService.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then fDragging = false end
     end))
-    
-    -- Minimize Logic
+
     MinBtn.MouseButton1Click:Connect(function()
         local fadeOut = TweenService:Create(self.UIContent, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {GroupTransparency = 1})
         fadeOut:Play()
@@ -134,7 +118,7 @@ function Aurora.new(config)
             TweenService:Create(floatStroke, TweenInfo.new(0.2), {Transparency = 0}):Play()
         end)
     end)
-    
+
     self.FloatingBtn.MouseButton1Click:Connect(function()
         if fMoved then return end
         TweenService:Create(self.FloatingBtn, TweenInfo.new(0.2), {BackgroundTransparency = 1, TextTransparency = 1}):Play()
@@ -144,23 +128,17 @@ function Aurora.new(config)
         self.MainFrame.Visible = true
         TweenService:Create(self.UIContent, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {GroupTransparency = 0}):Play()
     end)
-    
-    -- ==========================================
-    -- Exit Confirmation Modal (🚀 FIXED Z-INDEX & BLUR)
-    -- ==========================================
+
     local exitMessage = "Are you sure you want to close Elite Hub? All active features will be terminated."
 
-    -- إنشاء تأثير البلور (تشويش حقيقي في الخلفية)
     local uiBlur = Create("BlurEffect", { Size = 0, Name = "AuroraExitBlur", Parent = Lighting })
-    table.insert(self.Cleanups, function() if uiBlur then uiBlur:Destroy() end end) -- تدميره عند الخروج
+    table.insert(self.Cleanups, function() if uiBlur then uiBlur:Destroy() end end)
 
-    -- [1] خلفية شفافة بالكامل لمنع النقرات الخاطئة (بدون مربع أسود ضخم)
     local confirmOverlay = Create("Frame", {
         Name = "ExitOverlay", Size = UDim2.new(1, 0, 1, 0),
         BackgroundTransparency = 1, Visible = false, Active = true, ZIndex = 100, Parent = self.GUI
     })
 
-    -- [2] نافذة التأكيد (مربع عادي Frame لتجنب اختفاء المحتوى)
     local confirmDialog = Create("Frame", {
         Name = "ExitDialog", Size = UDim2.new(0, 300, 0, 140), AnchorPoint = Vector2.new(0.5, 0.5),
         Position = UDim2.new(0.5, 0, 0.5, 0), BackgroundColor3 = Theme.Background,
@@ -199,7 +177,6 @@ function Aurora.new(config)
     })
     Create("UICorner", { CornerRadius = UDim.new(0, 6), Parent = NoBtn })
 
-    -- نظام أنيميشن يدوي نظيف
     local function toggleConfirm(show)
         local trans = show and 0 or 1
         local blurSize = show and 15 or 0
@@ -212,7 +189,6 @@ function Aurora.new(config)
         TweenService:Create(NoBtn, TweenInfo.new(0.2), {BackgroundTransparency = trans, TextTransparency = trans}):Play()
     end
 
-    -- [3] أوامر الأزرار (بسيطة وفعالة)
     YesBtn.MouseButton1Click:Connect(function()
         toggleConfirm(false)
         task.wait(0.2)
@@ -225,20 +201,16 @@ function Aurora.new(config)
             if not self.Destroyed then confirmOverlay.Visible = false end
         end)
     end)
-    
+
     CloseBtn.MouseButton1Click:Connect(function()
         if self.Destroyed then return end
         confirmOverlay.Visible = true
         toggleConfirm(true)
     end)
-    
+
     self.Tabs = {}
     return self
 end
-
--- ==========================================
--- 1.5 Cleanup Engine (🔥 نظام التدمير الشامل)
--- ==========================================
 
 function Aurora:OnClose(fn)
     if type(fn) == "function" and not self.Destroyed then
@@ -283,17 +255,17 @@ function Aurora:CreateTab(name)
     Tab.Name = name
     Tab.Window = self
     Tab.Connections = self.Connections
-    
+
     Tab.Button = Create("TextButton", {Size = UDim2.new(1, -10, 0, 30), BackgroundColor3 = Theme.Glass, BackgroundTransparency = 0.5, Text = "  " .. name, TextColor3 = Theme.SubText, Font = Enum.Font.GothamSemibold, TextSize = 12, TextXAlignment = Enum.TextXAlignment.Left, Parent = self.TabContainer})
     Create("UICorner", { CornerRadius = UDim.new(0, 6), Parent = Tab.Button })
-    
+
     Tab.Page = Create("ScrollingFrame", {
         Size = UDim2.new(1, -20, 1, -20), Position = UDim2.new(0, 10, 0, 10), BackgroundTransparency = 1,
         ScrollBarThickness = 2, ScrollBarImageColor3 = Theme.Accent, Visible = false, Parent = self.ContentContainer,
         AutomaticCanvasSize = Enum.AutomaticSize.Y, CanvasSize = UDim2.new(0, 0, 0, 0)
     })
     Create("UIListLayout", { Padding = UDim.new(0, 8), Parent = Tab.Page })
-    
+
     Tab.Button.MouseButton1Click:Connect(function()
         for _, t in pairs(self.Tabs) do
             t.Page.Visible = false
@@ -302,20 +274,17 @@ function Aurora:CreateTab(name)
         Tab.Page.Visible = true
         TweenService:Create(Tab.Button, TweenInfo.new(0.15), {BackgroundColor3 = Theme.Accent, TextColor3 = Theme.Background}):Play()
     end)
-    
+
     table.insert(self.Tabs, Tab)
     if #self.Tabs == 1 then
         Tab.Page.Visible = true
         TweenService:Create(Tab.Button, TweenInfo.new(0.15), {BackgroundColor3 = Theme.Accent, TextColor3 = Theme.Background}):Play()
     end
-    
+
     setmetatable(Tab, { __index = function(t, k) return Aurora.TabMethods[k] end })
     return Tab
 end
 
--- ==========================================
--- 2. Dynamic Elements Engine
--- ==========================================
 Aurora.TabMethods = {}
 
 local function CreateBaseContainer(parent, name, height)
@@ -346,7 +315,7 @@ function Aurora.TabMethods:CreateToggle(name, default, callback)
     Create("UICorner", { CornerRadius = UDim.new(1, 0), Parent = Switch })
     local Knob = Create("Frame", {Size = UDim2.new(0, 16, 0, 16), Position = State and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8), BackgroundColor3 = Theme.Text, Parent = Switch})
     Create("UICorner", { CornerRadius = UDim.new(1, 0), Parent = Knob })
-    
+
     Switch.MouseButton1Click:Connect(function()
         State = not State
         if State then
@@ -363,14 +332,14 @@ end
 function Aurora.TabMethods:CreateSlider(name, min, max, default, callback)
     local Container = CreateBaseContainer(self.Page, name, 50)
     local Hitbox = Create("TextButton", {Size = UDim2.new(1, -10, 1, 0), BackgroundTransparency = 1, Text = "", Parent = Container})
-    
+
     local Track = Create("Frame", {Size = UDim2.new(1, -20, 0, 4), Position = UDim2.new(0, 10, 0, 35), BackgroundColor3 = Theme.Stroke, Parent = Container})
     Create("UICorner", { CornerRadius = UDim.new(1, 0), Parent = Track })
     local Fill = Create("Frame", {Size = UDim2.new((default-min)/(max-min), 0, 1, 0), BackgroundColor3 = Theme.Accent, Parent = Track})
     Create("UICorner", { CornerRadius = UDim.new(1, 0), Parent = Fill })
     local Knob = Create("Frame", {Size = UDim2.new(0, 12, 0, 12), Position = UDim2.new(1, -6, 0.5, -4), BackgroundColor3 = Theme.Text, Parent = Fill})
     Create("UICorner", { CornerRadius = UDim.new(1, 0), Parent = Knob })
-    
+
     local dragging = false
     local function updateSlider(input)
         local pos = input.Position.X - Track.AbsolutePosition.X
@@ -379,18 +348,18 @@ function Aurora.TabMethods:CreateSlider(name, min, max, default, callback)
         Fill.Size = UDim2.new(percent, 0, 1, 0)
         if callback then callback(value) end
     end
-    
+
     Hitbox.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
             updateSlider(input)
         end
     end)
-    
+
     table.insert(self.Connections, UserInputService.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end
     end))
-    
+
     table.insert(self.Connections, UserInputService.InputChanged:Connect(function(input)
         if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
             updateSlider(input)
@@ -403,13 +372,13 @@ function Aurora.TabMethods:CreateDropdown(name, options, default, callback)
     local Selected = default or options[1]
     local Btn = Create("TextButton", {Size = UDim2.new(0, 100, 0, 20), Position = UDim2.new(1, -110, 0.5, -10), BackgroundColor3 = Theme.Glass, Text = Selected, TextColor3 = Theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 11, Parent = Container})
     Create("UICorner", { CornerRadius = UDim.new(0, 4), Parent = Btn })
-    
+
     local isOpen = false
     local listHeight = #options * 22 + 10
     local listFrame = Create("Frame", {Size = UDim2.new(1, -10, 0, listHeight), Position = UDim2.new(0, 5, 0, 40), BackgroundColor3 = Theme.Background, Visible = false, Parent = Container})
     Create("UICorner", { CornerRadius = UDim.new(0, 4), Parent = listFrame })
     Create("UIListLayout", { Padding = UDim.new(0, 2), Parent = listFrame })
-    
+
     for _, opt in ipairs(options) do
         local optBtn = Create("TextButton", {Size = UDim2.new(1, 0, 0, 20), BackgroundColor3 = Theme.Glass, Text = opt, TextColor3 = Theme.Text, Font = Enum.Font.Gotham, TextSize = 11, Parent = listFrame})
         optBtn.MouseButton1Click:Connect(function()
@@ -419,7 +388,7 @@ function Aurora.TabMethods:CreateDropdown(name, options, default, callback)
             TweenService:Create(Container, TweenInfo.new(0.2), {Size = UDim2.new(1, -10, 0, 40)}):Play()
         end)
     end
-    
+
     Btn.MouseButton1Click:Connect(function()
         isOpen = not isOpen; listFrame.Visible = isOpen
         TweenService:Create(Container, TweenInfo.new(0.2), {Size = UDim2.new(1, -10, 0, isOpen and (40 + listHeight) or 40)}):Play()
@@ -440,10 +409,10 @@ function Aurora.TabMethods:CreateKeybind(name, defaultKey, callback)
     local currentKey = defaultKey
     local Btn = Create("TextButton", {Size = UDim2.new(0, 60, 0, 20), Position = UDim2.new(1, -70, 0.5, -10), BackgroundColor3 = Theme.Glass, Text = tostring(currentKey.Name), TextColor3 = Theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 11, Parent = Container})
     Create("UICorner", { CornerRadius = UDim.new(0, 4), Parent = Btn })
-    
+
     local listening = false
     Btn.MouseButton1Click:Connect(function() listening = true; Btn.Text = "..." end)
-    
+
     table.insert(self.Connections, UserInputService.InputBegan:Connect(function(input, processed)
         if listening then
             listening = false; currentKey = input.KeyCode; Btn.Text = tostring(currentKey.Name)
@@ -458,13 +427,13 @@ function Aurora.TabMethods:CreateColorpicker(name, defaultColor, callback)
     local color = defaultColor or Color3.fromRGB(255,255,255)
     local Swatch = Create("TextButton", {Size = UDim2.new(0, 30, 0, 20), Position = UDim2.new(1, -40, 0.5, -10), BackgroundColor3 = color, Text = "", Parent = Container})
     Create("UICorner", { CornerRadius = UDim.new(0, 4), Parent = Swatch })
-    
+
     local palette = {Color3.fromRGB(255,0,0), Color3.fromRGB(0,255,0), Color3.fromRGB(0,0,255), Color3.fromRGB(255,255,0), Color3.fromRGB(0,255,255), Color3.fromRGB(255,255,255)}
     local isOpen = false
     local listFrame = Create("Frame", {Size = UDim2.new(0, 120, 0, 60), Position = UDim2.new(1, -130, 0, 40), BackgroundColor3 = Theme.Background, Visible = false, Parent = Container})
     Create("UICorner", { CornerRadius = UDim.new(0, 4), Parent = listFrame })
     Create("UIGridLayout", {CellSize = UDim2.new(0, 25, 0, 25), CellPadding = UDim2.new(0, 5, 0, 5), Parent = listFrame})
-    
+
     for _, c in ipairs(palette) do
         local b = Create("TextButton", {BackgroundColor3 = c, Text = "", Parent = listFrame})
         Create("UICorner", { CornerRadius = UDim.new(0, 4), Parent = b })
@@ -475,7 +444,7 @@ function Aurora.TabMethods:CreateColorpicker(name, defaultColor, callback)
             TweenService:Create(Container, TweenInfo.new(0.2), {Size = UDim2.new(1, -10, 0, 40)}):Play()
         end)
     end
-    
+
     Swatch.MouseButton1Click:Connect(function()
         isOpen = not isOpen; listFrame.Visible = isOpen
         TweenService:Create(Container, TweenInfo.new(0.2), {Size = UDim2.new(1, -10, 0, isOpen and 100 or 40)}):Play()
