@@ -1,7 +1,7 @@
 -- ==========================================
 -- Aurora UI Engine (Pure Module)
 -- Modern Glassmorphism UI for Mobile & PC
--- Version: 1.2.1 (Exit Confirmation - Fixed)
+-- Version: 1.2.2 (Exit Confirmation - PERFECTED)
 -- ==========================================
 
 local TweenService = game:GetService("TweenService")
@@ -36,8 +36,8 @@ Aurora.__index = Aurora
 function Aurora.new(config)
     local self = setmetatable({}, Aurora)
     self.Connections = {}
-    self.Cleanups   = {}   -- 🔥 دوال التنظيف المسجلة من السكربت الرئيسي
-    self.Threads    = {}   -- 🔥 الخيوط المتتبعة (قابلة للإلغاء)
+    self.Cleanups   = {}   
+    self.Threads    = {}   
     self.Destroyed  = false
 
     self.GUI = Create("ScreenGui", { Name = "Aurora_" .. math.random(1000,9999), Parent = uiParent, ResetOnSpawn = false, DisplayOrder = 9999 })
@@ -145,100 +145,72 @@ function Aurora.new(config)
     end)
     
     -- ==========================================
-    -- Exit Confirmation Modal (🔥 v1.2.1 — Fixed)
+    -- Exit Confirmation Modal (🚀 CLEAN & PERFECT)
     -- ==========================================
-    local exitTitle    = config.ExitTitle    or "Exit Confirmation"
-    local exitMessage  = config.ExitMessage  or "Are you sure you want to close Elite Hub? All active features will be terminated."
+    local exitMessage = "Are you sure you want to close Elite Hub? All active features will be terminated."
 
-    -- [1] طبقة تعتيم خفيفة (زجاجية — الشاشة تبقى مرئية خلفها)
+    -- [1] خلفية تعتيم سينمائية (سوداء شفافة تغطي الشاشة)
     local confirmOverlay = Create("Frame", {
         Name = "ExitOverlay", Size = UDim2.new(1, 0, 1, 0),
-        BackgroundColor3 = Color3.fromRGB(10, 10, 15), BackgroundTransparency = 1,
+        BackgroundColor3 = Color3.fromRGB(0, 0, 0), BackgroundTransparency = 1,
         Visible = false, Active = true, ZIndex = 50, Parent = self.GUI
     })
 
-    -- [2] نافذة التأكيد الصغيرة (320x160 في المنتصف — Frame عادي بلا CanvasGroup لضمان الرندر على الموبايل)
-    local confirmDialog = Create("Frame", {
-        Name = "ExitDialog", Size = UDim2.new(0, 320, 0, 160), AnchorPoint = Vector2.new(0.5, 0.5),
+    -- [2] نافذة التأكيد الذكية باستخدام CanvasGroup لأنيميشن خالي من العيوب
+    local confirmDialog = Create("CanvasGroup", {
+        Name = "ExitDialog", Size = UDim2.new(0, 300, 0, 140), AnchorPoint = Vector2.new(0.5, 0.5),
         Position = UDim2.new(0.5, 0, 0.5, 0), BackgroundColor3 = Theme.Background,
-        BackgroundTransparency = 1, ZIndex = 60, Parent = confirmOverlay
+        GroupTransparency = 1, ZIndex = 60, Parent = confirmOverlay
     })
     Create("UICorner", { CornerRadius = UDim.new(0, 10), Parent = confirmDialog })
-    local dialogStroke = Create("UIStroke", { Color = Theme.Stroke, Thickness = 1.5, Transparency = 1, Parent = confirmDialog })
-    local confirmScale = Create("UIScale", { Scale = 0.92, Parent = confirmDialog })
+    Create("UIStroke", { Color = Theme.Stroke, Thickness = 1.5, Parent = confirmDialog })
 
     local dialogTitle = Create("TextLabel", {
-        Size = UDim2.new(1, -28, 0, 22), Position = UDim2.new(0, 14, 0, 10),
-        BackgroundTransparency = 1, Text = exitTitle,
+        Size = UDim2.new(1, 0, 0, 35), Position = UDim2.new(0, 0, 0, 5),
+        BackgroundTransparency = 1, Text = "Exit Confirmation",
         TextColor3 = Theme.Accent, Font = Enum.Font.GothamBold, TextSize = 14,
-        TextXAlignment = Enum.TextXAlignment.Left, Parent = confirmDialog
+        TextXAlignment = Enum.TextXAlignment.Center, Parent = confirmDialog
     })
 
     local dialogMsg = Create("TextLabel", {
-        Size = UDim2.new(1, -28, 0, 58), Position = UDim2.new(0, 14, 0, 36),
+        Size = UDim2.new(1, -30, 0, 40), Position = UDim2.new(0, 15, 0, 40),
         BackgroundTransparency = 1, Text = exitMessage,
         TextColor3 = Theme.SubText, Font = Enum.Font.Gotham, TextSize = 12, TextWrapped = true,
-        TextXAlignment = Enum.TextXAlignment.Left, TextYAlignment = Enum.TextYAlignment.Top, Parent = confirmDialog
+        TextXAlignment = Enum.TextXAlignment.Center, TextYAlignment = Enum.TextYAlignment.Top, Parent = confirmDialog
     })
 
     local YesBtn = Create("TextButton", {
-        Size = UDim2.new(0, 120, 0, 32), Position = UDim2.new(0, 16, 1, -44),
-        BackgroundColor3 = Theme.Danger, BackgroundTransparency = 1, Text = "Yes", TextColor3 = Theme.Text,
-        TextTransparency = 1, Font = Enum.Font.GothamBold, TextSize = 13, Parent = confirmDialog
+        Size = UDim2.new(0, 110, 0, 30), Position = UDim2.new(0, 25, 1, -40),
+        BackgroundColor3 = Theme.Danger, Text = "Yes", TextColor3 = Theme.Text,
+        Font = Enum.Font.GothamBold, TextSize = 13, Parent = confirmDialog
     })
-    Create("UICorner", { CornerRadius = UDim.new(0, 8), Parent = YesBtn })
-    local yesStroke = Create("UIStroke", { Color = Theme.Danger, Thickness = 1, Transparency = 1, Parent = YesBtn })
+    Create("UICorner", { CornerRadius = UDim.new(0, 6), Parent = YesBtn })
 
     local NoBtn = Create("TextButton", {
-        Size = UDim2.new(0, 120, 0, 32), Position = UDim2.new(1, -136, 1, -44),
-        BackgroundColor3 = Theme.Stroke, BackgroundTransparency = 1, Text = "No", TextColor3 = Theme.Text,
-        TextTransparency = 1, Font = Enum.Font.GothamBold, TextSize = 13, Parent = confirmDialog
+        Size = UDim2.new(0, 110, 0, 30), Position = UDim2.new(1, -135, 1, -40),
+        BackgroundColor3 = Theme.Stroke, Text = "No", TextColor3 = Theme.Text,
+        Font = Enum.Font.GothamBold, TextSize = 13, Parent = confirmDialog
     })
-    Create("UICorner", { CornerRadius = UDim.new(0, 8), Parent = NoBtn })
-    local noStroke = Create("UIStroke", { Color = Theme.Stroke, Thickness = 1, Transparency = 1, Parent = NoBtn })
+    Create("UICorner", { CornerRadius = UDim.new(0, 6), Parent = NoBtn })
 
-    -- [3] نظام Fade يدوي موحد (بديل CanvasGroup — آمن على كل الأجهزة)
-    local fadeTargets = {
-        {confirmDialog, "BackgroundTransparency", 0,    1},
-        {dialogStroke,  "Transparency",           0.3,  1},
-        {dialogTitle,   "TextTransparency",       0,    1},
-        {dialogMsg,     "TextTransparency",       0,    1},
-        {YesBtn,        "BackgroundTransparency", 0,    1},
-        {YesBtn,        "TextTransparency",       0,    1},
-        {yesStroke,     "Transparency",           0.4,  1},
-        {NoBtn,         "BackgroundTransparency", 0,    1},
-        {NoBtn,         "TextTransparency",       0,    1},
-        {noStroke,      "Transparency",           0.4,  1},
-    }
-
-    local function playDialogFade(show)
-        for _, t in ipairs(fadeTargets) do
-            TweenService:Create(t[1], TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {[t[2]] = show and t[3] or t[4]}):Play()
-        end
-    end
-
-    -- [Yes] → تنفيذ التدمير الشامل (Cleanup Engine v1.1)
+    -- [3] أوامر الأزرار (بسيطة وفعالة)
     YesBtn.MouseButton1Click:Connect(function()
         self:Destroy()
     end)
 
-    -- [No] → إخفاء ناعم فقط، لا يُمس أي شيء يعمل في الخلفية
     NoBtn.MouseButton1Click:Connect(function()
-        TweenService:Create(confirmOverlay, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 1}):Play()
-        TweenService:Create(confirmScale,   TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Scale = 0.92}):Play()
-        playDialogFade(false)
-        task.delay(0.22, function()
+        TweenService:Create(confirmOverlay, TweenInfo.new(0.2), {BackgroundTransparency = 1}):Play()
+        TweenService:Create(confirmDialog, TweenInfo.new(0.2), {GroupTransparency = 1}):Play()
+        task.delay(0.2, function()
             if not self.Destroyed then confirmOverlay.Visible = false end
         end)
     end)
     
-    -- Close Logic 🔥 (فتح نافذة التأكيد بدل التدمير الفوري)
     CloseBtn.MouseButton1Click:Connect(function()
         if self.Destroyed then return end
         confirmOverlay.Visible = true
-        TweenService:Create(confirmOverlay, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 0.65}):Play()
-        TweenService:Create(confirmScale,   TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Scale = 1}):Play()
-        playDialogFade(true)
+        TweenService:Create(confirmOverlay, TweenInfo.new(0.2), {BackgroundTransparency = 0.6}):Play()
+        TweenService:Create(confirmDialog, TweenInfo.new(0.2), {GroupTransparency = 0}):Play()
     end)
     
     self.Tabs = {}
@@ -249,14 +221,12 @@ end
 -- 1.5 Cleanup Engine (🔥 نظام التدمير الشامل)
 -- ==========================================
 
--- تسجيل دالة تنظيف تُنفذ لحظة الضغط على X
 function Aurora:OnClose(fn)
     if type(fn) == "function" and not self.Destroyed then
         table.insert(self.Cleanups, fn)
     end
 end
 
--- إنشاء خيط متتبع يُقتل تلقائياً عند الإغلاق (بديل task.spawn)
 function Aurora:Spawn(fn, ...)
     if self.Destroyed or type(fn) ~= "function" then return end
     local co = coroutine.create(fn)
@@ -266,7 +236,6 @@ function Aurora:Spawn(fn, ...)
     return co
 end
 
--- تسجيل توصيل خارجي (من السكربت الرئيسي) ليُفك عند الإغلاق
 function Aurora:Track(connection)
     if connection and not self.Destroyed then
         table.insert(self.Connections, connection)
@@ -274,30 +243,19 @@ function Aurora:Track(connection)
     return connection
 end
 
--- تسلسل التدمير الربعي: تنظيفات ← خيوط ← توصيلات ← GUI
 function Aurora:Destroy()
     if self.Destroyed then return end
     self.Destroyed = true
 
-    -- [1/4] تنفيذ دوال التنظيف المسجلة (إيقاف الأصوات/الرايات/الحلقات)
-    for _, fn in ipairs(self.Cleanups) do
-        pcall(fn)
-    end
+    for _, fn in ipairs(self.Cleanups) do pcall(fn) end
     table.clear(self.Cleanups)
 
-    -- [2/4] إلغاء كل الخيوط المتتبعة فوراً
-    for _, co in ipairs(self.Threads) do
-        pcall(function() task.cancel(co) end)
-    end
+    for _, co in ipairs(self.Threads) do pcall(function() task.cancel(co) end) end
     table.clear(self.Threads)
 
-    -- [3/4] فك جميع التوصيلات (الداخلية + المسجلة خارجياً)
-    for _, conn in ipairs(self.Connections) do
-        pcall(function() conn:Disconnect() end)
-    end
+    for _, conn in ipairs(self.Connections) do pcall(function() conn:Disconnect() end) end
     table.clear(self.Connections)
 
-    -- [4/4] تدمير الواجهة من الذاكرة
     pcall(function() self.GUI:Destroy() end)
 end
 
@@ -351,7 +309,6 @@ local function CreateBaseContainer(parent, name, height)
     return Container
 end
 
--- 1. CreateButton
 function Aurora.TabMethods:CreateButton(name, callback)
     local Container = CreateBaseContainer(self.Page, name, 35)
     local Btn = Create("TextButton", {Size = UDim2.new(0, 60, 0, 20), Position = UDim2.new(1, -70, 0.5, -10), BackgroundColor3 = Theme.Accent, Text = "Run", TextColor3 = Theme.Background, Font = Enum.Font.GothamBold, TextSize = 11, Parent = Container})
@@ -363,7 +320,6 @@ function Aurora.TabMethods:CreateButton(name, callback)
     end)
 end
 
--- 2. CreateToggle
 function Aurora.TabMethods:CreateToggle(name, default, callback)
     local Container = CreateBaseContainer(self.Page, name, 40)
     local State = default or false
@@ -385,7 +341,6 @@ function Aurora.TabMethods:CreateToggle(name, default, callback)
     end)
 end
 
--- 3. CreateSlider
 function Aurora.TabMethods:CreateSlider(name, min, max, default, callback)
     local Container = CreateBaseContainer(self.Page, name, 50)
     local Hitbox = Create("TextButton", {Size = UDim2.new(1, -10, 1, 0), BackgroundTransparency = 1, Text = "", Parent = Container})
@@ -414,9 +369,7 @@ function Aurora.TabMethods:CreateSlider(name, min, max, default, callback)
     end)
     
     table.insert(self.Connections, UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = false
-        end
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end
     end))
     
     table.insert(self.Connections, UserInputService.InputChanged:Connect(function(input)
@@ -426,7 +379,6 @@ function Aurora.TabMethods:CreateSlider(name, min, max, default, callback)
     end))
 end
 
--- 4. CreateDropdown
 function Aurora.TabMethods:CreateDropdown(name, options, default, callback)
     local Container = CreateBaseContainer(self.Page, name, 40)
     local Selected = default or options[1]
@@ -444,24 +396,17 @@ function Aurora.TabMethods:CreateDropdown(name, options, default, callback)
         optBtn.MouseButton1Click:Connect(function()
             Selected = opt; Btn.Text = Selected
             if callback then callback(Selected) end
-            isOpen = false
-            listFrame.Visible = false
+            isOpen = false; listFrame.Visible = false
             TweenService:Create(Container, TweenInfo.new(0.2), {Size = UDim2.new(1, -10, 0, 40)}):Play()
         end)
     end
     
     Btn.MouseButton1Click:Connect(function()
-        isOpen = not isOpen
-        listFrame.Visible = isOpen
-        if isOpen then
-            TweenService:Create(Container, TweenInfo.new(0.2), {Size = UDim2.new(1, -10, 0, 40 + listHeight)}):Play()
-        else
-            TweenService:Create(Container, TweenInfo.new(0.2), {Size = UDim2.new(1, -10, 0, 40)}):Play()
-        end
+        isOpen = not isOpen; listFrame.Visible = isOpen
+        TweenService:Create(Container, TweenInfo.new(0.2), {Size = UDim2.new(1, -10, 0, isOpen and (40 + listHeight) or 40)}):Play()
     end)
 end
 
--- 5. CreateInput
 function Aurora.TabMethods:CreateInput(name, placeholder, callback)
     local Container = CreateBaseContainer(self.Page, name, 40)
     local Box = Create("TextBox", {Size = UDim2.new(0, 100, 0, 20), Position = UDim2.new(1, -110, 0.5, -10), BackgroundColor3 = Theme.Glass, Text = "", PlaceholderText = placeholder or "Enter...", TextColor3 = Theme.Text, Font = Enum.Font.GothamSemibold, TextSize = 11, ClearTextOnFocus = false, Parent = Container})
@@ -471,7 +416,6 @@ function Aurora.TabMethods:CreateInput(name, placeholder, callback)
     end)
 end
 
--- 6. CreateKeybind
 function Aurora.TabMethods:CreateKeybind(name, defaultKey, callback)
     local Container = CreateBaseContainer(self.Page, name, 40)
     local currentKey = defaultKey
@@ -479,9 +423,7 @@ function Aurora.TabMethods:CreateKeybind(name, defaultKey, callback)
     Create("UICorner", { CornerRadius = UDim.new(0, 4), Parent = Btn })
     
     local listening = false
-    Btn.MouseButton1Click:Connect(function()
-        listening = true; Btn.Text = "..."
-    end)
+    Btn.MouseButton1Click:Connect(function() listening = true; Btn.Text = "..." end)
     
     table.insert(self.Connections, UserInputService.InputBegan:Connect(function(input, processed)
         if listening then
@@ -492,7 +434,6 @@ function Aurora.TabMethods:CreateKeybind(name, defaultKey, callback)
     end))
 end
 
--- 7. CreateColorpicker
 function Aurora.TabMethods:CreateColorpicker(name, defaultColor, callback)
     local Container = CreateBaseContainer(self.Page, name, 40)
     local color = defaultColor or Color3.fromRGB(255,255,255)
@@ -501,8 +442,7 @@ function Aurora.TabMethods:CreateColorpicker(name, defaultColor, callback)
     
     local palette = {Color3.fromRGB(255,0,0), Color3.fromRGB(0,255,0), Color3.fromRGB(0,0,255), Color3.fromRGB(255,255,0), Color3.fromRGB(0,255,255), Color3.fromRGB(255,255,255)}
     local isOpen = false
-    local paletteHeight = 60
-    local listFrame = Create("Frame", {Size = UDim2.new(0, 120, 0, paletteHeight), Position = UDim2.new(1, -130, 0, 40), BackgroundColor3 = Theme.Background, Visible = false, Parent = Container})
+    local listFrame = Create("Frame", {Size = UDim2.new(0, 120, 0, 60), Position = UDim2.new(1, -130, 0, 40), BackgroundColor3 = Theme.Background, Visible = false, Parent = Container})
     Create("UICorner", { CornerRadius = UDim.new(0, 4), Parent = listFrame })
     Create("UIGridLayout", {CellSize = UDim2.new(0, 25, 0, 25), CellPadding = UDim2.new(0, 5, 0, 5), Parent = listFrame})
     
@@ -518,24 +458,17 @@ function Aurora.TabMethods:CreateColorpicker(name, defaultColor, callback)
     end
     
     Swatch.MouseButton1Click:Connect(function()
-        isOpen = not isOpen
-        listFrame.Visible = isOpen
-        if isOpen then
-            TweenService:Create(Container, TweenInfo.new(0.2), {Size = UDim2.new(1, -10, 0, 40 + paletteHeight)}):Play()
-        else
-            TweenService:Create(Container, TweenInfo.new(0.2), {Size = UDim2.new(1, -10, 0, 40)}):Play()
-        end
+        isOpen = not isOpen; listFrame.Visible = isOpen
+        TweenService:Create(Container, TweenInfo.new(0.2), {Size = UDim2.new(1, -10, 0, isOpen and 100 or 40)}):Play()
     end)
 end
 
--- 8. CreateSection
 function Aurora.TabMethods:CreateSection(title)
     local Container = Create("Frame", {Size = UDim2.new(1, -10, 0, 25), BackgroundColor3 = Theme.Background, BackgroundTransparency = 1, Parent = self.Page})
     Create("TextLabel", {Size = UDim2.new(1, 0, 1, 0), BackgroundTransparency = 1, Text = "  " .. title, TextColor3 = Theme.Accent, Font = Enum.Font.GothamBold, TextSize = 13, TextXAlignment = Enum.TextXAlignment.Left, Parent = Container})
-    local line = Create("Frame", {Size = UDim2.new(1, 0, 0, 1), Position = UDim2.new(0, 0, 1, 0), BackgroundColor3 = Theme.Stroke, Parent = Container})
+    Create("Frame", {Size = UDim2.new(1, 0, 0, 1), Position = UDim2.new(0, 0, 1, 0), BackgroundColor3 = Theme.Stroke, Parent = Container})
 end
 
--- 9. CreateParagraph
 function Aurora.TabMethods:CreateParagraph(text)
     local Container = Create("Frame", {Size = UDim2.new(1, -10, 0, 40), BackgroundColor3 = Theme.Background, BackgroundTransparency = 0.5, Parent = self.Page})
     Create("UICorner", { CornerRadius = UDim.new(0, 6), Parent = Container })
