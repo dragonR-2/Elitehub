@@ -1,7 +1,7 @@
 -- ==========================================
 -- Aurora UI Engine (Pure Module)
 -- Modern Glassmorphism UI for Mobile & PC
--- Version: 1.0.0 (Optimized)
+-- Version: 1.1.0 (Cleanup Engine)
 -- ==========================================
 
 local TweenService = game:GetService("TweenService")
@@ -36,7 +36,10 @@ Aurora.__index = Aurora
 function Aurora.new(config)
     local self = setmetatable({}, Aurora)
     self.Connections = {}
-    
+    self.Cleanups   = {}   -- 🔥 دوال التنظيف المسجلة من السكربت الرئيسي
+    self.Threads    = {}   -- 🔥 الخيوط المتتبعة (قابلة للإلغاء)
+    self.Destroyed  = false
+
     self.GUI = Create("ScreenGui", { Name = "Aurora_" .. math.random(1000,9999), Parent = uiParent, ResetOnSpawn = false, DisplayOrder = 9999 })
     
     -- Floating Button (💎)
@@ -123,7 +126,7 @@ function Aurora.new(config)
     MinBtn.MouseButton1Click:Connect(function()
         local fadeOut = TweenService:Create(self.UIContent, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {GroupTransparency = 1})
         fadeOut:Play()
-        fadeOut.Completed:Connect(function()
+        fadeOut.Completed:Once(function()
             self.MainFrame.Visible = false
             self.FloatingBtn.Visible = true
             TweenService:Create(self.FloatingBtn, TweenInfo.new(0.2), {BackgroundTransparency = 0, TextTransparency = 0}):Play()
@@ -141,14 +144,69 @@ function Aurora.new(config)
         TweenService:Create(self.UIContent, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {GroupTransparency = 0}):Play()
     end)
     
-    -- Close Logic
+    -- Close Logic 🔥 (التدمير الشامل)
     CloseBtn.MouseButton1Click:Connect(function()
-        for _, conn in ipairs(self.Connections) do pcall(function() conn:Disconnect() end) end
-        self.GUI:Destroy()
+        self:Destroy()
     end)
     
     self.Tabs = {}
     return self
+end
+
+-- ==========================================
+-- 1.5 Cleanup Engine (🔥 نظام التدمير الشامل)
+-- ==========================================
+
+-- تسجيل دالة تنظيف تُنفذ لحظة الضغط على X
+function Aurora:OnClose(fn)
+    if type(fn) == "function" and not self.Destroyed then
+        table.insert(self.Cleanups, fn)
+    end
+end
+
+-- إنشاء خيط متتبع يُقتل تلقائياً عند الإغلاق (بديل task.spawn)
+function Aurora:Spawn(fn, ...)
+    if self.Destroyed or type(fn) ~= "function" then return end
+    local co = coroutine.create(fn)
+    table.insert(self.Threads, co)
+    local ok, err = coroutine.resume(co, ...)
+    if not ok then warn("[Aurora] Thread error: " .. tostring(err)) end
+    return co
+end
+
+-- تسجيل توصيل خارجي (من السكربت الرئيسي) ليُفك عند الإغلاق
+function Aurora:Track(connection)
+    if connection and not self.Destroyed then
+        table.insert(self.Connections, connection)
+    end
+    return connection
+end
+
+-- تسلسل التدمير الربعي: تنظيفات ← خيوط ← توصيلات ← GUI
+function Aurora:Destroy()
+    if self.Destroyed then return end
+    self.Destroyed = true
+
+    -- [1/4] تنفيذ دوال التنظيف المسجلة (إيقاف الأصوات/الرايات/الحلقات)
+    for _, fn in ipairs(self.Cleanups) do
+        pcall(fn)
+    end
+    table.clear(self.Cleanups)
+
+    -- [2/4] إلغاء كل الخيوط المتتبعة فوراً
+    for _, co in ipairs(self.Threads) do
+        pcall(function() task.cancel(co) end)
+    end
+    table.clear(self.Threads)
+
+    -- [3/4] فك جميع التوصيلات (الداخلية + المسجلة خارجياً)
+    for _, conn in ipairs(self.Connections) do
+        pcall(function() conn:Disconnect() end)
+    end
+    table.clear(self.Connections)
+
+    -- [4/4] تدمير الواجهة من الذاكرة
+    pcall(function() self.GUI:Destroy() end)
 end
 
 function Aurora:CreateTab(name)
