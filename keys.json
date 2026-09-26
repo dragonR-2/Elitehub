@@ -103,5 +103,10 @@
         "discord_id": "904445170039275590",
         "hwid": "dba8aeb9-5620-4178-9c8d-191c7d71c281",
         "expires_at": 1790534940
+    },
+    "VGX-CP4H-CL01-2026": {
+        "discord_id": "1510052330777743461",
+        "hwid": null,
+        "expires_at": 1790535043
     }
 }
