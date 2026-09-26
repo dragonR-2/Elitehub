@@ -78,5 +78,10 @@
         "discord_id": "1234495580567244885",
         "hwid": null,
         "expires_at": 1790526838
+    },
+    "VGX-VE4H-5C6G-2026": {
+        "discord_id": "879634628644859925",
+        "hwid": null,
+        "expires_at": 1790528789
     }
 }
