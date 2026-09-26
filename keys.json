@@ -53,5 +53,10 @@
         "discord_id": "620677422249017348",
         "hwid": "AE3C0832-A40C-4D0A-95F7-D556530C0D3B",
         "expires_at": 1790522644
+    },
+    "VGX-LPYP-T32M-2026": {
+        "discord_id": "1529902731190603787",
+        "hwid": null,
+        "expires_at": 1790523278
     }
 }
