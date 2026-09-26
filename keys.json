@@ -43,5 +43,10 @@
         "discord_id": "1530980275713216557",
         "hwid": "35b2bea0-d989-4f46-8c81-73866de7b369",
         "expires_at": 1790522061
+    },
+    "VGX-EICC-RDMX-2026": {
+        "discord_id": "1106967930308153474",
+        "hwid": null,
+        "expires_at": 1790522505
     }
 }
