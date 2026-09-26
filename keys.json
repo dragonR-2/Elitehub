@@ -78,5 +78,10 @@
         "discord_id": "1234495580567244885",
         "hwid": null,
         "expires_at": 1790526838
+    },
+    "VGX-CMJ0-8M8O-2026": {
+        "discord_id": "1398674088905543680",
+        "hwid": null,
+        "expires_at": 1790529706
     }
 }
