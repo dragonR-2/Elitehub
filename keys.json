@@ -68,5 +68,10 @@
         "discord_id": "1417889859074523350",
         "hwid": "dc8f0849-996f-4e07-8a2e-d6586e0bbc3c",
         "expires_at": 1790523813
+    },
+    "VGX-NZP5-96Z0-2026": {
+        "discord_id": "958470173663297616",
+        "hwid": null,
+        "expires_at": 1790525603
     }
 }
