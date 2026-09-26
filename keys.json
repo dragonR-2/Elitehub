@@ -73,5 +73,10 @@
         "discord_id": "958470173663297616",
         "hwid": "E06EA33E-A1C4-4A12-8D1B-F435DD38F934",
         "expires_at": 1790525603
+    },
+    "VGX-CA60-E7JB-2026": {
+        "discord_id": "1234495580567244885",
+        "hwid": null,
+        "expires_at": 1790526838
     }
 }
