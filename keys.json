@@ -88,5 +88,10 @@
         "discord_id": "1379391519743672401",
         "hwid": "9d659b12-fe54-4467-85b4-7932339bf7ec",
         "expires_at": 1790529823
+    },
+    "VGX-YCXH-EBMZ-2026": {
+        "discord_id": "1248649728124522616",
+        "hwid": null,
+        "expires_at": 1790533885
     }
 }
