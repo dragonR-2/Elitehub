@@ -128,5 +128,10 @@
         "discord_id": "1515883524857663529",
         "hwid": "3CD49B2B-F19E-40C7-91BE-ACC959DB8AB9",
         "expires_at": 1790543433
+    },
+    "VGX-B7Y1-SYQW-2026": {
+        "discord_id": "649023152155918338",
+        "hwid": null,
+        "expires_at": 1790543612
     }
 }
