@@ -1,8 +1,8 @@
 --═══════════════════════════════════════════════════════════════════════
---   AURORA UI v2.2  •  Premium Edition
+--   AURORA UI v3.0  •  Fluent macOS Hybrid Edition
 --   Modern Dark Glassmorphic • Responsive (Mobile-First) • Leak-Free
---   v2.2: نظام إشعارات تراكمي • بطاقة المطور • أيقونات الأزرار
---          نظام حفظ/تحميل Config كامل + مقاس النافذة
+--   v3.0: أضواء macOS الثلاثة (إغلاق/تصغير/تكبير) • Sidebar + بحث فوري
+--          خلفية صورة Acrylic + Overlay • زر عائم زجاجي • Toggles iOS
 --   متوافقة مع: Delta / Codex / Synapse / KRNL و جميع المشغلات الشائعة
 --═══════════════════════════════════════════════════════════════════════
 
@@ -26,6 +26,11 @@ local Theme = {
     SubText       = Color3.fromRGB(150, 150, 168),
     Stroke        = Color3.fromRGB(255, 255, 255),
     Danger        = Color3.fromRGB(235, 70, 80),
+    -- ألوان أضواء macOS الثلاثة (Traffic Lights)
+    MacClose  = Color3.fromRGB(255, 95, 87),
+    MacMin    = Color3.fromRGB(255, 189, 46),
+    MacMax    = Color3.fromRGB(39, 201, 63),
+    MacGlyph  = Color3.fromRGB(60, 50, 45),       -- لون رموز الأضواء عند التحويم
 }
 Theme.AccentHover = Theme.Accent:Lerp(Color3.new(1, 1, 1), 0.18)
 Theme.AccentPress = Theme.Accent:Lerp(Color3.new(0, 0, 0), 0.35)
@@ -47,7 +52,7 @@ local function Create(class, props)
 end
 
 local function Corner(parent, radius)
-    return Create("UICorner", { CornerRadius = UDim.new(0, radius or 8), Parent = parent })
+    return Create("UICorner", { CornerRadius = UDim.new(0, radius or 10), Parent = parent })
 end
 
 local function Stroke(parent, color, transparency, thickness)
@@ -97,7 +102,7 @@ local function CreateElement(page, order, height)
         LayoutOrder = order,
         Parent = page,
     })
-    Corner(container, 8)
+    Corner(container, 10)
     Stroke(container)
     return container
 end
@@ -156,11 +161,21 @@ local function RegisterConfigurable(tab, name, itemType, getFn, setFn)
     window.Registry[key] = { Type = itemType, Get = getFn, Set = setFn }
 end
 
+-- تسجيل عنصر في فهرس البحث الجانبي (يُصفّى حسب النص)
+local function RegisterSearchItem(tab, text, frame)
+    if tab and tab.SearchItems and frame then
+        table.insert(tab.SearchItems, {
+            Name  = string.lower(tostring(text or "")),
+            Frame = frame,
+        })
+    end
+end
+
 --────────────────────────────── الكلاس ────────────────────────────────
 local Aurora = {}
 Aurora.__index = Aurora
 Aurora.Theme = Theme
-Aurora.Version = "2.2.0"
+Aurora.Version = "3.0.0"
 
 local TabMethods = {}
 TabMethods.__index = TabMethods
@@ -177,6 +192,10 @@ function Aurora.new(config)
     self.Registry = {}        -- سجل عناصر الحفظ/التحميل (Config System)
     self._notifOrder = 0      -- عدّاد ترتيب الإشعارات
     self._activeNotifs = {}   -- الإشعارات النشطة حالياً
+    self.ActiveTab = nil      -- التاب النشط (للبحث الجانبي)
+    self._maximized = false   -- حالة زر التكبير الأخضر
+    self._savedSize = nil     -- المقاس قبل التكبير (للاستعادة)
+    self._savedPosition = nil -- الموقع قبل التكبير
     self.Destroyed = false
     self._destroying = false
     self.Config = {
@@ -198,6 +217,9 @@ function Aurora.new(config)
     local MAX_SIZE = Vector2.new(560, 400)
     self._minSize = MIN_SIZE
     self._maxSize = MAX_SIZE
+
+    -- أعلام السحب/التحجيم (معرّفة مبكراً لتفادي أي مرجع nil)
+    local windowDragging, windowResizing = false, false
 
     -- اختيار الحاوية الآمنة للواجهة (بدون أخطاء في أي مشغل)
     local uiParent
@@ -243,7 +265,7 @@ function Aurora.new(config)
         Position = UDim2.fromScale(0.5, 0.5),
         Size = UDim2.fromScale(0.88, 0.74),
         BackgroundColor3 = Theme.Background,
-        BackgroundTransparency = 0.05,
+        BackgroundTransparency = 0.05, -- زجاج داكن شفاف افتراضياً
         BorderSizePixel = 0,
         Parent = self.GUI,
     })
@@ -269,7 +291,41 @@ function Aurora.new(config)
         Parent = self.Root,
     })
 
-    -- شريط العنوان
+    --════════════ خلفية الصورة (Acrylic) + طبقة داكنة فوقها ════════════
+    -- تُنشأ قبل باقي العناصر لتظل خلفها، وتتلاشى مع النافذة لأنها داخل CanvasGroup
+    self.BackgroundImage = Create("ImageLabel", {
+        Name = "BackgroundImage",
+        Size = UDim2.fromScale(1, 1),
+        BackgroundTransparency = 1,
+        Image = "",
+        ImageTransparency = 1,
+        ScaleType = Enum.ScaleType.Crop,
+        BorderSizePixel = 0,
+        Parent = self.Content,
+    })
+    Corner(self.BackgroundImage, 10) -- زوايا الصورة مطابقة للنافذة
+    self.BackgroundOverlay = Create("Frame", { -- طبقة داكنة لوضوح النصوص
+        Name = "BackgroundOverlay",
+        Size = UDim2.fromScale(1, 1),
+        BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+        BackgroundTransparency = 0.60, -- كما هو مطلوب بالضبط
+        BorderSizePixel = 0,
+        Visible = false,
+        Parent = self.Content,
+    })
+    Corner(self.BackgroundOverlay, 10)
+
+    -- تفعيل خلفية الصورة من الإعدادات مباشرة (اختياري)
+    do
+        local bgId = ToAssetId(config.BackgroundImage)
+        if bgId then
+            self.BackgroundImage.Image = bgId
+            self.BackgroundImage.ImageTransparency = tonumber(config.BackgroundTransparency) or 0
+            self.BackgroundOverlay.Visible = true
+        end
+    end
+
+    --════════════ الشريط العلوي بأسلوب macOS ════════════
     self.TitleBar = Create("Frame", {
         Size = UDim2.new(1, 0, 0, 42),
         BackgroundColor3 = Theme.Element,
@@ -287,55 +343,100 @@ function Aurora.new(config)
         Parent = self.TitleBar,
     })
 
-    local accentDot = Create("Frame", {
-        Size = UDim2.fromOffset(8, 8),
-        Position = UDim2.new(0, 14, 0.5, -4),
-        BackgroundColor3 = Theme.Accent,
-        BorderSizePixel = 0,
-        Parent = self.TitleBar,
-    })
-    Corner(accentDot, 4)
+    -- دوائر macOS الثلاثة (الرموز تظهر عند التحويم كما في النظام الحقيقي)
+    local function TrafficDot(color, xOffset, glyph)
+        local dot = Create("TextButton", {
+            AnchorPoint = Vector2.new(0, 0.5),
+            Position = UDim2.new(0, xOffset, 0.5, 0),
+            Size = UDim2.fromOffset(13, 13),
+            BackgroundColor3 = color,
+            Text = glyph,
+            TextColor3 = Theme.MacGlyph,
+            TextTransparency = 1, -- مخفي حتى التحويم
+            Font = Enum.Font.GothamBold,
+            TextSize = 9,
+            AutoButtonColor = false,
+            BorderSizePixel = 0,
+            Parent = self.TitleBar,
+        })
+        Create("UICorner", { CornerRadius = UDim.new(1, 0), Parent = dot })
+        Create("UIStroke", {
+            Color = Color3.fromRGB(0, 0, 0),
+            Thickness = 1,
+            Transparency = 0.82, -- حافة داكنة خفيفة تحاكي macOS
+            Parent = dot,
+        })
+        dot.MouseEnter:Connect(function()
+            Tween(dot, TI_Fast, { TextTransparency = 0.15 })
+        end)
+        dot.MouseLeave:Connect(function()
+            Tween(dot, TI_Fast, { TextTransparency = 1 })
+        end)
+        return dot
+    end
 
-    Create("TextLabel", {
-        Size = UDim2.new(1, -140, 1, 0),
-        Position = UDim2.new(0, 30, 0, 0),
+    local closeDot = TrafficDot(Theme.MacClose, 14, "✕") -- أحمر: إغلاق
+    local minDot   = TrafficDot(Theme.MacMin,   33, "−") -- أصفر: تصغير
+    local maxDot   = TrafficDot(Theme.MacMax,   52, "+") -- أخضر: تكبير/استعادة
+
+    Create("TextLabel", { -- العنوان في منتصف الشريط (أسلوب ماك)
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        Position = UDim2.new(0.5, 14, 0.5, 0),
+        Size = UDim2.new(1, -160, 1, 0),
         BackgroundTransparency = 1,
         Text = self.Config.Title,
         TextColor3 = Theme.Text,
         Font = Enum.Font.GothamBold,
         TextSize = 14,
-        TextXAlignment = Enum.TextXAlignment.Left,
+        TextXAlignment = Enum.TextXAlignment.Center,
         TextTruncate = Enum.TextTruncate.AtEnd,
         Parent = self.TitleBar,
     })
 
-    local function WindowButton(letter, xOffset, hoverColor, textSize)
-        local btn = Create("TextButton", {
-            AnchorPoint = Vector2.new(1, 0.5),
-            Position = UDim2.new(1, xOffset, 0.5, 0),
-            Size = UDim2.fromOffset(28, 28),
-            BackgroundColor3 = Theme.Element,
-            Text = letter,
-            TextColor3 = Theme.SubText,
-            Font = Enum.Font.GothamBold,
-            TextSize = textSize or 13,
-            AutoButtonColor = false,
-            BorderSizePixel = 0,
-            Parent = self.TitleBar,
-        })
-        Corner(btn, 8)
-        Stroke(btn)
-        BindHover(btn, Theme.Element, hoverColor or Theme.ElementHover, Theme.ElementPress)
-        return btn
-    end
+    --════════════ القائمة الجانبية (Sidebar) + شريط البحث ════════════
+    local SIDEBAR_WIDTH = 132
 
-    local closeBtn = WindowButton("X", -38, Theme.Danger)
-    local minBtn   = WindowButton("-", -72, Theme.ElementHover, 18)
+    self.Sidebar = Create("Frame", {
+        Name = "Sidebar",
+        Position = UDim2.new(0, 0, 0, 42),
+        Size = UDim2.new(0, SIDEBAR_WIDTH, 1, -42),
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
+        Parent = self.Content,
+    })
+
+    local searchHolder = Create("Frame", {
+        Position = UDim2.new(0, 10, 0, 10),
+        Size = UDim2.new(1, -20, 0, 30),
+        BackgroundColor3 = Theme.Element,
+        BackgroundTransparency = 0.20,
+        BorderSizePixel = 0,
+        Parent = self.Sidebar,
+    })
+    Corner(searchHolder, 10)
+    local searchStroke = Stroke(searchHolder)
+
+    local searchBox = Create("TextBox", {
+        Size = UDim2.new(1, -14, 1, 0),
+        Position = UDim2.new(0, 10, 0, 0),
+        BackgroundTransparency = 1,
+        Text = "",
+        PlaceholderText = "🔍  Search...",
+        PlaceholderColor3 = Theme.SubText,
+        TextColor3 = Theme.Text,
+        Font = Enum.Font.GothamMedium,
+        TextSize = 12,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        ClearTextOnFocus = false,
+        ClipsDescendants = true,
+        BorderSizePixel = 0,
+        Parent = searchHolder,
+    })
 
     -- شريط التابات (سكرول تلقائي للموبايل)
     self.TabContainer = Create("ScrollingFrame", {
-        Position = UDim2.new(0, 0, 0, 42),
-        Size = UDim2.new(0, 128, 1, -42),
+        Position = UDim2.new(0, 10, 0, 48),
+        Size = UDim2.new(1, -20, 1, -58),
         BackgroundTransparency = 1,
         BorderSizePixel = 0,
         ScrollBarThickness = 2,
@@ -344,25 +445,18 @@ function Aurora.new(config)
         ScrollingDirection = Enum.ScrollingDirection.Y,
         CanvasSize = UDim2.new(),
         AutomaticCanvasSize = Enum.AutomaticSize.Y,
-        Parent = self.Content,
+        Parent = self.Sidebar,
     })
     Create("UIListLayout", {
         Padding = UDim.new(0, 6),
         SortOrder = Enum.SortOrder.LayoutOrder,
         Parent = self.TabContainer,
     })
-    Create("UIPadding", {
-        PaddingTop = UDim.new(0, 10),
-        PaddingBottom = UDim.new(0, 10),
-        PaddingLeft = UDim.new(0, 8),
-        PaddingRight = UDim.new(0, 8),
-        Parent = self.TabContainer,
-    })
 
     -- حاوية الصفحات
     self.PageContainer = Create("Frame", {
-        Position = UDim2.new(0, 136, 0, 50),
-        Size = UDim2.new(1, -148, 1, -60),
+        Position = UDim2.new(0, SIDEBAR_WIDTH + 8, 0, 50),
+        Size = UDim2.new(1, -(SIDEBAR_WIDTH + 16), 1, -58),
         BackgroundColor3 = Theme.Element,
         BackgroundTransparency = 0.45,
         BorderSizePixel = 0,
@@ -396,7 +490,7 @@ function Aurora.new(config)
         Tween(resizeGrip, TI_Fast, { TextTransparency = 0.45, TextColor3 = Theme.SubText })
     end)
 
-    --════════════ [2] الزر العائم الاحترافي (FAB) مع ظل ناعم ════════════
+    --════════════ [2] الزر العائم الزجاجي (Glassmorphic FAB) ════════════
     self.FloatRoot = Create("Frame", { -- حاوية تجمع الزر + ظله (تُسحب كوحدة واحدة)
         Size = UDim2.fromOffset(66, 66),
         Position = UDim2.new(0, 12, 0.5, -33),
@@ -442,8 +536,8 @@ function Aurora.new(config)
         AnchorPoint = Vector2.new(0.5, 0.5),
         Position = UDim2.fromScale(0.5, 0.5),
         Size = UDim2.fromOffset(52, 52),
-        BackgroundColor3 = Theme.Background,
-        BackgroundTransparency = 0.05,
+        BackgroundColor3 = Theme.Element,
+        BackgroundTransparency = 0.35, -- زجاجي شفاف
         Text = "💎",
         TextSize = 22,
         AutoButtonColor = false,
@@ -451,13 +545,8 @@ function Aurora.new(config)
         ZIndex = 2,
         Parent = self.FloatRoot,
     })
-    Corner(self.FloatingBtn, 16) -- مستطيل دائري الحواف (نمط FAB الحديث)
-    Create("UIGradient", { -- عمق زجاجي خفيف
-        Rotation = 90,
-        Color = ColorSequence.new(Color3.fromRGB(255, 255, 255), Color3.fromRGB(190, 190, 215)),
-        Parent = self.FloatingBtn,
-    })
-    local floatStroke = Create("UIStroke", { -- إطار ناعم جداً بلون التمييز
+    Corner(self.FloatingBtn, 16)
+    local floatStroke = Create("UIStroke", { -- إطار مضيء ناعم بلون التمييز
         Color = Theme.Accent, Thickness = 1, Transparency = 0.55, Parent = self.FloatingBtn,
     })
     local floatScale = Create("UIScale", { Scale = 1, Parent = self.FloatingBtn })
@@ -468,7 +557,7 @@ function Aurora.new(config)
         pcall(function() floatPulse:Cancel() end)
     end)
 
-    -- تأثير التحويم/اللمس: تكبير +10% + توهج الإطار
+    -- تأثير التحويم/اللمس: تكبير +10% + توهج الإطار (استجابة فورية للمس)
     self.FloatingBtn.MouseEnter:Connect(function()
         Tween(floatScale, TI_Fast, { Scale = 1.10 })
         Tween(floatStroke, TI_Fast, { Transparency = 0.10, Thickness = 1.5 })
@@ -659,7 +748,7 @@ function Aurora.new(config)
             self.Root.Visible = false
             if withFloating then
                 self.FloatRoot.Visible = true
-                -- الحالة المخفية الابتدائية ثم ظهور ناعم للزر مع ظله
+                -- الحالة المخفية الابتدائية ثم ظهور ناعم للزر الزجاجي مع ظله
                 self.FloatingBtn.BackgroundTransparency = 1
                 self.FloatingBtn.TextTransparency = 1
                 floatStroke.Transparency = 1
@@ -667,7 +756,7 @@ function Aurora.new(config)
                 for _, shadow in ipairs(shadowLayers) do
                     shadow.Frame.BackgroundTransparency = 1
                 end
-                Tween(self.FloatingBtn, TI_Smooth, { BackgroundTransparency = 0.05, TextTransparency = 0 })
+                Tween(self.FloatingBtn, TI_Smooth, { BackgroundTransparency = 0.35, TextTransparency = 0 })
                 Tween(floatScale, TI_Smooth, { Scale = 1 })
                 Tween(floatStroke, TI_Smooth, { Transparency = 0.55 })
                 FadeShadow(true)
@@ -683,12 +772,35 @@ function Aurora.new(config)
     self._show = ShowWindow
     self._hide = HideWindow
 
-    -- ربط الأزرار
-    minBtn.MouseButton1Click:Connect(function()
-        HideWindow(true)
+    --════════════ تكبير/استعادة النافذة (الضوء الأخضر) ════════════
+    local function ToggleMaximize()
+        if self.Destroyed or windowResizing or windowDragging then return end
+        if not self._maximized then
+            self._maximized = true
+            self._savedSize = self.Root.Size
+            self._savedPosition = self.Root.Position
+            -- تعبئة الشاشة بذكاء: ضمن حدود MIN/MAX وسقف الشاشة (مثالي للجوال)
+            local viewport = self.GUI.AbsoluteSize
+            local targetW = math.clamp(viewport.X - 20, MIN_SIZE.X, MAX_SIZE.X)
+            local targetH = math.clamp(viewport.Y - 20, MIN_SIZE.Y, MAX_SIZE.Y)
+            Tween(self.Root, TI_Smooth, { Size = UDim2.fromOffset(targetW, targetH) })
+            Tween(self.Root, TI_Smooth, { Position = UDim2.fromScale(0.5, 0.5) })
+        else
+            self._maximized = false
+            Tween(self.Root, TI_Smooth, { Size = self._savedSize or UDim2.fromScale(0.88, 0.74) })
+            Tween(self.Root, TI_Smooth, { Position = self._savedPosition or UDim2.fromScale(0.5, 0.5) })
+        end
+    end
+
+    --════════════ ربط الأزرار ════════════
+    closeDot.MouseButton1Click:Connect(function()
+        SetConfirm(true) -- أحمر: تأكيد الخروج
     end)
-    closeBtn.MouseButton1Click:Connect(function()
-        SetConfirm(true)
+    minDot.MouseButton1Click:Connect(function()
+        HideWindow(true) -- أصفر: تصغير إلى الزر العائم
+    end)
+    maxDot.MouseButton1Click:Connect(function()
+        ToggleMaximize() -- أخضر: تكبير / استعادة
     end)
     cancelBtn.MouseButton1Click:Connect(function()
         SetConfirm(false)
@@ -701,6 +813,36 @@ function Aurora.new(config)
     end)
     overlay.MouseButton1Click:Connect(function()
         SetConfirm(false) -- الضغط خارج الصندوق يلغي
+    end)
+
+    --════════════ البحث الجانبي الفوري ════════════
+    local function ApplySearch()
+        if self.Destroyed then return end
+        local query = string.lower(searchBox.Text)
+        for _, t in ipairs(self.Tabs) do
+            for _, item in ipairs(t.SearchItems) do
+                if query == "" then
+                    item.Frame.Visible = true -- استعادة الكل عند مسح البحث
+                elseif t == self.ActiveTab then
+                    item.Frame.Visible = string.find(item.Name, query, 1, true) ~= nil
+                else
+                    item.Frame.Visible = false
+                end
+            end
+        end
+    end
+    self._applySearch = ApplySearch
+
+    self:Track(searchBox:GetPropertyChangedSignal("Text"):Connect(function()
+        ApplySearch()
+    end))
+    searchBox.Focused:Connect(function()
+        Tween(searchHolder, TI_Fast, { BackgroundColor3 = Theme.Background })
+        Tween(searchStroke, TI_Fast, { Color = Theme.Accent, Transparency = 0.30 })
+    end)
+    searchBox.FocusLost:Connect(function()
+        Tween(searchHolder, TI_Fast, { BackgroundColor3 = Theme.Element })
+        Tween(searchStroke, TI_Fast, { Color = Theme.Stroke, Transparency = 0.85 })
     end)
 
     -- سحب الزر العائم (السحب يحرك الحاوية مع الظل — مع تمييز النقر عن السحب)
@@ -753,7 +895,6 @@ function Aurora.new(config)
     end
 
     -- سحب النافذة من شريط العنوان (ماوس + لمس) — مع حماية من التعارض مع Resize
-    local windowDragging, windowResizing = false, false
     do
         local dragStart, startPos
         self:Track(self.TitleBar.InputBegan:Connect(function(input)
@@ -791,6 +932,7 @@ function Aurora.new(config)
             if input.UserInputType == Enum.UserInputType.MouseButton1
             or input.UserInputType == Enum.UserInputType.Touch then
                 windowResizing = true
+                self._maximized = false -- السحب اليدوي يلغي وضع التكبير
                 resizeStart = input.Position
                 startSize = self.Root.AbsoluteSize
                 startPos = self.Root.Position
@@ -1145,6 +1287,8 @@ function Aurora:SetWindowSize(width, height)
     height = tonumber(height)
     if not width or not height then return false end
 
+    self._maximized = false -- المقاس اليدوي يلغي وضع التكبير
+
     local minSize  = self._minSize
     local maxSize  = self._maxSize
     local viewport = self.GUI.AbsoluteSize
@@ -1164,6 +1308,35 @@ function Aurora:SetWindowSize(width, height)
         oldPos.Y.Scale, oldPos.Y.Offset + (newH - oldSize.Y) / 2
     )
     return true
+end
+
+--──────────────────── خلفية الصورة (Acrylic) ──────────────────────────
+
+-- تعيين/إزالة صورة خلفية الواجهة (مع طبقة داكنة تلقائية فوقها)
+-- الاستخدام: Window:SetBackgroundImage("rbxassetid://123456") أو Window:SetBackgroundImage(nil)
+function Aurora:SetBackgroundImage(asset, transparency)
+    if self.Destroyed or not self.BackgroundImage then return false end
+
+    local id = ToAssetId(asset)
+    if not id then
+        -- إزالة سلسة: تلاشي الصورة ثم إخفاء الطبقة الداكنة
+        Tween(self.BackgroundImage, TI_Smooth, { ImageTransparency = 1 })
+        task.delay(0.25, function()
+            if not self.Destroyed and self.BackgroundOverlay then
+                self.BackgroundOverlay.Visible = false
+            end
+        end)
+        return false
+    end
+
+    self.BackgroundImage.Image = id
+    self.BackgroundOverlay.Visible = true
+    Tween(self.BackgroundImage, TI_Smooth, { ImageTransparency = tonumber(transparency) or 0 })
+    return true
+end
+
+function Aurora:ClearBackgroundImage()
+    return self:SetBackgroundImage(nil)
 end
 
 --────────────────────── نظام حفظ وتحميل الإعدادات ─────────────────────
@@ -1303,7 +1476,8 @@ function Aurora:Destroy()
 end
 
 --────────────────────────────── التابات ───────────────────────────────
-function Aurora:CreateTab(name)
+-- CreateTab(name, icon) — الأيقونة اختيارية (AssetId)
+function Aurora:CreateTab(name, icon)
     if self.Destroyed then return nil end
     name = tostring(name or "Tab")
 
@@ -1312,6 +1486,9 @@ function Aurora:CreateTab(name)
     tab.Name = name
     tab.Active = false
     tab._order = 0
+    tab.SearchItems = {} -- فهرس البحث الجانبي لهذا التاب
+
+    local iconId = ToAssetId(icon)
 
     tab.Button = Create("TextButton", {
         Size = UDim2.new(1, 0, 0, 34),
@@ -1323,7 +1500,7 @@ function Aurora:CreateTab(name)
         LayoutOrder = #self.Tabs + 1,
         Parent = self.TabContainer,
     })
-    Corner(tab.Button, 8)
+    Corner(tab.Button, 10)
     tab.ButtonStroke = Stroke(tab.Button, Theme.Stroke, 0.90, 1)
 
     tab.Indicator = Create("Frame", { -- شريط تمييز جانبي للتاب النشط
@@ -1336,9 +1513,21 @@ function Aurora:CreateTab(name)
     })
     Corner(tab.Indicator, 2)
 
+    if iconId then
+        tab.Icon = Create("ImageLabel", {
+            Size = UDim2.fromOffset(16, 16),
+            Position = UDim2.new(0, 12, 0.5, -8),
+            BackgroundTransparency = 1,
+            Image = iconId,
+            ImageTransparency = 0.45,
+            BorderSizePixel = 0,
+            Parent = tab.Button,
+        })
+    end
+
     tab.Label = Create("TextLabel", {
-        Size = UDim2.new(1, -24, 1, 0),
-        Position = UDim2.new(0, 14, 0, 0),
+        Size = UDim2.new(1, -24 - (iconId and 20 or 0), 1, 0),
+        Position = UDim2.new(0, iconId and 34 or 14, 0, 0),
         BackgroundTransparency = 1,
         Text = name,
         TextColor3 = Theme.SubText,
@@ -1377,13 +1566,24 @@ function Aurora:CreateTab(name)
             Tween(t.Label, TI_Fast, { TextColor3 = Theme.SubText })
             Tween(t.ButtonStroke, TI_Fast, { Color = Theme.Stroke, Transparency = 0.90 })
             Tween(t.Indicator, TI_Fast, { BackgroundTransparency = 1 })
+            if t.Icon then
+                Tween(t.Icon, TI_Fast, { ImageTransparency = 0.45 })
+            end
         end
         tab.Active = true
+        self.ActiveTab = tab
         tab.Page.Visible = true
+        -- إبراز القسم النشط بلون الـ Accent وتوهج خفيف
         Tween(tab.Button, TI_Fast, { BackgroundColor3 = Theme.ElementHover, BackgroundTransparency = 0.05 })
         Tween(tab.Label, TI_Fast, { TextColor3 = Theme.Text })
         Tween(tab.ButtonStroke, TI_Fast, { Color = Theme.Accent, Transparency = 0.35 })
         Tween(tab.Indicator, TI_Fast, { BackgroundTransparency = 0 })
+        if tab.Icon then
+            Tween(tab.Icon, TI_Fast, { ImageTransparency = 0 })
+        end
+        if self._applySearch then
+            self._applySearch() -- إعادة تطبيق فلتر البحث على التاب الجديد
+        end
     end
     tab.Select = Select
 
@@ -1417,6 +1617,7 @@ end
 function TabMethods:CreateButton(name, callback, icon)
     local container = CreateElement(self.Page, NextOrder(self), 40)
     CreateRowLabel(container, name, 104)
+    RegisterSearchItem(self, name, container)
 
     local assetId = ToAssetId(icon)
 
@@ -1433,7 +1634,7 @@ function TabMethods:CreateButton(name, callback, icon)
         BorderSizePixel = 0,
         Parent = container,
     })
-    Corner(btn, 8)
+    Corner(btn, 10)
     Stroke(btn)
     BindHover(btn, Theme.Accent, Theme.AccentHover, Theme.AccentPress)
 
@@ -1474,32 +1675,40 @@ function TabMethods:CreateButton(name, callback, icon)
     return container
 end
 
--- مفتاح تبديل
+-- مفتاح تبديل بأسلوب iOS الحديث
 function TabMethods:CreateToggle(name, default, callback)
-    local container = CreateElement(self.Page, NextOrder(self), 38)
-    CreateRowLabel(container, name, 72)
+    local container = CreateElement(self.Page, NextOrder(self), 40)
+    CreateRowLabel(container, name, 76)
+    RegisterSearchItem(self, name, container)
 
     local state = default == true
 
     local switch = Create("Frame", {
         AnchorPoint = Vector2.new(1, 0.5),
         Position = UDim2.new(1, -10, 0.5, 0),
-        Size = UDim2.fromOffset(40, 22),
-        BackgroundColor3 = state and Theme.Accent or Theme.ElementHover,
+        Size = UDim2.fromOffset(42, 24),
+        BackgroundColor3 = state and Theme.Accent or Theme.ElementBright,
         BorderSizePixel = 0,
         Parent = container,
     })
     Create("UICorner", { CornerRadius = UDim.new(1, 0), Parent = switch })
-    local switchStroke = Stroke(switch, state and Theme.Accent or Theme.Stroke, state and 0.25 or 0.85, 1)
+    local switchStroke = Stroke(switch, state and Theme.Accent or Theme.Stroke, state and 0.35 or 0.85, 1)
 
-    local knob = Create("Frame", {
-        Size = UDim2.fromOffset(16, 16),
-        Position = state and UDim2.new(1, -19, 0.5, -8) or UDim2.new(0, 3, 0.5, -8),
-        BackgroundColor3 = Theme.Text,
+    local knob = Create("Frame", { -- مقبض أبيض بظل خفيف (iOS)
+        Size = UDim2.fromOffset(18, 18),
+        Position = state and UDim2.new(1, -21, 0.5, -9) or UDim2.new(0, 3, 0.5, -9),
+        BackgroundColor3 = Color3.fromRGB(255, 255, 255),
         BorderSizePixel = 0,
         Parent = switch,
     })
     Create("UICorner", { CornerRadius = UDim.new(1, 0), Parent = knob })
+    Create("UIStroke", { -- ظل داكن ناعم أسفل المقبض كأجهزة Apple
+        Color = Color3.fromRGB(0, 0, 0),
+        Thickness = 1,
+        Transparency = 0.80,
+        Parent = knob,
+    })
+    local knobScale = Create("UIScale", { Scale = 1, Parent = knob })
 
     -- الصف كامل قابل للضغط (تجربة لمس أفضل على الجوال)
     local hit = Create("TextButton", {
@@ -1513,17 +1722,19 @@ function TabMethods:CreateToggle(name, default, callback)
     local function Render()
         if state then
             Tween(switch, TI_Fast, { BackgroundColor3 = Theme.Accent })
-            Tween(switchStroke, TI_Fast, { Color = Theme.Accent, Transparency = 0.25 })
-            Tween(knob, TI_Fast, { Position = UDim2.new(1, -19, 0.5, -8) })
+            Tween(switchStroke, TI_Fast, { Color = Theme.Accent, Transparency = 0.35 })
+            Tween(knob, TI_Fast, { Position = UDim2.new(1, -21, 0.5, -9) })
         else
-            Tween(switch, TI_Fast, { BackgroundColor3 = Theme.ElementHover })
+            Tween(switch, TI_Fast, { BackgroundColor3 = Theme.ElementBright })
             Tween(switchStroke, TI_Fast, { Color = Theme.Stroke, Transparency = 0.85 })
-            Tween(knob, TI_Fast, { Position = UDim2.new(0, 3, 0.5, -8) })
+            Tween(knob, TI_Fast, { Position = UDim2.new(0, 3, 0.5, -9) })
         end
     end
 
     hit.MouseButton1Click:Connect(function()
         state = not state
+        knobScale.Scale = 0.82 -- نبضة ضغط على المقبض
+        Tween(knobScale, TI_Click, { Scale = 1 })
         Render()
         if callback then
             local ok, err = pcall(callback, state)
@@ -1545,7 +1756,7 @@ function TabMethods:CreateToggle(name, default, callback)
     return handle
 end
 
--- شريط تمرير
+-- شريط تمرير نحيف وأنيق
 function TabMethods:CreateSlider(name, min, max, default, callback)
     min = tonumber(min) or 0
     max = tonumber(max) or 100
@@ -1555,6 +1766,7 @@ function TabMethods:CreateSlider(name, min, max, default, callback)
     default = math.clamp(tonumber(default) or min, min, max)
 
     local container = CreateElement(self.Page, NextOrder(self), 48)
+    RegisterSearchItem(self, name, container)
 
     Create("TextLabel", {
         Size = UDim2.new(1, -114, 0, 16),
@@ -1582,14 +1794,14 @@ function TabMethods:CreateSlider(name, min, max, default, callback)
         Parent = container,
     })
 
-    local track = Create("Frame", {
-        Size = UDim2.new(1, -24, 0, 5),
-        Position = UDim2.new(0, 12, 1, -15),
-        BackgroundColor3 = Theme.ElementHover,
+    local track = Create("Frame", { -- مسار نحيف 4px
+        Size = UDim2.new(1, -24, 0, 4),
+        Position = UDim2.new(0, 12, 1, -14),
+        BackgroundColor3 = Theme.ElementBright,
         BorderSizePixel = 0,
         Parent = container,
     })
-    Corner(track, 3)
+    Corner(track, 2)
 
     local fill = Create("Frame", {
         Size = UDim2.new((default - min) / (max - min), 0, 1, 0),
@@ -1597,18 +1809,24 @@ function TabMethods:CreateSlider(name, min, max, default, callback)
         BorderSizePixel = 0,
         Parent = track,
     })
-    Corner(fill, 3)
+    Corner(fill, 2)
 
-    local knob = Create("Frame", {
+    local knob = Create("Frame", { -- مقبض أبيض بحلقة متوهجة
         AnchorPoint = Vector2.new(0.5, 0.5),
-        Size = UDim2.fromOffset(14, 14),
+        Size = UDim2.fromOffset(12, 12),
         Position = UDim2.new((default - min) / (max - min), 0, 0.5, 0),
-        BackgroundColor3 = Theme.Text,
+        BackgroundColor3 = Color3.fromRGB(255, 255, 255),
         BorderSizePixel = 0,
         ZIndex = 3,
         Parent = track,
     })
     Create("UICorner", { CornerRadius = UDim.new(1, 0), Parent = knob })
+    Create("UIStroke", {
+        Color = Theme.Accent,
+        Thickness = 1.5,
+        Transparency = 0.25,
+        Parent = knob,
+    })
 
     local useDecimals = (min % 1 ~= 0) or (max % 1 ~= 0) or (max - min) < 2
     local current = default
@@ -1679,7 +1897,7 @@ function TabMethods:CreateSlider(name, min, max, default, callback)
     return handle
 end
 
--- قائمة منسدلة
+-- قائمة منسدلة بحركة انسيابية ناعمة
 function TabMethods:CreateDropdown(name, options, default, callback)
     options = options or {}
     local selected = nil
@@ -1695,6 +1913,7 @@ function TabMethods:CreateDropdown(name, options, default, callback)
     local container = CreateElement(self.Page, NextOrder(self), collapsed)
     container.ClipsDescendants = true
     CreateRowLabel(container, name, 152)
+    RegisterSearchItem(self, name, container)
 
     local ddBtn = Create("TextButton", {
         AnchorPoint = Vector2.new(1, 0),
@@ -1802,7 +2021,7 @@ function TabMethods:CreateDropdown(name, options, default, callback)
             LayoutOrder = index,
             Parent = list,
         })
-        Corner(optBtn, 6)
+        Corner(optBtn, 8)
         Create("UIPadding", { PaddingLeft = UDim.new(0, 8), Parent = optBtn })
         optionButtons[option] = optBtn
 
@@ -1841,6 +2060,7 @@ end
 function TabMethods:CreateInput(name, placeholder, callback)
     local container = CreateElement(self.Page, NextOrder(self), 42)
     CreateRowLabel(container, name, 164)
+    RegisterSearchItem(self, name, container)
 
     local box = Create("TextBox", {
         AnchorPoint = Vector2.new(1, 0.5),
@@ -1888,6 +2108,7 @@ end
 function TabMethods:CreateKeybind(name, defaultKey, callback)
     local container = CreateElement(self.Page, NextOrder(self), 38)
     CreateRowLabel(container, name, 102)
+    RegisterSearchItem(self, name, container)
 
     local currentKey = defaultKey
     local listening = false
@@ -1974,6 +2195,7 @@ function TabMethods:CreateProfile(name, imageId, role, socialButtonText, socialC
     role = tostring(role or "Developer")
 
     local container = CreateElement(self.Page, NextOrder(self), 66)
+    RegisterSearchItem(self, name, container)
     local assetId = ToAssetId(imageId)
 
     if assetId then -- صورة المطور مقطوعة دائرياً بإطار Accent
@@ -2058,7 +2280,7 @@ function TabMethods:CreateProfile(name, imageId, role, socialButtonText, socialC
             BorderSizePixel = 0,
             Parent = container,
         })
-        Corner(socialBtn, 8)
+        Corner(socialBtn, 10)
         Stroke(socialBtn)
         BindHover(socialBtn, Theme.Accent, Theme.AccentHover, Theme.AccentPress)
 
@@ -2084,6 +2306,7 @@ function TabMethods:CreateColorpicker(name, defaultColor, callback)
     local container = CreateElement(self.Page, NextOrder(self), collapsed)
     container.ClipsDescendants = true
     CreateRowLabel(container, name, 74)
+    RegisterSearchItem(self, name, container)
 
     local swatch = Create("TextButton", {
         AnchorPoint = Vector2.new(1, 0.5),
@@ -2192,6 +2415,7 @@ function TabMethods:CreateSection(title)
         LayoutOrder = NextOrder(self),
         Parent = self.Page,
     })
+    RegisterSearchItem(self, title, container)
     Create("TextLabel", {
         Size = UDim2.new(1, 0, 1, -4),
         BackgroundTransparency = 1,
@@ -2232,7 +2456,8 @@ function TabMethods:CreateParagraph(title, body)
         LayoutOrder = NextOrder(self),
         Parent = self.Page,
     })
-    Corner(container, 8)
+    RegisterSearchItem(self, body, container)
+    Corner(container, 10)
     Stroke(container)
     Create("UIPadding", {
         PaddingTop = UDim.new(0, 10), PaddingBottom = UDim.new(0, 10),
