@@ -213,5 +213,10 @@
         "discord_id": "982521240768086076",
         "hwid": "2d6b55c3-689e-4138-be2a-54b7001eb0e2",
         "expires_at": 1790573374
+    },
+    "VGX-TZ1L-VJCM-2026": {
+        "discord_id": "1533361604450582568",
+        "hwid": null,
+        "expires_at": 1790573890
     }
 }
