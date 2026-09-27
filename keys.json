@@ -223,5 +223,10 @@
         "discord_id": "1545106363510689913",
         "hwid": null,
         "expires_at": 1790575194
+    },
+    "VGX-KNS1-WQ03-2026": {
+        "discord_id": "1012745910536638536",
+        "hwid": null,
+        "expires_at": 1790580384
     }
 }
