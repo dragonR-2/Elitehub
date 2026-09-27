@@ -233,5 +233,10 @@
         "discord_id": "1281344148074397798",
         "hwid": "884dec95-6bcd-4f2a-958c-a80f7cd78711",
         "expires_at": 1790580939
+    },
+    "VGX-EMLY-K3OL-2026": {
+        "discord_id": "1551862227303137384",
+        "hwid": null,
+        "expires_at": 1790583172
     }
 }
