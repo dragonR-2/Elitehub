@@ -303,5 +303,10 @@
         "discord_id": "875962761199353976",
         "hwid": "c487dcee-40d0-4557-8cfa-718d323b3577",
         "expires_at": 1790636143
+    },
+    "VGX-NJNV-B8KN-2026": {
+        "discord_id": "1384862691524608062",
+        "hwid": null,
+        "expires_at": 1790637684
     }
 }
