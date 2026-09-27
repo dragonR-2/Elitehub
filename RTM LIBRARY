@@ -1,12 +1,14 @@
 --═══════════════════════════════════════════════════════════════════════
---   AURORA UI v2.1  •  Fluent Glass Edition
+--   AURORA UI v2.2  •  Premium Edition
 --   Modern Dark Glassmorphic • Responsive (Mobile-First) • Leak-Free
---   v2.1: FAB بظل ناعم • Overlay زجاجي + Blur • Resize Grip احترافي
+--   v2.2: نظام إشعارات تراكمي • بطاقة المطور • أيقونات الأزرار
+--          نظام حفظ/تحميل Config كامل + مقاس النافذة
 --   متوافقة مع: Delta / Codex / Synapse / KRNL و جميع المشغلات الشائعة
 --═══════════════════════════════════════════════════════════════════════
 
 local TweenService     = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
+local HttpService      = game:GetService("HttpService")
 local Lighting         = game:GetService("Lighting")
 local Players          = game:GetService("Players")
 
@@ -115,10 +117,50 @@ local function CreateRowLabel(container, text, rightReserve)
     })
 end
 
+-- تحويل رقم/نص إلى مسار أصل صالح (rbxassetid)
+local function ToAssetId(value)
+    if type(value) == "number" and value > 0 then
+        return "rbxassetid://" .. tostring(math.floor(value))
+    elseif type(value) == "string" and value ~= "" then
+        if string.sub(value, 1, 10) == "rbxassetid" or string.sub(value, 1, 9) == "rbxasset:" then
+            return value
+        end
+        return "rbxassetid://" .. value
+    end
+    return nil
+end
+
+-- نسخ نص إلى الحافظة بدعم صيغ المشغلات المختلفة
+local function CopyToClipboard(text)
+    if type(setclipboard) == "function" then
+        return pcall(setclipboard, text)
+    elseif type(toclipboard) == "function" then
+        return pcall(toclipboard, text)
+    elseif type(clipboard) == "table" and type(clipboard.set) == "function" then
+        return pcall(clipboard.set, text)
+    end
+    return false
+end
+
+-- تسجيل عنصر تفاعلي في سجل الحفظ (Registry) بمفتاح فريد "Tab/Name"
+local function RegisterConfigurable(tab, name, itemType, getFn, setFn)
+    local window = tab and tab.Window
+    if not window or not window.Registry or window.Destroyed then return end
+    local baseKey = tostring(tab.Name) .. "/" .. tostring(name)
+    local key = baseKey
+    local suffix = 2
+    while window.Registry[key] do -- تفادي تصادم الأسماء المكررة
+        key = baseKey .. "#" .. tostring(suffix)
+        suffix += 1
+    end
+    window.Registry[key] = { Type = itemType, Get = getFn, Set = setFn }
+end
+
 --────────────────────────────── الكلاس ────────────────────────────────
 local Aurora = {}
 Aurora.__index = Aurora
 Aurora.Theme = Theme
+Aurora.Version = "2.2.0"
 
 local TabMethods = {}
 TabMethods.__index = TabMethods
@@ -132,7 +174,11 @@ function Aurora.new(config)
     self.Cleanups = {}
     self.Threads = {}
     self.Tabs = {}
+    self.Registry = {}        -- سجل عناصر الحفظ/التحميل (Config System)
+    self._notifOrder = 0      -- عدّاد ترتيب الإشعارات
+    self._activeNotifs = {}   -- الإشعارات النشطة حالياً
     self.Destroyed = false
+    self._destroying = false
     self.Config = {
         Title       = config.Title or "Aurora UI",
         ToggleKey   = config.ToggleKey or Enum.KeyCode.RightShift,
@@ -150,6 +196,8 @@ function Aurora.new(config)
     -- حدود تغيير الحجم (مصدر واحد يستخدمه UISizeConstraint و Resize Grip معاً)
     local MIN_SIZE = Vector2.new(320, 230)
     local MAX_SIZE = Vector2.new(560, 400)
+    self._minSize = MIN_SIZE
+    self._maxSize = MAX_SIZE
 
     -- اختيار الحاوية الآمنة للواجهة (بدون أخطاء في أي مشغل)
     local uiParent
@@ -436,13 +484,31 @@ function Aurora.new(config)
         Tween(floatScale, TI_Fast, { Scale = 1.10 })
     end)
 
+    --════════════ [3] حاوية الإشعارات التراكمية ════════════
+    self.NotifyHolder = Create("Frame", {
+        Name = "NotificationHost",
+        AnchorPoint = Vector2.new(1, 0),
+        Position = UDim2.new(1, -12, 0, 12),
+        Size = UDim2.fromOffset(272, 400),
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
+        ZIndex = 60, -- فوق كل شيء (حتى شاشة الخروج)
+        Parent = self.GUI,
+    })
+    Create("UIListLayout", {
+        Padding = UDim.new(0, 8),
+        SortOrder = Enum.SortOrder.LayoutOrder,
+        VerticalAlignment = Enum.VerticalAlignment.Bottom, -- الجديدة تدفع القديمة للأعلى تلقائياً
+        Parent = self.NotifyHolder,
+    })
+
     -- بلور + نافذة تأكيد الإغلاق
     self.Blur = Create("BlurEffect", { Name = "AuroraBlur", Size = 0, Parent = Lighting })
     table.insert(self.Cleanups, function()
         pcall(function() self.Blur:Destroy() end)
     end)
 
-    --════════════ [3] Overlay زجاجي شفاف بدل الأسود الصلب ════════════
+    --════════════ Overlay زجاجي شفاف بدل الأسود الصلب ════════════
     local overlay = Create("TextButton", { -- يلتقط الضغط خارج الصندوق
         Size = UDim2.fromScale(1, 1),
         BackgroundColor3 = Color3.fromRGB(0, 0, 0),
@@ -817,14 +883,411 @@ function Aurora:Track(connection)
     return connection
 end
 
-function Aurora:Destroy()
-    if self.Destroyed then return end
-    self.Destroyed = true
+--──────────────────── نظام الإشعارات التراكمية ────────────────────────
+-- الاستخدام المتقدم:
+--   Window:Notify({
+--       Title = "عنوان", Message = "نص الرسالة", Duration = 5,
+--       ButtonText = "Copy Link", ClipboardText = "https://...",
+--       ButtonCallback = function() end,
+--   })
+-- أو بالشكل المختصر: Window:Notify("عنوان", "نص", 5)
+function Aurora:Notify(options, legacyMessage, legacyDuration)
+    if self.Destroyed then return nil end
 
+    local title, message, duration
+    local buttonText, buttonCallback, clipboardText
+
+    if type(options) == "table" then
+        title          = tostring(options.Title or "Notification")
+        message        = tostring(options.Message or options.Text or "")
+        duration       = tonumber(options.Duration) or 5
+        buttonText     = options.ButtonText and tostring(options.ButtonText) or nil
+        buttonCallback = (type(options.ButtonCallback) == "function") and options.ButtonCallback or nil
+        clipboardText  = options.ClipboardText and tostring(options.ClipboardText) or nil
+    else
+        title    = tostring(options or "Notification")
+        message  = tostring(legacyMessage or "")
+        duration = tonumber(legacyDuration) or 5
+    end
+    duration = math.clamp(duration, 1, 60)
+
+    -- سقف الإشعارات المتزامنة (4): الأقدم يُغلق فوراً عند الفيضان
+    while #self._activeNotifs >= 4 do
+        local oldest = table.remove(self._activeNotifs, 1)
+        if oldest and oldest.Dismiss then
+            pcall(oldest.Dismiss)
+        end
+    end
+
+    self._notifOrder += 1
+
+    local container = Create("Frame", {
+        Size = UDim2.new(1, 0, 0, 0),
+        AutomaticSize = Enum.AutomaticSize.Y,
+        BackgroundColor3 = Theme.Element,
+        BackgroundTransparency = 0.10,
+        BorderSizePixel = 0,
+        ClipsDescendants = true,
+        LayoutOrder = self._notifOrder,
+        Parent = self.NotifyHolder,
+    })
+    Corner(container, 10)
+    Stroke(container)
+
+    -- الطبقة المنزلقة (Slide In/Out) داخل حاوية مقصوصة
+    local inner = Create("CanvasGroup", {
+        Size = UDim2.new(1, 0, 0, 0),
+        AutomaticSize = Enum.AutomaticSize.Y,
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
+        GroupTransparency = 1,
+        Position = UDim2.new(0, 320, 0, 0), -- يبدأ خارج الحاوية (يمين)
+        Parent = container,
+    })
+    Create("UIListLayout", {
+        Padding = UDim.new(0, 5),
+        SortOrder = Enum.SortOrder.LayoutOrder,
+        Parent = inner,
+    })
+    Create("UIPadding", {
+        PaddingTop = UDim.new(0, 10),
+        PaddingBottom = UDim.new(0, 10),
+        PaddingLeft = UDim.new(0, 12),
+        PaddingRight = UDim.new(0, 12),
+        Parent = inner,
+    })
+
+    local dismissed = false
+    local Dismiss
+    local progressTween
+
+    -- صف العنوان (نقطة تمييز + نص + زر إغلاق)
+    local titleRow = Create("Frame", {
+        Size = UDim2.new(1, 0, 0, 18),
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
+        LayoutOrder = 1,
+        Parent = inner,
+    })
+    local notifDot = Create("Frame", {
+        Size = UDim2.fromOffset(6, 6),
+        Position = UDim2.new(0, 0, 0.5, -3),
+        BackgroundColor3 = Theme.Accent,
+        BorderSizePixel = 0,
+        Parent = titleRow,
+    })
+    Corner(notifDot, 3)
+    Create("TextLabel", {
+        Size = UDim2.new(1, -30, 1, 0),
+        Position = UDim2.new(0, 12, 0, 0),
+        BackgroundTransparency = 1,
+        Text = title,
+        TextColor3 = Theme.Text,
+        Font = Enum.Font.GothamBold,
+        TextSize = 13,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextTruncate = Enum.TextTruncate.AtEnd,
+        Parent = titleRow,
+    })
+    local closeBtn = Create("TextButton", {
+        AnchorPoint = Vector2.new(1, 0.5),
+        Position = UDim2.new(1, 0, 0.5, 0),
+        Size = UDim2.fromOffset(18, 18),
+        BackgroundTransparency = 1,
+        Text = "✕",
+        TextColor3 = Theme.SubText,
+        Font = Enum.Font.GothamBold,
+        TextSize = 10,
+        AutoButtonColor = false,
+        BorderSizePixel = 0,
+        Parent = titleRow,
+    })
+    closeBtn.MouseButton1Click:Connect(function()
+        Dismiss()
+    end)
+
+    -- نص الرسالة (اختياري — يتمدد تلقائياً حسب الطول)
+    local nextOrder = 2
+    if message ~= "" then
+        Create("TextLabel", {
+            Size = UDim2.new(1, 0, 0, 0),
+            AutomaticSize = Enum.AutomaticSize.Y,
+            BackgroundTransparency = 1,
+            Text = message,
+            TextColor3 = Theme.SubText,
+            Font = Enum.Font.Gotham,
+            TextSize = 12,
+            TextWrapped = true,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            LayoutOrder = 2,
+            Parent = inner,
+        })
+        nextOrder = 3
+    end
+
+    -- زر تفاعلي اختياري (مثال: نسخ رابط إلى الحافظة بضغطة واحدة)
+    if buttonText then
+        local actionBtn = Create("TextButton", {
+            Size = UDim2.new(1, 0, 0, 26),
+            BackgroundColor3 = Theme.Accent,
+            Text = buttonText,
+            TextColor3 = Color3.fromRGB(255, 255, 255),
+            Font = Enum.Font.GothamBold,
+            TextSize = 12,
+            AutoButtonColor = false,
+            BorderSizePixel = 0,
+            LayoutOrder = nextOrder,
+            Parent = inner,
+        })
+        Corner(actionBtn, 6)
+        Stroke(actionBtn)
+        BindHover(actionBtn, Theme.Accent, Theme.AccentHover, Theme.AccentPress)
+        actionBtn.MouseButton1Click:Connect(function()
+            if clipboardText then
+                CopyToClipboard(clipboardText)
+                actionBtn.Text = "Copied ✓" -- تأكيد بصري فوري
+                task.delay(1.1, function()
+                    if actionBtn.Parent then
+                        actionBtn.Text = buttonText
+                    end
+                end)
+            end
+            if buttonCallback then
+                local ok, err = pcall(buttonCallback)
+                if not ok then warn("[Aurora] Notify button error: " .. tostring(err)) end
+            end
+            task.delay(clipboardText and 1.1 or 0.15, function()
+                Dismiss()
+            end)
+        end)
+    end
+
+    -- شريط عمر الإشعار (يستنزف تدريجياً بمرور الوقت)
+    local progressTrack = Create("Frame", {
+        Size = UDim2.new(1, 0, 0, 2),
+        BackgroundColor3 = Theme.ElementHover,
+        BackgroundTransparency = 0.35,
+        BorderSizePixel = 0,
+        LayoutOrder = 50,
+        Parent = inner,
+    })
+    Corner(progressTrack, 1)
+    local progressFill = Create("Frame", {
+        Size = UDim2.new(1, 0, 1, 0),
+        BackgroundColor3 = Theme.Accent,
+        BorderSizePixel = 0,
+        Parent = progressTrack,
+    })
+    Corner(progressFill, 1)
+
+    -- تسجيل الإشعار ضمن القائمة النشطة
+    local record = { Container = container }
+    table.insert(self._activeNotifs, record)
+
+    Dismiss = function()
+        if dismissed then return end
+        dismissed = true
+        for index, item in ipairs(self._activeNotifs) do
+            if item == record then
+                table.remove(self._activeNotifs, index)
+                break
+            end
+        end
+        if progressTween then
+            pcall(function() progressTween:Cancel() end)
+        end
+        if self.Destroyed or not container.Parent then
+            pcall(function() container:Destroy() end)
+            return
+        end
+        -- خروج انسيابي: انزلاق خارج + تلاشي
+        local slideOut = Tween(inner,
+            TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+            {
+                Position = UDim2.new(0, math.max(container.AbsoluteSize.X, 220) + 30, 0, 0),
+                GroupTransparency = 1,
+            })
+        slideOut.Completed:Once(function()
+            pcall(function() container:Destroy() end)
+        end)
+    end
+    record.Dismiss = Dismiss
+
+    -- دخول انسيابي: انزلاق + تلاشي
+    Tween(inner, TweenInfo.new(0.30, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+        Position = UDim2.new(0, 0, 0, 0),
+        GroupTransparency = 0,
+    })
+
+    -- استنزاف شريط العمر + إغلاق تلقائي بعد المدة
+    progressTween = Tween(progressFill,
+        TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
+        { Size = UDim2.new(0, 0, 1, 0) })
+    task.delay(duration, function()
+        Dismiss()
+    end)
+
+    return record -- يحتوي .Dismiss لإغلاقه برمجياً عند الحاجة
+end
+
+--──────────────────── مقاس النافذة (للحفظ والاسترجاع) ─────────────────
+
+-- قراءة مقاس النافذة الحالي بالبكسل (يشمل تعديلات Resize Grip)
+function Aurora:GetWindowSize()
+    local size = self.Root.AbsoluteSize
+    return math.round(size.X), math.round(size.Y)
+end
+
+-- تعيين مقاس النافذة يدوياً بحدود آمنة (يُستخدم داخلياً في LoadConfig)
+function Aurora:SetWindowSize(width, height)
+    if self.Destroyed then return false end
+    width  = tonumber(width)
+    height = tonumber(height)
+    if not width or not height then return false end
+
+    local minSize  = self._minSize
+    local maxSize  = self._maxSize
+    local viewport = self.GUI.AbsoluteSize
+
+    -- سقف ذكي حسب الشاشة (مهم للجوال) + math.clamp للحدود
+    local maxW = math.max(minSize.X, math.min(maxSize.X, viewport.X - 24))
+    local maxH = math.max(minSize.Y, math.min(maxSize.Y, viewport.Y - 24))
+    local newW = math.clamp(math.floor(width), minSize.X, maxW)
+    local newH = math.clamp(math.floor(height), minSize.Y, maxH)
+
+    local oldSize = self.Root.AbsoluteSize
+    local oldPos  = self.Root.Position
+    self.Root.Size = UDim2.fromOffset(newW, newH)
+    -- تعويض حول المركز حتى لا "تقفز" النافذة
+    self.Root.Position = UDim2.new(
+        oldPos.X.Scale, oldPos.X.Offset + (newW - oldSize.X) / 2,
+        oldPos.Y.Scale, oldPos.Y.Offset + (newH - oldSize.Y) / 2
+    )
+    return true
+end
+
+--────────────────────── نظام حفظ وتحميل الإعدادات ─────────────────────
+
+-- حفظ كل الإعدادات + مقاس النافذة في ملف JSON
+-- الاستخدام: Window:SaveConfig("MyHub", "config")
+function Aurora:SaveConfig(folderName, fileName)
+    if self.Destroyed then return false, "Window is destroyed" end
+    if type(writefile) ~= "function" or type(readfile) ~= "function" then
+        return false, "This executor does not support the file system"
+    end
+
+    folderName = tostring(folderName or "AuroraUI")
+    fileName   = tostring(fileName or "config")
+
+    local data = { WindowSize = {}, Elements = {} }
+
+    -- [حاسم] حفظ مقاس النافذة الحالي (الذي عدّله المستخدم عبر Resize Grip)
+    local okSize, w, h = pcall(function()
+        return self:GetWindowSize()
+    end)
+    if okSize and w and h and w > 50 and h > 50 then
+        data.WindowSize = { W = w, H = h }
+    end
+
+    -- حفظ حالة كل عنصر تفاعلي مسجل في الـ Registry
+    for key, entry in pairs(self.Registry) do
+        local okGet, value = pcall(entry.Get)
+        if okGet and value ~= nil then
+            if typeof(value) == "Color3" then
+                value = { R = value.R, G = value.G, B = value.B } -- Color3 لا يُشفَّر مباشرة
+            end
+            data.Elements[key] = { T = entry.Type, V = value }
+        end
+    end
+
+    local okEncode, encoded = pcall(function()
+        return HttpService:JSONEncode(data)
+    end)
+    if not okEncode or type(encoded) ~= "string" then
+        return false, "JSON encoding failed"
+    end
+
+    -- تجهيز المجلد بأمان (makefolder / isfolder)
+    if type(isfolder) == "function" and type(makefolder) == "function" then
+        local exists = false
+        pcall(function() exists = (isfolder(folderName) == true) end)
+        if not exists then
+            local okMake = pcall(makefolder, folderName)
+            if not okMake then
+                return false, "Could not create folder: " .. folderName
+            end
+        end
+    end
+
+    local path = folderName .. "/" .. fileName .. ".json"
+    local okWrite = pcall(writefile, path, encoded)
+    if not okWrite then
+        return false, "Could not write: " .. path
+    end
+    return true, path
+end
+
+-- استرجاع الإعدادات + مقاس النافذة من ملف JSON
+-- الاستخدام: Window:LoadConfig("MyHub", "config")
+function Aurora:LoadConfig(folderName, fileName)
+    if self.Destroyed then return false, "Window is destroyed" end
+    if type(readfile) ~= "function" then
+        return false, "This executor does not support the file system"
+    end
+
+    folderName = tostring(folderName or "AuroraUI")
+    fileName   = tostring(fileName or "config")
+    local path = folderName .. "/" .. fileName .. ".json"
+
+    local okRead, raw = pcall(readfile, path)
+    if not okRead or type(raw) ~= "string" or raw == "" then
+        return false, "Config file not found: " .. path
+    end
+
+    local okDecode, data = pcall(function()
+        return HttpService:JSONDecode(raw)
+    end)
+    if not okDecode or type(data) ~= "table" then
+        return false, "Config file is corrupted"
+    end
+
+    -- [حاسم] استرجاع المقاس المخصص أولاً (من Resize Grip)
+    if type(data.WindowSize) == "table"
+    and tonumber(data.WindowSize.W) and tonumber(data.WindowSize.H) then
+        self:SetWindowSize(data.WindowSize.W, data.WindowSize.H)
+    end
+
+    -- استرجاع حالة كل عنصر مسجل (تطبيق صامت — لا يطلق الـ Callbacks)
+    local applied = 0
+    for key, saved in pairs(data.Elements or {}) do
+        local entry = self.Registry[key]
+        if entry and type(saved) == "table" then
+            local value = saved.V
+            -- إعادة تحويل Color3 المخزن كجدول {R, G, B}
+            if entry.Type == "Colorpicker" and type(value) == "table"
+            and tonumber(value.R) and tonumber(value.G) and tonumber(value.B) then
+                value = Color3.new(value.R, value.G, value.B)
+            end
+            if pcall(entry.Set, value) then
+                applied += 1
+            end
+        end
+    end
+
+    return true, applied
+end
+
+function Aurora:Destroy()
+    if self.Destroyed or self._destroying then return end
+    self._destroying = true
+
+    -- تشغيل دوال التنظيف أولاً (يتيح للمستخدم حفظ الإعدادات عند الخروج)
     for _, fn in ipairs(self.Cleanups) do
         pcall(fn)
     end
     table.clear(self.Cleanups)
+
+    self.Destroyed = true
 
     for _, thread in ipairs(self.Threads) do
         pcall(task.cancel, thread)
@@ -950,10 +1413,12 @@ end
 
 --──────────────────────────── عناصر التاب ─────────────────────────────
 
--- زر تنفيذي
-function TabMethods:CreateButton(name, callback)
+-- زر تنفيذي (يدعم أيقونة اختيارية: CreateButton(name, callback, iconId))
+function TabMethods:CreateButton(name, callback, icon)
     local container = CreateElement(self.Page, NextOrder(self), 40)
     CreateRowLabel(container, name, 104)
+
+    local assetId = ToAssetId(icon)
 
     local btn = Create("TextButton", {
         AnchorPoint = Vector2.new(1, 0.5),
@@ -971,6 +1436,30 @@ function TabMethods:CreateButton(name, callback)
     Corner(btn, 8)
     Stroke(btn)
     BindHover(btn, Theme.Accent, Theme.AccentHover, Theme.AccentPress)
+
+    if assetId then -- أيقونة تُعرض بجانب النص بتنسيق متناسق
+        btn.Text = ""
+        Create("ImageLabel", {
+            AnchorPoint = Vector2.new(0, 0.5),
+            Position = UDim2.new(0, 8, 0.5, 0),
+            Size = UDim2.fromOffset(13, 13),
+            BackgroundTransparency = 1,
+            BorderSizePixel = 0,
+            Image = assetId,
+            Parent = btn,
+        })
+        Create("TextLabel", {
+            Size = UDim2.new(1, -34, 1, 0),
+            Position = UDim2.new(0, 26, 0, 0),
+            BackgroundTransparency = 1,
+            Text = "Run",
+            TextColor3 = Color3.fromRGB(255, 255, 255),
+            Font = Enum.Font.GothamBold,
+            TextSize = 12,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            Parent = btn,
+        })
+    end
 
     local scale = Create("UIScale", { Scale = 1, Parent = btn })
     btn.MouseButton1Click:Connect(function()
@@ -1042,17 +1531,18 @@ function TabMethods:CreateToggle(name, default, callback)
         end
     end)
 
-    return {
-        Container = container,
-        Set = function(value)
-            value = value == true
-            if value ~= state then
-                state = value
-                Render()
-            end
-        end,
-        Get = function() return state end,
-    }
+    local handle = {}
+    handle.Container = container
+    handle.Set = function(value)
+        value = value == true
+        if value ~= state then
+            state = value
+            Render()
+        end
+    end
+    handle.Get = function() return state end
+    RegisterConfigurable(self, name, "Toggle", handle.Get, handle.Set)
+    return handle
 end
 
 -- شريط تمرير
@@ -1179,11 +1669,14 @@ function TabMethods:CreateSlider(name, min, max, default, callback)
         end
     end))
 
-    return {
-        Container = container,
-        Set = function(value) SetValue(tonumber(value) or min, false) end,
-        Get = function() return current end,
-    }
+    local handle = {}
+    handle.Container = container
+    handle.Set = function(value)
+        SetValue(tonumber(value) or min, false)
+    end
+    handle.Get = function() return current end
+    RegisterConfigurable(self, name, "Slider", handle.Get, handle.Set)
+    return handle
 end
 
 -- قائمة منسدلة
@@ -1330,17 +1823,18 @@ function TabMethods:CreateDropdown(name, options, default, callback)
     end)
     RefreshOptionColors()
 
-    return {
-        Container = container,
-        Set = function(option)
-            if table.find(options, option) then
-                selected = option
-                ddBtn.Text = tostring(option)
-                RefreshOptionColors()
-            end
-        end,
-        Get = function() return selected end,
-    }
+    local handle = {}
+    handle.Container = container
+    handle.Set = function(option)
+        if table.find(options, option) then
+            selected = option
+            ddBtn.Text = tostring(option)
+            RefreshOptionColors()
+        end
+    end
+    handle.Get = function() return selected end
+    RegisterConfigurable(self, name, "Dropdown", handle.Get, handle.Set)
+    return handle
 end
 
 -- حقل إدخال نصي
@@ -1382,6 +1876,11 @@ function TabMethods:CreateInput(name, placeholder, callback)
         end
     end)
 
+    RegisterConfigurable(self, name, "Input",
+        function() return box.Text end,
+        function(value)
+            box.Text = tostring(value or "")
+        end)
     return container
 end
 
@@ -1446,16 +1945,135 @@ function TabMethods:CreateKeybind(name, defaultKey, callback)
         end
     end))
 
-    return {
-        Container = container,
-        Set = function(key)
-            currentKey = key
-            if not listening then
-                bindBtn.Text = currentKey and currentKey.Name or "None"
+    local handle = {}
+    handle.Container = container
+    handle.Set = function(key)
+        currentKey = key
+        if not listening then
+            bindBtn.Text = currentKey and currentKey.Name or "None"
+        end
+    end
+    handle.Get = function() return currentKey end
+    RegisterConfigurable(self, name, "Keybind",
+        function() return currentKey and currentKey.Name or "" end,
+        function(value)
+            if type(value) == "string" and value ~= "" then
+                local ok, key = pcall(function() return Enum.KeyCode[value] end)
+                if ok and key then
+                    handle.Set(key)
+                end
             end
-        end,
-        Get = function() return currentKey end,
-    }
+        end)
+    return handle
+end
+
+-- بطاقة المطور (Developer Profile Card)
+-- الاستخدام: Tab:CreateProfile("Name", imageId, "Role", "BtnText", callback)
+function TabMethods:CreateProfile(name, imageId, role, socialButtonText, socialCallback)
+    name = tostring(name or "Developer")
+    role = tostring(role or "Developer")
+
+    local container = CreateElement(self.Page, NextOrder(self), 66)
+    local assetId = ToAssetId(imageId)
+
+    if assetId then -- صورة المطور مقطوعة دائرياً بإطار Accent
+        local avatar = Create("ImageLabel", {
+            Size = UDim2.fromOffset(44, 44),
+            Position = UDim2.new(0, 11, 0.5, -22),
+            BackgroundColor3 = Theme.ElementHover,
+            Image = assetId,
+            BorderSizePixel = 0,
+            Parent = container,
+        })
+        Create("UICorner", { CornerRadius = UDim.new(1, 0), Parent = avatar })
+        Create("UIStroke", { Color = Theme.Accent, Thickness = 1.5, Transparency = 0.45, Parent = avatar })
+    else -- بديل أنيق: حرف أول من الاسم داخل دائرة
+        local avatar = Create("Frame", {
+            Size = UDim2.fromOffset(44, 44),
+            Position = UDim2.new(0, 11, 0.5, -22),
+            BackgroundColor3 = Theme.ElementHover,
+            BorderSizePixel = 0,
+            Parent = container,
+        })
+        Create("UICorner", { CornerRadius = UDim.new(1, 0), Parent = avatar })
+        Create("UIStroke", { Color = Theme.Accent, Thickness = 1.5, Transparency = 0.45, Parent = avatar })
+        Create("TextLabel", {
+            Size = UDim2.fromScale(1, 1),
+            BackgroundTransparency = 1,
+            Text = string.upper(string.sub(name, 1, 1)),
+            TextColor3 = Theme.Accent,
+            Font = Enum.Font.GothamBold,
+            TextSize = 18,
+            Parent = avatar,
+        })
+    end
+
+    Create("TextLabel", { -- الاسم
+        Size = UDim2.new(1, -190, 0, 16),
+        Position = UDim2.new(0, 66, 0, 14),
+        BackgroundTransparency = 1,
+        Text = name,
+        TextColor3 = Theme.Text,
+        Font = Enum.Font.GothamBold,
+        TextSize = 14,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextTruncate = Enum.TextTruncate.AtEnd,
+        Parent = container,
+    })
+
+    local roleDot = Create("Frame", { -- نقطة تمييز بجانب الدور
+        Size = UDim2.fromOffset(5, 5),
+        Position = UDim2.new(0, 66, 0, 39),
+        BackgroundColor3 = Theme.Accent,
+        BorderSizePixel = 0,
+        Parent = container,
+    })
+    Corner(roleDot, 3)
+
+    Create("TextLabel", { -- الدور
+        Size = UDim2.new(1, -180, 0, 14),
+        Position = UDim2.new(0, 78, 0, 34),
+        BackgroundTransparency = 1,
+        Text = role,
+        TextColor3 = Theme.SubText,
+        Font = Enum.Font.GothamMedium,
+        TextSize = 11,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextTruncate = Enum.TextTruncate.AtEnd,
+        Parent = container,
+    })
+
+    if socialButtonText then -- زر تفاعلي اختياري بجانب البطاقة
+        local socialBtn = Create("TextButton", {
+            AnchorPoint = Vector2.new(1, 0.5),
+            Position = UDim2.new(1, -10, 0.5, 0),
+            Size = UDim2.fromOffset(104, 30),
+            BackgroundColor3 = Theme.Accent,
+            Text = tostring(socialButtonText),
+            TextColor3 = Color3.fromRGB(255, 255, 255),
+            Font = Enum.Font.GothamBold,
+            TextSize = 12,
+            TextTruncate = Enum.TextTruncate.AtEnd,
+            AutoButtonColor = false,
+            BorderSizePixel = 0,
+            Parent = container,
+        })
+        Corner(socialBtn, 8)
+        Stroke(socialBtn)
+        BindHover(socialBtn, Theme.Accent, Theme.AccentHover, Theme.AccentPress)
+
+        local btnScale = Create("UIScale", { Scale = 1, Parent = socialBtn })
+        socialBtn.MouseButton1Click:Connect(function()
+            btnScale.Scale = 0.92
+            Tween(btnScale, TI_Click, { Scale = 1 })
+            if socialCallback then
+                local ok, err = pcall(socialCallback)
+                if not ok then warn("[Aurora] Profile callback error: " .. tostring(err)) end
+            end
+        end)
+    end
+
+    return container
 end
 
 -- منتقي ألوان
@@ -1552,16 +2170,17 @@ function TabMethods:CreateColorpicker(name, defaultColor, callback)
         SetOpen(not open)
     end)
 
-    return {
-        Container = container,
-        Set = function(value)
-            if typeof(value) == "Color3" then
-                color = value
-                swatch.BackgroundColor3 = color
-            end
-        end,
-        Get = function() return color end,
-    }
+    local handle = {}
+    handle.Container = container
+    handle.Set = function(value)
+        if typeof(value) == "Color3" then
+            color = value
+            swatch.BackgroundColor3 = color
+        end
+    end
+    handle.Get = function() return color end
+    RegisterConfigurable(self, name, "Colorpicker", handle.Get, handle.Set)
+    return handle
 end
 
 -- عنوان قسم
