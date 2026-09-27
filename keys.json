@@ -298,5 +298,10 @@
         "discord_id": "1260176053595275329",
         "hwid": "66fa10fd-a2ef-48cc-a3db-47c013bae271",
         "expires_at": 1790634808
+    },
+    "VGX-SESH-P9FU-2026": {
+        "discord_id": "875962761199353976",
+        "hwid": null,
+        "expires_at": 1790636143
     }
 }
