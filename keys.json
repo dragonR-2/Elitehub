@@ -148,5 +148,10 @@
         "discord_id": "1548797769580552243",
         "hwid": "cddedb5b-a10a-4490-9b7a-81597f7274c2",
         "expires_at": 1790553009
+    },
+    "VGX-75BN-KHR6-2026": {
+        "discord_id": "1538241898798514199",
+        "hwid": null,
+        "expires_at": 1790554458
     }
 }
