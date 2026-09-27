@@ -238,5 +238,10 @@
         "discord_id": "1551862227303137384",
         "hwid": "4ba473b9-646f-4e85-a3d1-93b7540a7637",
         "expires_at": 1790583172
+    },
+    "VGX-SGRI-F2XU-2026": {
+        "discord_id": "1533391893105344697",
+        "hwid": null,
+        "expires_at": 1790583913
     }
 }
