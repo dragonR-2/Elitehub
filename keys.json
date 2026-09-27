@@ -208,5 +208,10 @@
         "discord_id": "1485103085419499701",
         "hwid": "4000bfb3-56e8-486e-94b9-8fb895304ad1",
         "expires_at": 1790572540
+    },
+    "VGX-SUYW-F14R-2026": {
+        "discord_id": "982521240768086076",
+        "hwid": null,
+        "expires_at": 1790573374
     }
 }
