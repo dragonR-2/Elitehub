@@ -1,6 +1,7 @@
 --═══════════════════════════════════════════════════════════════════════
---   AURORA UI v2.0  •  Fluent Glass Edition
+--   AURORA UI v2.1  •  Fluent Glass Edition
 --   Modern Dark Glassmorphic • Responsive (Mobile-First) • Leak-Free
+--   v2.1: FAB بظل ناعم • Overlay زجاجي + Blur • Resize Grip احترافي
 --   متوافقة مع: Delta / Codex / Synapse / KRNL و جميع المشغلات الشائعة
 --═══════════════════════════════════════════════════════════════════════
 
@@ -146,6 +147,10 @@ function Aurora.new(config)
         Theme.AccentPress = Theme.Accent:Lerp(Color3.new(0, 0, 0), 0.35)
     end
 
+    -- حدود تغيير الحجم (مصدر واحد يستخدمه UISizeConstraint و Resize Grip معاً)
+    local MIN_SIZE = Vector2.new(320, 230)
+    local MAX_SIZE = Vector2.new(560, 400)
+
     -- اختيار الحاوية الآمنة للواجهة (بدون أخطاء في أي مشغل)
     local uiParent
     do
@@ -197,8 +202,8 @@ function Aurora.new(config)
     Corner(self.Root, 10)
     Stroke(self.Root)
     Create("UISizeConstraint", {
-        MinSize = Vector2.new(300, 220),
-        MaxSize = Vector2.new(560, 400),
+        MinSize = MIN_SIZE,
+        MaxSize = MAX_SIZE,
         Parent = self.Root,
     })
     Create("UIGradient", { -- عمق زجاجي خفيف
@@ -318,21 +323,93 @@ function Aurora.new(config)
     Corner(self.PageContainer, 10)
     Stroke(self.PageContainer)
 
-    -- الزر العائم (إعادة الفتح بعد التصغير — مثالي للجوال)
-    self.FloatingBtn = Create("TextButton", {
-        Size = UDim2.fromOffset(46, 46),
-        Position = UDim2.new(0, 16, 0.5, -23),
-        BackgroundColor3 = Theme.Background,
-        BackgroundTransparency = 0.05,
-        Text = "💎",
-        TextSize = 20,
+    --════════════ [1] مقبض تغيير الحجم (Resize Grip) ════════════
+    local resizeGrip = Create("TextButton", {
+        Name = "ResizeGrip",
+        AnchorPoint = Vector2.new(1, 1),
+        Position = UDim2.new(1, -3, 1, -3),
+        Size = UDim2.fromOffset(20, 20),
+        BackgroundColor3 = Theme.Element,
+        BackgroundTransparency = 1,
+        Text = "◢",
+        TextColor3 = Theme.SubText,
+        TextTransparency = 0.45,
+        Font = Enum.Font.GothamBold,
+        TextSize = 11,
         AutoButtonColor = false,
+        BorderSizePixel = 0,
+        ZIndex = 20,
+        Parent = self.Content,
+    })
+    resizeGrip.MouseEnter:Connect(function()
+        Tween(resizeGrip, TI_Fast, { TextTransparency = 0, TextColor3 = Theme.Accent })
+    end)
+    resizeGrip.MouseLeave:Connect(function()
+        Tween(resizeGrip, TI_Fast, { TextTransparency = 0.45, TextColor3 = Theme.SubText })
+    end)
+
+    --════════════ [2] الزر العائم الاحترافي (FAB) مع ظل ناعم ════════════
+    self.FloatRoot = Create("Frame", { -- حاوية تجمع الزر + ظله (تُسحب كوحدة واحدة)
+        Size = UDim2.fromOffset(66, 66),
+        Position = UDim2.new(0, 12, 0.5, -33),
+        BackgroundTransparency = 1,
         BorderSizePixel = 0,
         Visible = false,
         Parent = self.GUI,
     })
-    Create("UICorner", { CornerRadius = UDim.new(1, 0), Parent = self.FloatingBtn })
-    local floatStroke = Create("UIStroke", {
+
+    -- ظل خفيف ناعم: طبقات متراكزة بلا أي أصول خارجية (يعمل في كل المشغلات)
+    local shadowLayers = {}
+    for index, info in ipairs({
+        { inset = -8, alpha = 0.78, drop = 1 }, -- الطبقة الأقرب (الأغمق)
+        { inset = -4, alpha = 0.87, drop = 2 },
+        { inset =  0, alpha = 0.93, drop = 3 }, -- الطبقة الأبعد (الأفتح)
+    }) do
+        local layerSize = 66 + info.inset
+        local layer = Create("Frame", {
+            Name = "FabShadow_" .. index,
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            Position = UDim2.new(0.5, 0, 0.5, info.drop), -- إزاحة لأسفل = ظل حقيقي
+            Size = UDim2.new(1, info.inset, 1, info.inset),
+            BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+            BackgroundTransparency = 1,
+            BorderSizePixel = 0,
+            ZIndex = 1,
+            Parent = self.FloatRoot,
+        })
+        -- زوايا تتبع شكل الزر الخارجي (Squircle) لتظل متناسقة
+        Create("UICorner", { CornerRadius = UDim.new(0, 16 + (layerSize - 52) / 2), Parent = layer })
+        shadowLayers[index] = { Frame = layer, Alpha = info.alpha }
+    end
+
+    local function FadeShadow(visible)
+        for _, shadow in ipairs(shadowLayers) do
+            Tween(shadow.Frame, TI_Smooth, {
+                BackgroundTransparency = visible and shadow.Alpha or 1,
+            })
+        end
+    end
+
+    self.FloatingBtn = Create("TextButton", {
+        AnchorPoint = Vector2.new(0.5, 0.5),
+        Position = UDim2.fromScale(0.5, 0.5),
+        Size = UDim2.fromOffset(52, 52),
+        BackgroundColor3 = Theme.Background,
+        BackgroundTransparency = 0.05,
+        Text = "💎",
+        TextSize = 22,
+        AutoButtonColor = false,
+        BorderSizePixel = 0,
+        ZIndex = 2,
+        Parent = self.FloatRoot,
+    })
+    Corner(self.FloatingBtn, 16) -- مستطيل دائري الحواف (نمط FAB الحديث)
+    Create("UIGradient", { -- عمق زجاجي خفيف
+        Rotation = 90,
+        Color = ColorSequence.new(Color3.fromRGB(255, 255, 255), Color3.fromRGB(190, 190, 215)),
+        Parent = self.FloatingBtn,
+    })
+    local floatStroke = Create("UIStroke", { -- إطار ناعم جداً بلون التمييز
         Color = Theme.Accent, Thickness = 1, Transparency = 0.55, Parent = self.FloatingBtn,
     })
     local floatScale = Create("UIScale", { Scale = 1, Parent = self.FloatingBtn })
@@ -343,12 +420,29 @@ function Aurora.new(config)
         pcall(function() floatPulse:Cancel() end)
     end)
 
+    -- تأثير التحويم/اللمس: تكبير +10% + توهج الإطار
+    self.FloatingBtn.MouseEnter:Connect(function()
+        Tween(floatScale, TI_Fast, { Scale = 1.10 })
+        Tween(floatStroke, TI_Fast, { Transparency = 0.10, Thickness = 1.5 })
+    end)
+    self.FloatingBtn.MouseLeave:Connect(function()
+        Tween(floatScale, TI_Fast, { Scale = 1 })
+        Tween(floatStroke, TI_Fast, { Transparency = 0.55, Thickness = 1 })
+    end)
+    self.FloatingBtn.MouseButton1Down:Connect(function()
+        Tween(floatScale, TI_Click, { Scale = 0.92 }) -- انكماش عند الضغط
+    end)
+    self.FloatingBtn.MouseButton1Up:Connect(function()
+        Tween(floatScale, TI_Fast, { Scale = 1.10 })
+    end)
+
     -- بلور + نافذة تأكيد الإغلاق
     self.Blur = Create("BlurEffect", { Name = "AuroraBlur", Size = 0, Parent = Lighting })
     table.insert(self.Cleanups, function()
         pcall(function() self.Blur:Destroy() end)
     end)
 
+    --════════════ [3] Overlay زجاجي شفاف بدل الأسود الصلب ════════════
     local overlay = Create("TextButton", { -- يلتقط الضغط خارج الصندوق
         Size = UDim2.fromScale(1, 1),
         BackgroundColor3 = Color3.fromRGB(0, 0, 0),
@@ -373,6 +467,11 @@ function Aurora.new(config)
         Parent = overlay,
     })
     Corner(dialog, 10)
+    Create("UIGradient", { -- لمعة زجاجية على صندوق الرسالة
+        Rotation = 90,
+        Color = ColorSequence.new(Color3.fromRGB(255, 255, 255), Color3.fromRGB(205, 205, 225)),
+        Parent = dialog,
+    })
     local dialogStroke = Stroke(dialog, Theme.Stroke, 1, 1)
     local dialogScale = Create("UIScale", { Scale = 0.88, Parent = dialog })
 
@@ -444,10 +543,14 @@ function Aurora.new(config)
         if show then
             dialogScale.Scale = 0.88 -- إعادة تعيين قبل الحركة الارتدادية
         end
-        Tween(overlay, TI_Smooth, { BackgroundTransparency = show and 0.45 or 1 })
+        -- خلفية زجاجية شفافة جداً (بدل المربع الأسود الصلب)
+        Tween(overlay, TI_Smooth, { BackgroundTransparency = show and 0.60 or 1 })
+        -- بلور للعالم خلف الواجهة = عمق حقيقي
         Tween(self.Blur, TI_Smooth, { Size = show and 14 or 0 })
-        Tween(dialog, TI_Smooth, { BackgroundTransparency = show and 0.03 or 1 })
-        Tween(dialogStroke, TI_Smooth, { Transparency = show and 0.85 or 1 })
+        -- دفع النافذة الأصلية للخلف بتبهة ناعمة: تبدو "مضببة" خلف الرسالة بأناقة
+        Tween(self.Content, TI_Smooth, { GroupTransparency = show and 0.30 or 0 })
+        Tween(dialog, TI_Smooth, { BackgroundTransparency = show and 0.10 or 1 })
+        Tween(dialogStroke, TI_Smooth, { Transparency = show and 0.55 or 1 })
         Tween(dialogScale, TI_Smooth, { Scale = show and 1 or 0.88 })
         Tween(dialogContent, TI_Smooth, { GroupTransparency = show and 0 or 1 })
         if not show then
@@ -465,6 +568,11 @@ function Aurora.new(config)
     local function ShowWindow()
         if self.Destroyed then return end
         hideToken += 1
+        -- مزامنة: إخفاء الزر العائم إن كان ظاهراً (عند الفتح بمفتاح التبديل)
+        if self.FloatRoot.Visible then
+            floatPulse:Cancel()
+            self.FloatRoot.Visible = false
+        end
         self.Root.Visible = true
         self.Content.GroupTransparency = 1
         rootScale.Scale = 0.92
@@ -484,17 +592,22 @@ function Aurora.new(config)
             if self.Destroyed or myToken ~= hideToken then return end
             self.Root.Visible = false
             if withFloating then
-                self.FloatingBtn.Visible = true
+                self.FloatRoot.Visible = true
+                -- الحالة المخفية الابتدائية ثم ظهور ناعم للزر مع ظله
                 self.FloatingBtn.BackgroundTransparency = 1
                 self.FloatingBtn.TextTransparency = 1
                 floatStroke.Transparency = 1
                 floatScale.Scale = 0.60
+                for _, shadow in ipairs(shadowLayers) do
+                    shadow.Frame.BackgroundTransparency = 1
+                end
                 Tween(self.FloatingBtn, TI_Smooth, { BackgroundTransparency = 0.05, TextTransparency = 0 })
                 Tween(floatScale, TI_Smooth, { Scale = 1 })
-                local fade = Tween(floatStroke, TI_Smooth, { Transparency = 0.55 })
-                fade.Completed:Once(function()
-                    if self.FloatingBtn.Visible and not self.Destroyed then
-                        floatPulse:Play()
+                Tween(floatStroke, TI_Smooth, { Transparency = 0.55 })
+                FadeShadow(true)
+                task.delay(0.25, function()
+                    if self.FloatRoot.Visible and not self.Destroyed then
+                        floatPulse:Play() -- بدء النبض المتوهج بعد اكتمال الظهور
                     end
                 end)
             end
@@ -524,7 +637,7 @@ function Aurora.new(config)
         SetConfirm(false) -- الضغط خارج الصندوق يلغي
     end)
 
-    -- سحب الزر العائم (مع تمييز النقر عن السحب)
+    -- سحب الزر العائم (السحب يحرك الحاوية مع الظل — مع تمييز النقر عن السحب)
     do
         local fDragging, fMoved = false, false
         local fStart, fOrigin
@@ -534,7 +647,7 @@ function Aurora.new(config)
             or input.UserInputType == Enum.UserInputType.Touch then
                 fDragging, fMoved = true, false
                 fStart = input.Position
-                fOrigin = self.FloatingBtn.Position
+                fOrigin = self.FloatRoot.Position
             end
         end))
         self:Track(UserInputService.InputChanged:Connect(function(input)
@@ -544,7 +657,7 @@ function Aurora.new(config)
                 if math.abs(delta.X) + math.abs(delta.Y) > 8 then
                     fMoved = true
                 end
-                self.FloatingBtn.Position = UDim2.new(
+                self.FloatRoot.Position = UDim2.new(
                     fOrigin.X.Scale, fOrigin.X.Offset + delta.X,
                     fOrigin.Y.Scale, fOrigin.Y.Offset + delta.Y
                 )
@@ -562,28 +675,32 @@ function Aurora.new(config)
             floatPulse:Cancel()
             Tween(self.FloatingBtn, TI_Fast, { BackgroundTransparency = 1, TextTransparency = 1 })
             Tween(floatStroke, TI_Fast, { Transparency = 1 })
+            Tween(floatScale, TI_Fast, { Scale = 0.60 })
+            FadeShadow(false)
             task.delay(0.12, function()
                 if not self.Destroyed then
-                    self.FloatingBtn.Visible = false
+                    self.FloatRoot.Visible = false
                     ShowWindow()
                 end
             end)
         end)
     end
 
-    -- سحب النافذة من شريط العنوان (ماوس + لمس)
+    -- سحب النافذة من شريط العنوان (ماوس + لمس) — مع حماية من التعارض مع Resize
+    local windowDragging, windowResizing = false, false
     do
-        local dragging, dragStart, startPos
+        local dragStart, startPos
         self:Track(self.TitleBar.InputBegan:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.MouseButton1
             or input.UserInputType == Enum.UserInputType.Touch then
-                dragging = true
+                windowDragging = true
                 dragStart = input.Position
                 startPos = self.Root.Position
             end
         end))
         self:Track(UserInputService.InputChanged:Connect(function(input)
-            if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement
+            if windowDragging and not windowResizing
+            and (input.UserInputType == Enum.UserInputType.MouseMovement
             or input.UserInputType == Enum.UserInputType.Touch) then
                 local delta = input.Position - dragStart
                 self.Root.Position = UDim2.new(
@@ -595,7 +712,54 @@ function Aurora.new(config)
         self:Track(UserInputService.InputEnded:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.MouseButton1
             or input.UserInputType == Enum.UserInputType.Touch then
-                dragging = false
+                windowDragging = false
+            end
+        end))
+    end
+
+    --════════════ منطق تغيير الحجم (ماوس + لمس) ════════════
+    do
+        local resizeStart, startSize, startPos
+
+        self:Track(resizeGrip.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1
+            or input.UserInputType == Enum.UserInputType.Touch then
+                windowResizing = true
+                resizeStart = input.Position
+                startSize = self.Root.AbsoluteSize
+                startPos = self.Root.Position
+                Tween(resizeGrip, TI_Fast, { TextTransparency = 0, TextColor3 = Theme.Accent })
+            end
+        end))
+
+        self:Track(UserInputService.InputChanged:Connect(function(input)
+            if windowResizing and not windowDragging
+            and (input.UserInputType == Enum.UserInputType.MouseMovement
+            or input.UserInputType == Enum.UserInputType.Touch) then
+                local delta = input.Position - resizeStart
+                -- سقف ذكي يمنع خروج النافذة عن حدود الشاشة (مهم جداً للجوال)
+                local viewport = self.GUI.AbsoluteSize
+                local maxW = math.max(MIN_SIZE.X, math.min(MAX_SIZE.X, viewport.X - 24))
+                local maxH = math.max(MIN_SIZE.Y, math.min(MAX_SIZE.Y, viewport.Y - 24))
+                -- math.clamp: حد أدنى وحد أقصى حتى لا تتشوه النافذة
+                local newW = math.clamp(startSize.X + delta.X, MIN_SIZE.X, maxW)
+                local newH = math.clamp(startSize.Y + delta.Y, MIN_SIZE.Y, maxH)
+                self.Root.Size = UDim2.fromOffset(newW, newH)
+                -- تثبيت الزاوية العلوية اليسرى أثناء التكبير/التصغير (سلوك النوافذ الحقيقي)
+                self.Root.Position = UDim2.new(
+                    startPos.X.Scale, startPos.X.Offset + (newW - startSize.X) / 2,
+                    startPos.Y.Scale, startPos.Y.Offset + (newH - startSize.Y) / 2
+                )
+            end
+        end))
+
+        self:Track(UserInputService.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1
+            or input.UserInputType == Enum.UserInputType.Touch then
+                if windowResizing then
+                    windowResizing = false
+                    Tween(resizeGrip, TI_Fast, { TextTransparency = 0.45, TextColor3 = Theme.SubText })
+                end
             end
         end))
     end
