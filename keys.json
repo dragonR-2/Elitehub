@@ -278,5 +278,10 @@
         "discord_id": "1493977256199061645",
         "hwid": "8E5A5DFA-E92C-4F40-A1CD-99280EDB53AA",
         "expires_at": 1790600351
+    },
+    "VGX-28EG-PH24-2026": {
+        "discord_id": "1539504027660845107",
+        "hwid": null,
+        "expires_at": 1790600594
     }
 }
