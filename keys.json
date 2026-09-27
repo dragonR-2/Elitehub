@@ -218,5 +218,10 @@
         "discord_id": "1533361604450582568",
         "hwid": "de1eb604-f575-418c-8c99-fb1f8d9ae452",
         "expires_at": 1790573890
+    },
+    "VGX-FYJG-WIVM-2026": {
+        "discord_id": "1545106363510689913",
+        "hwid": null,
+        "expires_at": 1790575194
     }
 }
