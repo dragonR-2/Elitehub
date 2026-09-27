@@ -308,5 +308,10 @@
         "discord_id": "1384862691524608062",
         "hwid": "dd4fff19-3260-454c-ad40-ced129a69fef",
         "expires_at": 1790637684
+    },
+    "VGX-6V63-0GOA-2026": {
+        "discord_id": "1468830518995849342",
+        "hwid": null,
+        "expires_at": 1790638483
     }
 }
