@@ -368,5 +368,10 @@
         "discord_id": "1451164701533802580",
         "hwid": "65732dfd-b7e5-4ce5-9671-766ac5f02504",
         "expires_at": 1790693794
+    },
+    "VGX-LMLH-EFV6-2026": {
+        "discord_id": "1390735606132244660",
+        "hwid": null,
+        "expires_at": 1790693967
     }
 }
