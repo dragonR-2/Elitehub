@@ -313,5 +313,10 @@
         "discord_id": "1543737547719704659",
         "hwid": "64dcb4d6-2d5c-44bd-b3df-b758b2cd6667",
         "expires_at": 1790654669
+    },
+    "VGX-4HDK-1F4B-2026": {
+        "discord_id": "1553065707007123511",
+        "hwid": null,
+        "expires_at": 1790663642
     }
 }
