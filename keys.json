@@ -323,5 +323,10 @@
         "discord_id": "1506426004619399280",
         "hwid": "4ab0dfd8-b276-4a0f-80c7-8c050892aa45",
         "expires_at": 1790665521
+    },
+    "VGX-OOOC-NHHO-2026": {
+        "discord_id": "1507524082168762561",
+        "hwid": null,
+        "expires_at": 1790667040
     }
 }
