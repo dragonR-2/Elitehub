@@ -343,5 +343,10 @@
         "discord_id": "1526763582145040550",
         "hwid": null,
         "expires_at": 1790681566
+    },
+    "VGX-AKSY-XMBS-2026": {
+        "discord_id": "1533391893105344697",
+        "hwid": null,
+        "expires_at": 1790681817
     }
 }
