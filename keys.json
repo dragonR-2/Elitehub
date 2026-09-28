@@ -383,5 +383,10 @@
         "discord_id": "1469679828792905820",
         "hwid": "ae595689-dae6-46eb-bfd9-d73b576928a0",
         "expires_at": 1790699255
+    },
+    "VGX-3DAX-DM2F-2026": {
+        "discord_id": "894350028548751360",
+        "hwid": null,
+        "expires_at": 1790702102
     }
 }
