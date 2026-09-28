@@ -333,5 +333,10 @@
         "discord_id": "839971045989679176",
         "hwid": "738dc6e9-80e3-4ced-bdb2-7f5d2b31df10",
         "expires_at": 1790667722
+    },
+    "VGX-GBA5-PWVF-2026": {
+        "discord_id": "1377631142085394502",
+        "hwid": null,
+        "expires_at": 1790669818
     }
 }
