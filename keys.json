@@ -318,5 +318,10 @@
         "discord_id": "1553065707007123511",
         "hwid": "ddaad8a1-3d16-4102-9495-2d5da373fa66",
         "expires_at": 1790663642
+    },
+    "VGX-R82J-IONR-2026": {
+        "discord_id": "1506426004619399280",
+        "hwid": null,
+        "expires_at": 1790665521
     }
 }
