@@ -368,5 +368,10 @@
         "discord_id": "957946235493449781",
         "hwid": "4B520E38-DC72-4D5F-9089-7BC6D8B60A69",
         "expires_at": 1790693314
+    },
+    "VGX-LUTV-A8RN-2026": {
+        "discord_id": "1451164701533802580",
+        "hwid": null,
+        "expires_at": 1790693794
     }
 }
