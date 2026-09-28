@@ -393,5 +393,10 @@
         "discord_id": "649626282577100813",
         "hwid": "c7a4f370-e8c5-4d0d-96c7-ed550c44e930",
         "expires_at": 1790703111
+    },
+    "VGX-BRS8-6YEW-2026": {
+        "discord_id": "1376255708869300225",
+        "hwid": null,
+        "expires_at": 1790707907
     }
 }
