@@ -378,5 +378,10 @@
         "discord_id": "1463224063001628672",
         "hwid": "18B8C025-87D3-43B1-A3A8-4129C82FF607",
         "expires_at": 1790695705
+    },
+    "VGX-JMPA-D8PF-2026": {
+        "discord_id": "963079877253267497",
+        "hwid": null,
+        "expires_at": 1790697845
     }
 }
