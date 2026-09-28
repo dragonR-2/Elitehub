@@ -398,5 +398,10 @@
         "discord_id": "1503426792147648719",
         "hwid": "1BA4C07B-8B17-4EC7-B4F8-593895C82DAA",
         "expires_at": 1790716306
+    },
+    "VGX-99I5-ELXQ-2026": {
+        "discord_id": "935675924769280050",
+        "hwid": null,
+        "expires_at": 1790719185
     }
 }
