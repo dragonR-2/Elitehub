@@ -358,5 +358,10 @@
         "discord_id": "1537839584790978681",
         "hwid": "9818e0de-793a-4514-a223-2fbbe8e5c21d",
         "expires_at": 1790688816
+    },
+    "VGX-04NU-AKHJ-2026": {
+        "discord_id": "1150367838821961808",
+        "hwid": null,
+        "expires_at": 1790689075
     }
 }
