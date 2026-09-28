@@ -343,5 +343,10 @@
         "discord_id": "1176881924409667645",
         "hwid": null,
         "expires_at": 1790674903
+    },
+    "VGX-CTCU-4TW0-2026": {
+        "discord_id": "1526763582145040550",
+        "hwid": null,
+        "expires_at": 1790681566
     }
 }
