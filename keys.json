@@ -413,5 +413,10 @@
         "discord_id": "1533364579638181890",
         "hwid": "34d4d51f-effe-4e05-a7d4-f1c749b47e8d",
         "expires_at": 1790741025
+    },
+    "VGX-S7NY-STPB-2026": {
+        "discord_id": "1450141939872563201",
+        "hwid": null,
+        "expires_at": 1790746973
     }
 }
