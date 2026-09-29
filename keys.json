@@ -483,5 +483,10 @@
         "discord_id": "1191405868001013886",
         "hwid": "c64ef6e2-b325-45d2-b12f-cfe0a8b3ac6a",
         "expires_at": 1790791204
+    },
+    "VGX-HGBR-E1L5-2026": {
+        "discord_id": "806908690124636260",
+        "hwid": null,
+        "expires_at": 1790791386
     }
 }
