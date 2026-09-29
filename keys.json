@@ -518,5 +518,10 @@
         "discord_id": "581772302417395713",
         "hwid": "8404F2A8-C481-40AF-BCB4-B0BE64B62BE3",
         "expires_at": 1790804741
+    },
+    "VGX-YNNI-LHCT-2026": {
+        "discord_id": "1070837981130272860",
+        "hwid": null,
+        "expires_at": 1790805430
     }
 }
