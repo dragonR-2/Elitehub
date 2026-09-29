@@ -438,5 +438,10 @@
         "discord_id": "1546835883725164610",
         "hwid": null,
         "expires_at": 1790768898
+    },
+    "VGX-894X-AFH2-2026": {
+        "discord_id": "1315401909326319748",
+        "hwid": null,
+        "expires_at": 1790769262
     }
 }
