@@ -498,5 +498,10 @@
         "discord_id": "1376255708869300225",
         "hwid": "B2A6D628-6AAC-4FC8-8139-084E11442D4E",
         "expires_at": 1790798840
+    },
+    "VGX-HXNE-TORN-2026": {
+        "discord_id": "1432781711921381408",
+        "hwid": null,
+        "expires_at": 1790800318
     }
 }
