@@ -498,5 +498,10 @@
         "discord_id": "790189208214962187",
         "hwid": "d0845288-b1a6-4e60-aa4c-5f5550174cbb",
         "expires_at": 1790797168
+    },
+    "VGX-WXD7-NICD-2026": {
+        "discord_id": "1530975063325802505",
+        "hwid": null,
+        "expires_at": 1790798301
     }
 }
