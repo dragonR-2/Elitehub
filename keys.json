@@ -458,5 +458,10 @@
         "discord_id": "1191606113448247318",
         "hwid": "2069ef4a-eb7b-4bfd-9e97-1acfcc29f8c9",
         "expires_at": 1790778005
+    },
+    "VGX-HZCA-MLUY-2026": {
+        "discord_id": "821366160095969351",
+        "hwid": null,
+        "expires_at": 1790778342
     }
 }
