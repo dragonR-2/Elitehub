@@ -503,5 +503,10 @@
         "discord_id": "1432781711921381408",
         "hwid": "AF10485A-26F7-4702-A447-FF45DC7B8EBF",
         "expires_at": 1790800318
+    },
+    "VGX-UKWP-GYIR-2026": {
+        "discord_id": "1534511643847950361",
+        "hwid": null,
+        "expires_at": 1790800603
     }
 }
