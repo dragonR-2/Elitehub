@@ -493,5 +493,10 @@
         "discord_id": "1140970737155444777",
         "hwid": "77acdc66-a03d-4f0b-b060-f27637af0f71",
         "expires_at": 1790794518
+    },
+    "VGX-AKTA-ICBU-2026": {
+        "discord_id": "790189208214962187",
+        "hwid": null,
+        "expires_at": 1790797168
     }
 }
