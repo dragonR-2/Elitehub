@@ -528,5 +528,10 @@
         "discord_id": "1505457738203926533",
         "hwid": "ac8a8252-4a93-4b0e-b782-5c9355cfcabb",
         "expires_at": 1790808235
+    },
+    "VGX-5D8H-LFHK-2026": {
+        "discord_id": "1460698487891955852",
+        "hwid": null,
+        "expires_at": 1790811254
     }
 }
