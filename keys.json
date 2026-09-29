@@ -408,5 +408,10 @@
         "discord_id": "1552424164688789574",
         "hwid": "146aab31-8cff-4516-aae0-d8bad2b32f54",
         "expires_at": 1790728127
+    },
+    "VGX-US6R-1RY4-2026": {
+        "discord_id": "1533364579638181890",
+        "hwid": null,
+        "expires_at": 1790741025
     }
 }
