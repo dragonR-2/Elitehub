@@ -448,5 +448,10 @@
         "discord_id": "1251879245534462076",
         "hwid": "91f5e90e-9a69-4d8c-9f28-c84e72edd5a5",
         "expires_at": 1790774964
+    },
+    "VGX-FFZG-VUEC-2026": {
+        "discord_id": "1110592977765683210",
+        "hwid": null,
+        "expires_at": 1790776855
     }
 }
