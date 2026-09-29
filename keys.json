@@ -513,5 +513,10 @@
         "discord_id": "1554258042722455685",
         "hwid": "56d3d0da-5444-4b5c-b181-b4eed0a5b419",
         "expires_at": 1790800607
+    },
+    "VGX-FN90-NLT2-2026": {
+        "discord_id": "1487245725409480927",
+        "hwid": null,
+        "expires_at": 1790801372
     }
 }
