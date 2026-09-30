@@ -568,5 +568,10 @@
         "discord_id": "1546660020257689714",
         "hwid": "5749acda-cbdc-41ab-994a-e4e6bb95c49b",
         "expires_at": 1790845185
+    },
+    "VGX-TVOS-35MA-2026": {
+        "discord_id": "1505807523964391484",
+        "hwid": null,
+        "expires_at": 1790848198
     }
 }
