@@ -608,5 +608,10 @@
         "discord_id": "1345917586205839412",
         "hwid": "d1dd513b-b3e7-4068-b65f-ea08bee20adc",
         "expires_at": 1790861357
+    },
+    "VGX-JPZX-EMC5-2026": {
+        "discord_id": "727255209000173670",
+        "hwid": null,
+        "expires_at": 1790864844
     }
 }
