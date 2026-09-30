@@ -603,5 +603,10 @@
         "discord_id": "1269382840806674486",
         "hwid": "ABB18BBB-1766-490E-A89B-6AF3F53422CF",
         "expires_at": 1790859141
+    },
+    "VGX-HRKP-U2FT-2026": {
+        "discord_id": "1345917586205839412",
+        "hwid": null,
+        "expires_at": 1790861357
     }
 }
