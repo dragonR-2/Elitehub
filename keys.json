@@ -648,5 +648,10 @@
         "discord_id": "487661207516479509",
         "hwid": "4DF37ED0-569F-429B-B395-725C8EECBB4B",
         "expires_at": 1790876192
+    },
+    "VGX-9F9T-BGXY-2026": {
+        "discord_id": "1199652603554959402",
+        "hwid": null,
+        "expires_at": 1790877576
     }
 }
