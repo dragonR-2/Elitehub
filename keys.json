@@ -558,5 +558,10 @@
         "discord_id": "1238856763697266708",
         "hwid": "b8f9bffa-beba-41b1-b9d6-b9dd6d0faf81",
         "expires_at": 1790835257
+    },
+    "VGX-9ARP-IUBH-2026": {
+        "discord_id": "1076501525876191363",
+        "hwid": null,
+        "expires_at": 1790842958
     }
 }
