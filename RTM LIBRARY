@@ -1663,7 +1663,7 @@ function TabMethods:CreateButton(name, callback, icon)
     BindHover(btn, Theme.Accent, Theme.AccentHover, Theme.AccentPress)
 
     if assetId then -- أيقونة تُعرض بجانب النص بتنسيق متناسق
-        btn.Text = ""
+        btn.Text = "💎"
         Create("ImageLabel", {
             AnchorPoint = Vector2.new(0, 0.5),
             Position = UDim2.new(0, 8, 0.5, 0),
