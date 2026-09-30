@@ -359,11 +359,6 @@
         "hwid": "48267768-B626-4BCD-A61F-17982836327E",
         "expires_at": 1790724459
     },
-    "VGX-5WSJ-TRP3-2026": {
-        "discord_id": "1552424164688789574",
-        "hwid": "146aab31-8cff-4516-aae0-d8bad2b32f54",
-        "expires_at": 1790728127
-    },
     "VGX-US6R-1RY4-2026": {
         "discord_id": "1533364579638181890",
         "hwid": "34d4d51f-effe-4e05-a7d4-f1c749b47e8d",
@@ -688,5 +683,10 @@
         "discord_id": "869784868924571659",
         "hwid": "e2961e36-cee2-4b3d-b305-13ea7bfc4acd",
         "expires_at": 1790892869
+    },
+    "VGX-J8MP-6H3R-2026": {
+        "discord_id": "1552424164688789574",
+        "hwid": null,
+        "expires_at": 1790893654
     }
 }
