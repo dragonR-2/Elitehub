@@ -588,5 +588,10 @@
         "discord_id": "1164013142976778391",
         "hwid": "9badb28a-3b76-45f9-8abc-476fa041a5bd",
         "expires_at": 1790851754
+    },
+    "VGX-IA5A-TOAC-2026": {
+        "discord_id": "1474239522576531477",
+        "hwid": null,
+        "expires_at": 1790852080
     }
 }
