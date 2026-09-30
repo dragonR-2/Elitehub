@@ -613,5 +613,10 @@
         "discord_id": "727255209000173670",
         "hwid": "9BDF780B-ED18-4097-AEB3-D1BCF1582520",
         "expires_at": 1790864844
+    },
+    "VGX-952U-OIGC-2026": {
+        "discord_id": "1510175455683018803",
+        "hwid": null,
+        "expires_at": 1790865096
     }
 }
