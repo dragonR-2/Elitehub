@@ -688,5 +688,10 @@
         "discord_id": "1542988758909984804",
         "hwid": "527da3f8-f2fd-499a-a53d-fbbf965fab6f",
         "expires_at": 1790898584
+    },
+    "VGX-TELH-DJXH-2026": {
+        "discord_id": "1271521556706754670",
+        "hwid": null,
+        "expires_at": 1790898776
     }
 }
