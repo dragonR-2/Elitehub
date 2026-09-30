@@ -663,5 +663,10 @@
         "discord_id": "1464213840161013823",
         "hwid": "B7922DEF-53AD-415B-B896-BD1A34F52DE5",
         "expires_at": 1790880665
+    },
+    "VGX-W4A9-94US-2026": {
+        "discord_id": "1548091246487011350",
+        "hwid": null,
+        "expires_at": 1790881140
     }
 }
