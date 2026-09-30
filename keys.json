@@ -568,5 +568,10 @@
         "discord_id": "943910656342642770",
         "hwid": "E09E661F-C10D-48C9-9EB1-383478A3F70F",
         "expires_at": 1790845105
+    },
+    "VGX-SOYJ-IQEX-2026": {
+        "discord_id": "1546660020257689714",
+        "hwid": null,
+        "expires_at": 1790845185
     }
 }
