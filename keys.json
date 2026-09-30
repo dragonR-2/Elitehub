@@ -598,5 +598,10 @@
         "discord_id": "1396819321707303022",
         "hwid": "ff8d4feb-7f26-49d1-9591-78853dfcc2a0",
         "expires_at": 1790858638
+    },
+    "VGX-LTOP-0OZH-2026": {
+        "discord_id": "1269382840806674486",
+        "hwid": null,
+        "expires_at": 1790859141
     }
 }
