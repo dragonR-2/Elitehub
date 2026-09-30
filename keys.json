@@ -673,5 +673,10 @@
         "discord_id": "1515768887281586218",
         "hwid": "720b9ece-d7a3-453e-9466-a282c240eaf6",
         "expires_at": 1790881219
+    },
+    "VGX-W919-AFBD-2026": {
+        "discord_id": "1451439099075629102",
+        "hwid": null,
+        "expires_at": 1790888542
     }
 }
