@@ -793,5 +793,10 @@
         "discord_id": "1294957718972534786",
         "hwid": "a607613d-cf9f-44fe-b930-b4966e33dbdf",
         "expires_at": 1790969525
+    },
+    "VGX-98AT-F2MK-2026": {
+        "discord_id": "1239843841142558761",
+        "hwid": null,
+        "expires_at": 1790973415
     }
 }
