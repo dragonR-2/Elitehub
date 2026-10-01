@@ -693,5 +693,10 @@
         "discord_id": "1013097703544209439",
         "hwid": "522e7b12-0fb0-420a-80a7-449fac8e7e53",
         "expires_at": 1790906055
+    },
+    "VGX-5AFK-3LZ7-2026": {
+        "discord_id": "1448651130111266939",
+        "hwid": null,
+        "expires_at": 1790916939
     }
 }
