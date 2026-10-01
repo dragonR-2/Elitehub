@@ -723,5 +723,10 @@
         "discord_id": "1196104219208470641",
         "hwid": "7BE6060D-2696-431F-A1AA-C6DF9A1354F0",
         "expires_at": 1790929683
+    },
+    "VGX-GPH4-M560-2026": {
+        "discord_id": "1324717319619874927",
+        "hwid": null,
+        "expires_at": 1790931258
     }
 }
