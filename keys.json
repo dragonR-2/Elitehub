@@ -758,5 +758,10 @@
         "discord_id": "1003826765522804737",
         "hwid": "5882ea3b-9391-411c-b030-4aaa2cced80f",
         "expires_at": 1790950923
+    },
+    "VGX-0YUS-VIU4-2026": {
+        "discord_id": "1515675607093215242",
+        "hwid": null,
+        "expires_at": 1790953665
     }
 }
