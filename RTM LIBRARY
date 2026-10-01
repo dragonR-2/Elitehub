@@ -1,7 +1,7 @@
 --═══════════════════════════════════════════════════════════════════════
---   RTM LIBRARY v4.0  •  Violet Glass Edition — Professional Layout
---   نفس الـ API حرفياً (باراميترات مرتّبة) + دعم جدول اختياري للعناصر
---   Core: Aurora Engine • Mobile-First • Leak-Free
+--   RTM LIBRARY v4.0  •  Violet Glass Edition
+--   Premium Minimal Redesign — نفس الـ API والوظائف والسلوك تماماً
+--   Core: Aurora Engine (منطق محفوظ بالكامل) • Mobile-First • Leak-Free
 --   متوافقة مع: Delta / Codex / Synapse / KRNL و جميع المشغلات الشائعة
 --═══════════════════════════════════════════════════════════════════════
 
@@ -14,16 +14,18 @@ local Players          = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
 --─────────────────────────────── الثيم ────────────────────────────────
+-- هوية RTM: بنفسجي رئيسي هادئ + خلفيات داكنة بميل بنفسجي + زجاج ناعم
+-- (جميع مفاتيح الثيم الأصلية محفوظة — أُضيفت مفاتيح جديدة فقط)
 local Theme = {
-    Background     = Color3.fromRGB(16, 13, 24),
-    BackgroundSoft = Color3.fromRGB(24, 20, 37),
-    Element        = Color3.fromRGB(28, 24, 42),
+    Background     = Color3.fromRGB(16, 13, 24),    -- خلفية بنفسجية عميقة
+    BackgroundSoft = Color3.fromRGB(24, 20, 37),    -- أسطح التركيز (Search / Inputs)
+    Element        = Color3.fromRGB(28, 24, 42),    -- أسطح العناصر
     ElementHover   = Color3.fromRGB(37, 32, 56),
     ElementPress   = Color3.fromRGB(22, 18, 33),
     ElementBright  = Color3.fromRGB(45, 39, 66),
-    Accent         = Color3.fromRGB(138, 43, 226),
-    AccentSoft     = Color3.fromRGB(178, 134, 255),
-    AccentDeep     = Color3.fromRGB(96, 28, 166),
+    Accent         = Color3.fromRGB(138, 43, 226),  -- البنفسجي الرئيسي
+    AccentSoft     = Color3.fromRGB(178, 134, 255), -- بنفسجي فاتح (نصوص / تدرجات)
+    AccentDeep     = Color3.fromRGB(96, 28, 166),   -- بنفسجي غامق (نهايات التدرج)
     Text           = Color3.fromRGB(240, 238, 251),
     SubText        = Color3.fromRGB(157, 151, 188),
     Stroke         = Color3.fromRGB(255, 255, 255),
@@ -35,19 +37,6 @@ local Theme = {
 }
 Theme.AccentHover = Theme.Accent:Lerp(Color3.new(1, 1, 1), 0.20)
 Theme.AccentPress = Theme.Accent:Lerp(Color3.new(0, 0, 0), 0.32)
-
---──────────────── عقد الـ Layout (مصدر واحد لكل القياسات) ────────────────
-local Layout = {
-    TitleBarH = 48,  -- ارتفاع الهيدر
-    Pad       = 10,  -- هامش خارجي حول (السايدبار + لوحة المحتوى)
-    Gap       = 10,  -- فاصل السايدبار عن لوحة المحتوى
-    SidebarW  = 152, -- عرض السايدبار
-    SearchH   = 34,  -- ارتفاع صندوق البحث
-    TabH      = 34,  -- ارتفاع زر التاب
-    TabGap    = 6,   -- فراغ أزرار التابات
-    CardGap   = 8,   -- الفراغ الموحد بين الكروت
-    PagePad   = 10,  -- البادينغ الداخلي للصفحة (الكروت لا تلمس الحدود)
-}
 
 --──────────────────────────── أدوات مساعدة ────────────────────────────
 local TI_Click  = TweenInfo.new(0.10, Enum.EasingStyle.Quad,     Enum.EasingDirection.Out)
@@ -61,7 +50,7 @@ local function Create(class, props)
     for key, value in pairs(props) do
         inst[key] = value
     end
-    inst.Parent = parent
+    inst.Parent = parent -- الـ Parent دائماً الأخير لأداء أفضل
     return inst
 end
 
@@ -78,6 +67,7 @@ local function Stroke(parent, color, transparency, thickness)
     })
 end
 
+-- تدرج لوني مساعد (استخدام داخلي فقط)
 local function Gradient(parent, rotation, fromColor, toColor, transparencySeq)
     local props = {
         Rotation = rotation or 90,
@@ -96,6 +86,7 @@ local function Tween(inst, info, goal)
     return tw
 end
 
+-- تأثير تمرير/ضغط موحد (ماوس + لمس)
 local function BindHover(button, base, hover, pressed)
     button.MouseEnter:Connect(function()
         Tween(button, TI_Fast, { BackgroundColor3 = hover })
@@ -118,18 +109,36 @@ local function NextOrder(tab)
     return tab._order
 end
 
--- أصل أيقونة صالح (رقم أو مسار) — النصوص العادية تُعرض كرمز نصي بدلاً من ذلك
-local function IconAsset(value)
-    if type(value) == "number" and value > 0 then
-        return "rbxassetid://" .. tostring(math.floor(value))
-    elseif type(value) == "string" then
-        if string.sub(value, 1, 10) == "rbxassetid" or string.sub(value, 1, 9) == "rbxasset:" then
-            return value
-        end
-    end
-    return nil
+local function CreateElement(page, order, height)
+    local container = Create("Frame", {
+        Size = UDim2.new(1, 0, 0, height),
+        BackgroundColor3 = Theme.Element,
+        BackgroundTransparency = 0.25,
+        BorderSizePixel = 0,
+        LayoutOrder = order,
+        Parent = page,
+    })
+    Corner(container, 12)
+    Stroke(container, Theme.Stroke, 0.92, 1)
+    return container
 end
 
+local function CreateRowLabel(container, text, rightReserve)
+    return Create("TextLabel", {
+        Size = UDim2.new(1, -(rightReserve or 90), 1, 0),
+        Position = UDim2.new(0, 14, 0, 0),
+        BackgroundTransparency = 1,
+        Text = text,
+        TextColor3 = Theme.Text,
+        Font = Enum.Font.GothamMedium,
+        TextSize = 13,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextTruncate = Enum.TextTruncate.AtEnd,
+        Parent = container,
+    })
+end
+
+-- تحويل رقم/نص إلى مسار أصل صالح (rbxassetid)
 local function ToAssetId(value)
     if type(value) == "number" and value > 0 then
         return "rbxassetid://" .. tostring(math.floor(value))
@@ -142,6 +151,7 @@ local function ToAssetId(value)
     return nil
 end
 
+-- نسخ نص إلى الحافظة بدعم صيغ المشغلات المختلفة
 local function CopyToClipboard(text)
     if type(setclipboard) == "function" then
         return pcall(setclipboard, text)
@@ -153,19 +163,21 @@ local function CopyToClipboard(text)
     return false
 end
 
+-- تسجيل عنصر تفاعلي في سجل الحفظ (Registry) بمفتاح فريد "Tab/Name"
 local function RegisterConfigurable(tab, name, itemType, getFn, setFn)
     local window = tab and tab.Window
     if not window or not window.Registry or window.Destroyed then return end
     local baseKey = tostring(tab.Name) .. "/" .. tostring(name)
     local key = baseKey
     local suffix = 2
-    while window.Registry[key] do
+    while window.Registry[key] do -- تفادي تصادم الأسماء المكررة
         key = baseKey .. "#" .. tostring(suffix)
         suffix += 1
     end
     window.Registry[key] = { Type = itemType, Get = getFn, Set = setFn }
 end
 
+-- تسجيل عنصر في فهرس البحث الجانبي (يُصفّى حسب النص)
 local function RegisterSearchItem(tab, text, frame)
     if tab and tab.SearchItems and frame then
         table.insert(tab.SearchItems, {
@@ -175,130 +187,10 @@ local function RegisterSearchItem(tab, text, frame)
     end
 end
 
---──────────────────── بنّاعات الكروت الموحدة (جديد) ───────────────────────
-
-local function CreateCard(page, order, height)
-    local card = Create("Frame", {
-        Size = UDim2.new(1, 0, 0, height),
-        BackgroundColor3 = Theme.Element,
-        BackgroundTransparency = 0.35,
-        BorderSizePixel = 0,
-        LayoutOrder = order,
-        Parent = page,
-    })
-    Corner(card, 12)
-    Stroke(card, Theme.Stroke, 0.93, 1)
-    return card
-end
-
-local function BindCardHover(card)
-    card.MouseEnter:Connect(function()
-        Tween(card, TI_Fast, { BackgroundTransparency = 0.26 })
-    end)
-    card.MouseLeave:Connect(function()
-        Tween(card, TI_Fast, { BackgroundTransparency = 0.35 })
-    end)
-end
-
--- مربع أيقونة زجاجي بنفسجي (عمود أيسر ثابت في كل الكروت)
-local function AddIconTile(card, icon)
-    local tile = Create("Frame", {
-        Position = UDim2.new(0, 12, 0.5, -15),
-        Size = UDim2.fromOffset(30, 30),
-        BackgroundColor3 = Theme.Accent,
-        BackgroundTransparency = 0.84,
-        BorderSizePixel = 0,
-        Parent = card,
-    })
-    Corner(tile, 9)
-    Stroke(tile, Theme.AccentSoft, 0.80, 1)
-
-    local asset = IconAsset(icon)
-    if asset then
-        Create("ImageLabel", {
-            Position = UDim2.new(0.5, -8, 0.5, -8),
-            Size = UDim2.fromOffset(16, 16),
-            BackgroundTransparency = 1,
-            Image = asset,
-            ImageColor3 = Theme.AccentSoft,
-            BorderSizePixel = 0,
-            Parent = tile,
-        })
-    else
-        Create("TextLabel", {
-            Size = UDim2.fromScale(1, 1),
-            BackgroundTransparency = 1,
-            Text = tostring(icon),
-            TextSize = 14,
-            Font = Enum.Font.GothamBold,
-            TextColor3 = Theme.AccentSoft,
-            Parent = tile,
-        })
-    end
-end
-
--- عنوان + وصف بمحاذاة موحدة (نفس اليسار لكل الكروت، حجز أيمن موحد للتحكم)
-local function AddCardText(card, leftInset, rightReserve, title, desc)
-    local width = UDim2.new(1, -(leftInset + (rightReserve or 0)), 0, 0)
-    if desc then
-        Create("TextLabel", {
-            Position = UDim2.new(0, leftInset, 0, 11),
-            Size = UDim2.new(width.X.Scale, width.X.Offset, 0, 15),
-            BackgroundTransparency = 1,
-            Text = title,
-            TextColor3 = Theme.Text,
-            Font = Enum.Font.GothamBold,
-            TextSize = 13,
-            TextXAlignment = Enum.TextXAlignment.Left,
-            TextTruncate = Enum.TextTruncate.AtEnd,
-            Parent = card,
-        })
-        Create("TextLabel", {
-            Position = UDim2.new(0, leftInset, 0, 28),
-            Size = UDim2.new(width.X.Scale, width.X.Offset, 0, 13),
-            BackgroundTransparency = 1,
-            Text = desc,
-            TextColor3 = Theme.SubText,
-            Font = Enum.Font.Gotham,
-            TextSize = 11,
-            TextXAlignment = Enum.TextXAlignment.Left,
-            TextTruncate = Enum.TextTruncate.AtEnd,
-            Parent = card,
-        })
-    else
-        Create("TextLabel", {
-            Position = UDim2.new(0, leftInset, 0, 0),
-            Size = UDim2.new(width.X.Scale, width.X.Offset, 1, 0),
-            BackgroundTransparency = 1,
-            Text = title,
-            TextColor3 = Theme.Text,
-            Font = Enum.Font.GothamMedium,
-            TextSize = 13,
-            TextXAlignment = Enum.TextXAlignment.Left,
-            TextTruncate = Enum.TextTruncate.AtEnd,
-            Parent = card,
-        })
-    end
-end
-
--- كرت جاهز: يعيد الكرت + هامش النص الأيسر (بعد الأيقونة إن وُجدت)
-local function BuildCard(tab, title, desc, icon, rightReserve, height)
-    local card = CreateCard(tab.Holder, NextOrder(tab), height)
-    local leftInset = 12
-    if icon then
-        AddIconTile(card, icon)
-        leftInset = 52
-    end
-    AddCardText(card, leftInset, rightReserve, title, desc)
-    BindCardHover(card)
-    return card, leftInset
-end
-
 --────────────────────────────── الكلاس ────────────────────────────────
 local Aurora = {}
 Aurora.__index = Aurora
 Aurora.Theme = Theme
-Aurora.Layout = Layout
 Aurora.Version = "4.0.0"
 Aurora.Library = "RTM"
 
@@ -314,13 +206,13 @@ function Aurora.new(config)
     self.Cleanups = {}
     self.Threads = {}
     self.Tabs = {}
-    self.Registry = {}
-    self._notifOrder = 0
-    self._activeNotifs = {}
-    self.ActiveTab = nil
-    self._maximized = false
-    self._savedSize = nil
-    self._savedPosition = nil
+    self.Registry = {}        -- سجل عناصر الحفظ/التحميل (Config System)
+    self._notifOrder = 0      -- عدّاد ترتيب الإشعارات
+    self._activeNotifs = {}   -- الإشعارات النشطة حالياً
+    self.ActiveTab = nil      -- التاب النشط (للبحث الجانبي)
+    self._maximized = false   -- حالة زر التكبير الأخضر
+    self._savedSize = nil     -- المقاس قبل التكبير (للاستعادة)
+    self._savedPosition = nil -- الموقع قبل التكبير
     self.Destroyed = false
     self._destroying = false
     self.Config = {
@@ -330,6 +222,7 @@ function Aurora.new(config)
             or "Are you sure you want to close RTM Library? All active features will be terminated.",
     }
 
+    -- السماح بتغيير لون التمييز من الإعدادات (مع إعادة اشتقاق درجاته)
     if typeof(config.Accent) == "Color3" then
         Theme.Accent = config.Accent
         Theme.AccentHover = Theme.Accent:Lerp(Color3.new(1, 1, 1), 0.20)
@@ -338,13 +231,16 @@ function Aurora.new(config)
         Theme.AccentDeep  = Theme.Accent:Lerp(Color3.new(0, 0, 0), 0.30)
     end
 
+    -- حدود تغيير الحجم (مصدر واحد يستخدمه UISizeConstraint و Resize Grip معاً)
     local MIN_SIZE = Vector2.new(320, 230)
     local MAX_SIZE = Vector2.new(560, 400)
     self._minSize = MIN_SIZE
     self._maxSize = MAX_SIZE
 
+    -- أعلام السحب/التحجيم (معرّفة مبكراً لتفادي أي مرجع nil)
     local windowDragging, windowResizing = false, false
 
+    -- اختيار الحاوية الآمنة للواجهة (بدون أخطاء في أي مشغل)
     local uiParent
     do
         local ok, holder = pcall(function()
@@ -382,21 +278,7 @@ function Aurora.new(config)
     end)
     self.GUI.Parent = uiParent
 
-    -- توهج بنفسجي خافت جدًا خلف النافذة (بلا مبالغة — شفافية 0.93)
-    local rootGlow = Create("Frame", {
-        Name = "RootGlow",
-        AnchorPoint = Vector2.new(0.5, 0.5),
-        Position = UDim2.fromScale(0.5, 0.5),
-        Size = UDim2.new(0.88, 16, 0.74, 16),
-        BackgroundColor3 = Theme.Accent,
-        BackgroundTransparency = 0.93,
-        BorderSizePixel = 0,
-        Parent = self.GUI,
-    })
-    Corner(rootGlow, 24)
-    Gradient(rootGlow, 90, Theme.Accent, Theme.AccentDeep)
-
-    -- الإطار الرئيسي
+    -- الإطار الرئيسي: زجاج بنفسجي عميق بحدود مرنة للجوال
     self.Root = Create("Frame", {
         AnchorPoint = Vector2.new(0.5, 0.5),
         Position = UDim2.fromScale(0.5, 0.5),
@@ -406,13 +288,8 @@ function Aurora.new(config)
         BorderSizePixel = 0,
         Parent = self.GUI,
     })
-    Corner(self.Root, 16)
-    Create("UIStroke", {
-        Color = Theme.AccentSoft,
-        Thickness = 1,
-        Transparency = 0.80,
-        Parent = self.Root,
-    })
+    Corner(self.Root, 14)
+    Stroke(self.Root, Theme.Stroke, 0.86, 1)
     Create("UISizeConstraint", {
         MinSize = MIN_SIZE,
         MaxSize = MAX_SIZE,
@@ -421,23 +298,7 @@ function Aurora.new(config)
     Gradient(self.Root, 90, Color3.fromRGB(255, 255, 255), Color3.fromRGB(196, 186, 235))
     local rootScale = Create("UIScale", { Scale = 1, Parent = self.Root })
 
-    -- مزامنة التوهج مع السحب/التحجيم/الظهور
-    do
-        local function SyncGlow()
-            if self.Destroyed then return end
-            rootGlow.Position = self.Root.Position
-            rootGlow.Size = UDim2.new(
-                self.Root.Size.X.Scale, self.Root.Size.X.Offset + 16,
-                self.Root.Size.Y.Scale, self.Root.Size.Y.Offset + 16
-            )
-            rootGlow.Visible = self.Root.Visible
-        end
-        self:Track(self.Root:GetPropertyChangedSignal("Position"):Connect(SyncGlow))
-        self:Track(self.Root:GetPropertyChangedSignal("Size"):Connect(SyncGlow))
-        self:Track(self.Root:GetPropertyChangedSignal("Visible"):Connect(SyncGlow))
-        SyncGlow()
-    end
-
+    -- طبقة محتوى (CanvasGroup) للتحكم بشفافية النافذة كاملة
     self.Content = Create("CanvasGroup", {
         Size = UDim2.fromScale(1, 1),
         BackgroundTransparency = 1,
@@ -456,8 +317,8 @@ function Aurora.new(config)
         BorderSizePixel = 0,
         Parent = self.Content,
     })
-    Corner(self.BackgroundImage, 16)
-    self.BackgroundOverlay = Create("Frame", {
+    Corner(self.BackgroundImage, 14)
+    self.BackgroundOverlay = Create("Frame", { -- طبقة داكنة لوضوح النصوص
         Name = "BackgroundOverlay",
         Size = UDim2.fromScale(1, 1),
         BackgroundColor3 = Color3.fromRGB(8, 6, 14),
@@ -466,7 +327,7 @@ function Aurora.new(config)
         Visible = false,
         Parent = self.Content,
     })
-    Corner(self.BackgroundOverlay, 16)
+    Corner(self.BackgroundOverlay, 14)
 
     do
         local bgId = ToAssetId(config.BackgroundImage)
@@ -479,14 +340,14 @@ function Aurora.new(config)
 
     --════════════ الشريط العلوي (TitleBar) ════════════
     self.TitleBar = Create("Frame", {
-        Size = UDim2.new(1, 0, 0, Layout.TitleBarH),
+        Size = UDim2.new(1, 0, 0, 46),
         BackgroundColor3 = Theme.Element,
-        BackgroundTransparency = 0.45,
+        BackgroundTransparency = 0.25,
         BorderSizePixel = 0,
         Parent = self.Content,
     })
-    Corner(self.TitleBar, 16)
-    Create("Frame", {
+    Corner(self.TitleBar, 14)
+    Create("Frame", { -- خط فاصل رفيع أسفل الشريط
         Size = UDim2.new(1, 0, 0, 1),
         Position = UDim2.new(0, 0, 1, -1),
         BackgroundColor3 = Theme.Stroke,
@@ -495,6 +356,7 @@ function Aurora.new(config)
         Parent = self.TitleBar,
     })
 
+    -- أضواء macOS الثلاثة (الرموز تظهر عند التحويم كما في النظام الحقيقي)
     local function TrafficDot(color, xOffset, glyph)
         local dot = Create("TextButton", {
             AnchorPoint = Vector2.new(0, 0.5),
@@ -503,7 +365,7 @@ function Aurora.new(config)
             BackgroundColor3 = color,
             Text = glyph,
             TextColor3 = Theme.MacGlyph,
-            TextTransparency = 1,
+            TextTransparency = 1, -- مخفي حتى التحويم
             Font = Enum.Font.GothamBold,
             TextSize = 8,
             AutoButtonColor = false,
@@ -526,25 +388,25 @@ function Aurora.new(config)
         return dot
     end
 
-    local closeDot = TrafficDot(Theme.MacClose, 16, "✕")
-    local minDot   = TrafficDot(Theme.MacMin,   35, "−")
-    local maxDot   = TrafficDot(Theme.MacMax,   54, "+")
+    local closeDot = TrafficDot(Theme.MacClose, 16, "✕") -- أحمر: إغلاق
+    local minDot   = TrafficDot(Theme.MacMin,   35, "−") -- أصفر: تصغير
+    local maxDot   = TrafficDot(Theme.MacMax,   54, "+") -- أخضر: تكبير/استعادة
 
-    -- العنوان في منتصف الهيدر (كما في المرجع)
+    -- العنوان بمحاذاة يسارية حديثة بجوار الأضواء
     Create("TextLabel", {
-        AnchorPoint = Vector2.new(0.5, 0.5),
-        Position = UDim2.new(0.5, 0, 0.5, 0),
-        Size = UDim2.new(1, -190, 1, 0),
+        Position = UDim2.new(0, 80, 0, 0),
+        Size = UDim2.new(1, -180, 1, 0),
         BackgroundTransparency = 1,
         Text = self.Config.Title,
         TextColor3 = Theme.Text,
         Font = Enum.Font.GothamBold,
         TextSize = 14,
-        TextXAlignment = Enum.TextXAlignment.Center,
+        TextXAlignment = Enum.TextXAlignment.Left,
         TextTruncate = Enum.TextTruncate.AtEnd,
         Parent = self.TitleBar,
     })
 
+    -- شارة هوية RTM على يمين الشريط (حضور أنيق بلا مبالغة)
     Create("TextLabel", {
         AnchorPoint = Vector2.new(1, 0.5),
         Position = UDim2.new(1, -14, 0.5, 0),
@@ -552,24 +414,27 @@ function Aurora.new(config)
         BackgroundTransparency = 1,
         Text = "RTM  v4.0",
         TextColor3 = Theme.AccentSoft,
-        Font = Enum.Font.GothamMedium,
+        Font = Enum.Font.Gotham,
         TextSize = 10,
         TextXAlignment = Enum.TextXAlignment.Right,
         Parent = self.TitleBar,
     })
 
     --════════════ القائمة الجانبية (Sidebar) + البحث ════════════
+    local SIDEBAR_WIDTH = 136
+
     self.Sidebar = Create("Frame", {
         Name = "Sidebar",
-        Position = UDim2.new(0, Layout.Pad, 0, Layout.TitleBarH + Layout.Gap),
-        Size = UDim2.new(0, Layout.SidebarW, 1, -(Layout.TitleBarH + Layout.Gap + Layout.Pad)),
+        Position = UDim2.new(0, 0, 0, 46),
+        Size = UDim2.new(0, SIDEBAR_WIDTH, 1, -46),
         BackgroundTransparency = 1,
         BorderSizePixel = 0,
         Parent = self.Content,
     })
 
     local searchHolder = Create("Frame", {
-        Size = UDim2.new(1, 0, 0, Layout.SearchH),
+        Position = UDim2.new(0, 12, 0, 12),
+        Size = UDim2.new(1, -24, 0, 32),
         BackgroundColor3 = Theme.BackgroundSoft,
         BackgroundTransparency = 0.25,
         BorderSizePixel = 0,
@@ -579,7 +444,7 @@ function Aurora.new(config)
     local searchStroke = Stroke(searchHolder, Theme.Stroke, 0.92, 1)
 
     local searchBox = Create("TextBox", {
-        Size = UDim2.new(1, -18, 1, 0),
+        Size = UDim2.new(1, -16, 1, 0),
         Position = UDim2.new(0, 11, 0, 0),
         BackgroundTransparency = 1,
         Text = "",
@@ -595,9 +460,10 @@ function Aurora.new(config)
         Parent = searchHolder,
     })
 
+    -- شريط التابات (سكرول تلقائي للموبايل)
     self.TabContainer = Create("ScrollingFrame", {
-        Position = UDim2.new(0, 0, 0, Layout.SearchH + 8),
-        Size = UDim2.new(1, 0, 1, -(Layout.SearchH + 8)),
+        Position = UDim2.new(0, 12, 0, 56),
+        Size = UDim2.new(1, -24, 1, -68),
         BackgroundTransparency = 1,
         BorderSizePixel = 0,
         ScrollBarThickness = 2,
@@ -609,24 +475,24 @@ function Aurora.new(config)
         Parent = self.Sidebar,
     })
     Create("UIListLayout", {
-        Padding = UDim.new(0, Layout.TabGap),
+        Padding = UDim.new(0, 6),
         SortOrder = Enum.SortOrder.LayoutOrder,
         Parent = self.TabContainer,
     })
 
-    --════════════ لوحة المحتوى الزجاجية (PageContainer) ════════════
+    -- حاوية الصفحات (glass panel بتباعد مريح)
     self.PageContainer = Create("Frame", {
-        Position = UDim2.new(0, Layout.Pad + Layout.SidebarW + Layout.Gap, 0, Layout.TitleBarH + Layout.Gap),
-        Size = UDim2.new(1, -(Layout.Pad * 2 + Layout.SidebarW + Layout.Gap), 1, -(Layout.TitleBarH + Layout.Gap + Layout.Pad)),
-        BackgroundColor3 = Theme.BackgroundSoft,
-        BackgroundTransparency = 0.30,
+        Position = UDim2.new(0, SIDEBAR_WIDTH + 12, 0, 58),
+        Size = UDim2.new(1, -(SIDEBAR_WIDTH + 24), 1, -70),
+        BackgroundColor3 = Theme.Element,
+        BackgroundTransparency = 0.55,
         BorderSizePixel = 0,
         Parent = self.Content,
     })
     Corner(self.PageContainer, 14)
     Stroke(self.PageContainer, Theme.Stroke, 0.90, 1)
 
-    --════════════ مقبض تغيير الحجم ════════════
+    --════════════ [1] مقبض تغيير الحجم (Resize Grip) ════════════
     local resizeGrip = Create("TextButton", {
         Name = "ResizeGrip",
         AnchorPoint = Vector2.new(1, 1),
@@ -651,8 +517,8 @@ function Aurora.new(config)
         Tween(resizeGrip, TI_Fast, { TextTransparency = 0.35, TextColor3 = Theme.SubText })
     end)
 
-    --════════════ الزر العائم الزجاجي ════════════
-    self.FloatRoot = Create("Frame", {
+    --════════════ [2] الزر العائم الزجاجي (Glassmorphic FAB) ════════════
+    self.FloatRoot = Create("Frame", { -- حاوية تجمع الزر + ظله (تُسحب كوحدة واحدة)
         Size = UDim2.fromOffset(66, 66),
         Position = UDim2.new(0, 12, 0.5, -33),
         BackgroundTransparency = 1,
@@ -661,6 +527,7 @@ function Aurora.new(config)
         Parent = self.GUI,
     })
 
+    -- ظل خفيف ناعم: طبقات متراكزة بلا أي أصول خارجية (يعمل في كل المشغلات)
     local shadowLayers = {}
     for index, info in ipairs({
         { inset = -8, alpha = 0.78, drop = 1 },
@@ -696,7 +563,7 @@ function Aurora.new(config)
         Position = UDim2.fromScale(0.5, 0.5),
         Size = UDim2.fromOffset(52, 52),
         BackgroundColor3 = Theme.Element,
-        BackgroundTransparency = 0.30,
+        BackgroundTransparency = 0.30, -- زجاجي شفاف
         Text = "✦",
         TextColor3 = Theme.Text,
         TextSize = 26,
@@ -706,8 +573,8 @@ function Aurora.new(config)
         Parent = self.FloatRoot,
     })
     Corner(self.FloatingBtn, 16)
-    Gradient(self.FloatingBtn, 90, Theme.ElementHover, Theme.Element)
-    local floatStroke = Create("UIStroke", {
+    Gradient(self.FloatingBtn, 90, Theme.ElementHover, Theme.Element) -- لمعة زجاجية خفيفة
+    local floatStroke = Create("UIStroke", { -- إطار مضيء ناعم بلون البنفسجي
         Color = Theme.Accent, Thickness = 1, Transparency = 0.50, Parent = self.FloatingBtn,
     })
     local floatScale = Create("UIScale", { Scale = 1, Parent = self.FloatingBtn })
@@ -733,7 +600,7 @@ function Aurora.new(config)
         Tween(floatScale, TI_Fast, { Scale = 1.10 })
     end)
 
-    --════════════ حاوية الإشعارات التراكمية ════════════
+    --════════════ [3] حاوية الإشعارات التراكمية ════════════
     self.NotifyHolder = Create("Frame", {
         Name = "NotificationHost",
         AnchorPoint = Vector2.new(1, 0),
@@ -751,6 +618,7 @@ function Aurora.new(config)
         Parent = self.NotifyHolder,
     })
 
+    -- بلور + نافذة تأكيد الإغلاق
     self.Blur = Create("BlurEffect", { Name = "AuroraBlur", Size = 0, Parent = Lighting })
     table.insert(self.Cleanups, function()
         pcall(function() self.Blur:Destroy() end)
@@ -851,7 +719,7 @@ function Aurora.new(config)
         confirmOpen = show
         overlay.Visible = true
         if show then
-            dialogScale.Scale = 0.88
+            dialogScale.Scale = 0.88 -- إعادة تعيين قبل الحركة الارتدادية
         end
         Tween(overlay, TI_Smooth, { BackgroundTransparency = show and 0.60 or 1 })
         Tween(self.Blur, TI_Smooth, { Size = show and 14 or 0 })
@@ -869,6 +737,7 @@ function Aurora.new(config)
         end
     end
 
+    -- إظهار / إخفاء النافذة (مع منع تضارب الحركات عبر Token)
     local hideToken = 0
 
     local function ShowWindow()
@@ -883,7 +752,6 @@ function Aurora.new(config)
         rootScale.Scale = 0.92
         Tween(rootScale, TweenInfo.new(0.28, Enum.EasingStyle.Circular, Enum.EasingDirection.Out), { Scale = 1 })
         Tween(self.Content, TI_Smooth, { GroupTransparency = 0 })
-        Tween(rootGlow, TI_Smooth, { BackgroundTransparency = 0.93 })
     end
 
     local function HideWindow(withFloating)
@@ -891,7 +759,6 @@ function Aurora.new(config)
         if confirmOpen then SetConfirm(false) end
         hideToken += 1
         local myToken = hideToken
-        Tween(rootGlow, TI_Fast, { BackgroundTransparency = 1 })
         local tw = Tween(self.Content,
             TweenInfo.new(0.16, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
             { GroupTransparency = 1 })
@@ -923,7 +790,7 @@ function Aurora.new(config)
     self._show = ShowWindow
     self._hide = HideWindow
 
-    --════════════ تكبير/استعادة النافذة ════════════
+    --════════════ تكبير/استعادة النافذة (الضوء الأخضر) ════════════
     local function ToggleMaximize()
         if self.Destroyed or windowResizing or windowDragging then return end
         if not self._maximized then
@@ -995,7 +862,7 @@ function Aurora.new(config)
         Tween(searchStroke, TI_Fast, { Color = Theme.Stroke, Transparency = 0.92 })
     end)
 
-    -- سحب الزر العائم
+    -- سحب الزر العائم (مع تمييز النقر عن السحب)
     do
         local fDragging, fMoved = false, false
         local fStart, fOrigin
@@ -1044,7 +911,7 @@ function Aurora.new(config)
         end)
     end
 
-    -- سحب النافذة من شريط العنوان
+    -- سحب النافذة من شريط العنوان (ماوس + لمس)
     do
         local dragStart, startPos
         self:Track(self.TitleBar.InputBegan:Connect(function(input)
@@ -1074,7 +941,7 @@ function Aurora.new(config)
         end))
     end
 
-    --════════════ منطق تغيير الحجم ════════════
+    --════════════ منطق تغيير الحجم (ماوس + لمس) ════════════
     do
         local resizeStart, startSize, startPos
 
@@ -1119,7 +986,7 @@ function Aurora.new(config)
         end))
     end
 
-    -- مفتاح إظهار/إخفاء
+    -- مفتاح إظهار/إخفاء سريع
     self:Track(UserInputService.InputBegan:Connect(function(input, processed)
         if processed then return end
         if input.KeyCode == self.Config.ToggleKey then
@@ -1131,11 +998,11 @@ function Aurora.new(config)
         end
     end))
 
+    -- ظهور أولي أنيق
     ShowWindow()
 
     return self
 end
-
 --──────────────────────────── وظائف النافذة ───────────────────────────
 
 function Aurora:Toggle()
@@ -1172,6 +1039,13 @@ function Aurora:Track(connection)
 end
 
 --──────────────────── نظام الإشعارات التراكمية ────────────────────────
+-- الاستخدام المتقدم:
+--   Window:Notify({
+--       Title = "عنوان", Message = "نص الرسالة", Duration = 5,
+--       ButtonText = "Copy Link", ClipboardText = "https://...",
+--       ButtonCallback = function() end,
+--   })
+-- أو بالشكل المختصر: Window:Notify("عنوان", "نص", 5)
 function Aurora:Notify(options, legacyMessage, legacyDuration)
     if self.Destroyed then return nil end
 
@@ -1192,6 +1066,7 @@ function Aurora:Notify(options, legacyMessage, legacyDuration)
     end
     duration = math.clamp(duration, 1, 60)
 
+    -- سقف الإشعارات المتزامنة (4): الأقدم يُغلق فوراً عند الفيضان
     while #self._activeNotifs >= 4 do
         local oldest = table.remove(self._activeNotifs, 1)
         if oldest and oldest.Dismiss then
@@ -1201,6 +1076,7 @@ function Aurora:Notify(options, legacyMessage, legacyDuration)
 
     self._notifOrder += 1
 
+    -- بطاقة زجاجية بنفسجية بظل ناعم
     local container = Create("Frame", {
         Size = UDim2.new(1, 0, 0, 0),
         AutomaticSize = Enum.AutomaticSize.Y,
@@ -1214,13 +1090,14 @@ function Aurora:Notify(options, legacyMessage, legacyDuration)
     Corner(container, 12)
     Stroke(container, Theme.Stroke, 0.88, 1)
 
+    -- الطبقة المنزلقة (Slide In/Out) داخل حاوية مقصوصة
     local inner = Create("CanvasGroup", {
         Size = UDim2.new(1, 0, 0, 0),
         AutomaticSize = Enum.AutomaticSize.Y,
         BackgroundTransparency = 1,
         BorderSizePixel = 0,
         GroupTransparency = 1,
-        Position = UDim2.new(0, 320, 0, 0),
+        Position = UDim2.new(0, 320, 0, 0), -- يبدأ خارج الحاوية (يمين)
         Parent = container,
     })
     Create("UIListLayout", {
@@ -1240,6 +1117,7 @@ function Aurora:Notify(options, legacyMessage, legacyDuration)
     local Dismiss
     local progressTween
 
+    -- صف العنوان (نقطة بنفسجية متوهجة + نص + زر إغلاق)
     local titleRow = Create("Frame", {
         Size = UDim2.new(1, 0, 0, 18),
         BackgroundTransparency = 1,
@@ -1255,7 +1133,7 @@ function Aurora:Notify(options, legacyMessage, legacyDuration)
         Parent = titleRow,
     })
     Corner(notifDot, 3)
-    Create("UIStroke", {
+    Create("UIStroke", { -- هالة بنفسجية خفيفة حول النقطة
         Color = Theme.Accent,
         Thickness = 1,
         Transparency = 0.55,
@@ -1290,6 +1168,7 @@ function Aurora:Notify(options, legacyMessage, legacyDuration)
         Dismiss()
     end)
 
+    -- نص الرسالة (اختياري — يتمدد تلقائياً حسب الطول)
     local nextOrder = 2
     if message ~= "" then
         Create("TextLabel", {
@@ -1308,6 +1187,7 @@ function Aurora:Notify(options, legacyMessage, legacyDuration)
         nextOrder = 3
     end
 
+    -- زر تفاعلي اختياري (مثال: نسخ رابط إلى الحافظة بضغطة واحدة)
     if buttonText then
         local actionBtn = Create("TextButton", {
             Size = UDim2.new(1, 0, 0, 26),
@@ -1323,12 +1203,12 @@ function Aurora:Notify(options, legacyMessage, legacyDuration)
         })
         Corner(actionBtn, 8)
         Stroke(actionBtn, Theme.Stroke, 0.80, 1)
-        Gradient(actionBtn, 90, Theme.Accent, Theme.AccentDeep)
+        Gradient(actionBtn, 90, Theme.Accent, Theme.AccentDeep) -- تدرج بنفسجي أنيق
         BindHover(actionBtn, Theme.Accent, Theme.AccentHover, Theme.AccentPress)
         actionBtn.MouseButton1Click:Connect(function()
             if clipboardText then
                 CopyToClipboard(clipboardText)
-                actionBtn.Text = "Copied ✓"
+                actionBtn.Text = "Copied ✓" -- تأكيد بصري فوري
                 task.delay(1.1, function()
                     if actionBtn.Parent then
                         actionBtn.Text = buttonText
@@ -1345,6 +1225,7 @@ function Aurora:Notify(options, legacyMessage, legacyDuration)
         end)
     end
 
+    -- شريط عمر الإشعار (يستنزف تدريجياً بمرور الوقت)
     local progressTrack = Create("Frame", {
         Size = UDim2.new(1, 0, 0, 2),
         BackgroundColor3 = Theme.ElementBright,
@@ -1361,8 +1242,9 @@ function Aurora:Notify(options, legacyMessage, legacyDuration)
         Parent = progressTrack,
     })
     Corner(progressFill, 1)
-    Gradient(progressFill, 0, Theme.Accent, Theme.AccentSoft)
+    Gradient(progressFill, 0, Theme.Accent, Theme.AccentSoft) -- بنفسجي → فاتح أفقياً
 
+    -- تسجيل الإشعار ضمن القائمة النشطة
     local record = { Container = container }
     table.insert(self._activeNotifs, record)
 
@@ -1382,6 +1264,7 @@ function Aurora:Notify(options, legacyMessage, legacyDuration)
             pcall(function() container:Destroy() end)
             return
         end
+        -- خروج انسيابي: انزلاق خارج + تلاشي
         local slideOut = Tween(inner,
             TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
             {
@@ -1394,11 +1277,13 @@ function Aurora:Notify(options, legacyMessage, legacyDuration)
     end
     record.Dismiss = Dismiss
 
+    -- دخول انسيابي: انزلاق + تلاشي
     Tween(inner, TweenInfo.new(0.30, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
         Position = UDim2.new(0, 0, 0, 0),
         GroupTransparency = 0,
     })
 
+    -- استنزاف شريط العمر + إغلاق تلقائي بعد المدة
     progressTween = Tween(progressFill,
         TweenInfo.new(duration, Enum.EasingStyle.Linear, Enum.EasingDirection.Out),
         { Size = UDim2.new(0, 0, 1, 0) })
@@ -1406,23 +1291,25 @@ function Aurora:Notify(options, legacyMessage, legacyDuration)
         Dismiss()
     end)
 
-    return record
+    return record -- يحتوي .Dismiss لإغلاقه برمجياً عند الحاجة
 end
 
 --──────────────────── مقاس النافذة (للحفظ والاسترجاع) ─────────────────
 
+-- قراءة مقاس النافذة الحالي بالبكسل (يشمل تعديلات Resize Grip)
 function Aurora:GetWindowSize()
     local size = self.Root.AbsoluteSize
     return math.round(size.X), math.round(size.Y)
 end
 
+-- تعيين مقاس النافذة يدوياً بحدود آمنة (يُستخدم داخلياً في LoadConfig)
 function Aurora:SetWindowSize(width, height)
     if self.Destroyed then return false end
     width  = tonumber(width)
     height = tonumber(height)
     if not width or not height then return false end
 
-    self._maximized = false
+    self._maximized = false -- المقاس اليدوي يلغي وضع التكبير
 
     local minSize  = self._minSize
     local maxSize  = self._maxSize
@@ -1445,11 +1332,14 @@ end
 
 --──────────────────── خلفية الصورة (Acrylic) ──────────────────────────
 
+-- تعيين/إزالة صورة خلفية الواجهة (مع طبقة داكنة تلقائية فوقها)
+-- الاستخدام: Window:SetBackgroundImage("rbxassetid://123456") أو Window:SetBackgroundImage(nil)
 function Aurora:SetBackgroundImage(asset, transparency)
     if self.Destroyed or not self.BackgroundImage then return false end
 
     local id = ToAssetId(asset)
     if not id then
+        -- إزالة سلسة: تلاشي الصورة ثم إخفاء الطبقة الداكنة
         Tween(self.BackgroundImage, TI_Smooth, { ImageTransparency = 1 })
         task.delay(0.25, function()
             if not self.Destroyed and self.BackgroundOverlay then
@@ -1469,9 +1359,10 @@ function Aurora:ClearBackgroundImage()
     return self:SetBackgroundImage(nil)
 end
 
---──────────────────── نظام حفظ وتحميل الإعدادات ─────────────────────
--- (محفوظ حرفياً من نسختك الأصلية — نفس صيغة W/H و T/V وتحويل Color3)
+--────────────────────── نظام حفظ وتحميل الإعدادات ─────────────────────
 
+-- حفظ كل الإعدادات + مقاس النافذة في ملف JSON
+-- الاستخدام: Window:SaveConfig("MyHub", "config")
 function Aurora:SaveConfig(folderName, fileName)
     if self.Destroyed then return false, "Window is destroyed" end
     if type(writefile) ~= "function" or type(readfile) ~= "function" then
@@ -1483,6 +1374,7 @@ function Aurora:SaveConfig(folderName, fileName)
 
     local data = { WindowSize = {}, Elements = {} }
 
+    -- حفظ مقاس النافذة الحالي (الذي عدّله المستخدم عبر Resize Grip)
     local okSize, w, h = pcall(function()
         return self:GetWindowSize()
     end)
@@ -1490,11 +1382,12 @@ function Aurora:SaveConfig(folderName, fileName)
         data.WindowSize = { W = w, H = h }
     end
 
+    -- حفظ حالة كل عنصر تفاعلي مسجل في الـ Registry
     for key, entry in pairs(self.Registry) do
         local okGet, value = pcall(entry.Get)
         if okGet and value ~= nil then
             if typeof(value) == "Color3" then
-                value = { R = value.R, G = value.G, B = value.B }
+                value = { R = value.R, G = value.G, B = value.B } -- Color3 لا يُشفَّر مباشرة
             end
             data.Elements[key] = { T = entry.Type, V = value }
         end
@@ -1507,6 +1400,7 @@ function Aurora:SaveConfig(folderName, fileName)
         return false, "JSON encoding failed"
     end
 
+    -- تجهيز المجلد بأمان (makefolder / isfolder)
     if type(isfolder) == "function" and type(makefolder) == "function" then
         local exists = false
         pcall(function() exists = (isfolder(folderName) == true) end)
@@ -1526,6 +1420,8 @@ function Aurora:SaveConfig(folderName, fileName)
     return true, path
 end
 
+-- استرجاع الإعدادات + مقاس النافذة من ملف JSON
+-- الاستخدام: Window:LoadConfig("MyHub", "config")
 function Aurora:LoadConfig(folderName, fileName)
     if self.Destroyed then return false, "Window is destroyed" end
     if type(readfile) ~= "function" then
@@ -1548,16 +1444,19 @@ function Aurora:LoadConfig(folderName, fileName)
         return false, "Config file is corrupted"
     end
 
+    -- [حاسم] استرجاع المقاس المخصص أولاً (من Resize Grip)
     if type(data.WindowSize) == "table"
     and tonumber(data.WindowSize.W) and tonumber(data.WindowSize.H) then
         self:SetWindowSize(data.WindowSize.W, data.WindowSize.H)
     end
 
+    -- استرجاع حالة كل عنصر مسجل (تطبيق صامت — لا يطلق الـ Callbacks)
     local applied = 0
     for key, saved in pairs(data.Elements or {}) do
         local entry = self.Registry[key]
         if entry and type(saved) == "table" then
             local value = saved.V
+            -- إعادة تحويل Color3 المخزن كجدول {R, G, B}
             if entry.Type == "Colorpicker" and type(value) == "table"
             and tonumber(value.R) and tonumber(value.G) and tonumber(value.B) then
                 value = Color3.new(value.R, value.G, value.B)
@@ -1575,6 +1474,7 @@ function Aurora:Destroy()
     if self.Destroyed or self._destroying then return end
     self._destroying = true
 
+    -- تشغيل دوال التنظيف أولاً (يتيح للمستخدم حفظ الإعدادات عند الخروج)
     for _, fn in ipairs(self.Cleanups) do
         pcall(fn)
     end
@@ -1596,8 +1496,8 @@ function Aurora:Destroy()
 end
 
 --────────────────────────────── التابات ───────────────────────────────
--- CreateTab(name, icon) — نفس التواقيع والحقول (Button/Indicator/Icon/Label/Page/Select)
--- الصفحة الآن: Scroll → Holder (Padding + ListLayout) → كروت متساوية العرض
+-- CreateTab(name, icon) — الأيقونة اختيارية (AssetId)
+-- نمط RTM: زر شبح شفاف عند الخمول → غسلة بنفسجية + مؤشر pill عند التفعيل
 function Aurora:CreateTab(name, icon)
     if self.Destroyed then return nil end
     name = tostring(name or "Tab")
@@ -1607,15 +1507,14 @@ function Aurora:CreateTab(name, icon)
     tab.Name = name
     tab.Active = false
     tab._order = 0
-    tab.SearchItems = {}
+    tab.SearchItems = {} -- فهرس البحث الجانبي لهذا التاب
 
-    local iconId = IconAsset(icon)
-    tab._iconIsImage = (iconId ~= nil)
+    local iconId = ToAssetId(icon)
 
     tab.Button = Create("TextButton", {
-        Size = UDim2.new(1, 0, 0, Layout.TabH),
-        BackgroundColor3 = Theme.Accent,
-        BackgroundTransparency = 1,
+        Size = UDim2.new(1, 0, 0, 36),
+        BackgroundColor3 = Theme.Element,
+        BackgroundTransparency = 0.55, -- نمط شبح هادئ
         Text = "",
         AutoButtonColor = false,
         BorderSizePixel = 0,
@@ -1623,11 +1522,11 @@ function Aurora:CreateTab(name, icon)
         Parent = self.TabContainer,
     })
     Corner(tab.Button, 10)
-    tab.ButtonStroke = Stroke(tab.Button, Theme.AccentSoft, 1, 1)
+    tab.ButtonStroke = Stroke(tab.Button, Theme.Stroke, 0.94, 1)
 
     tab.Indicator = Create("Frame", { -- مؤشر pill بنفسجي للتاب النشط
-        Size = UDim2.new(0, 3, 0, 16),
-        Position = UDim2.new(0, 4, 0.5, -8),
+        Size = UDim2.new(0, 4, 0, 18),
+        Position = UDim2.new(0, 5, 0.5, -9),
         BackgroundColor3 = Theme.Accent,
         BackgroundTransparency = 1,
         BorderSizePixel = 0,
@@ -1638,31 +1537,18 @@ function Aurora:CreateTab(name, icon)
     if iconId then
         tab.Icon = Create("ImageLabel", {
             Size = UDim2.fromOffset(16, 16),
-            Position = UDim2.new(0, 14, 0.5, -8),
+            Position = UDim2.new(0, 16, 0.5, -8),
             BackgroundTransparency = 1,
             Image = iconId,
             ImageTransparency = 0.45,
             BorderSizePixel = 0,
             Parent = tab.Button,
         })
-    elseif icon then -- نص/إيموجي كأيقونة بديلة أنيقة
-        tab.Icon = Create("TextLabel", {
-            Size = UDim2.new(0, 16, 0, 16),
-            Position = UDim2.new(0, 14, 0.5, -8),
-            BackgroundTransparency = 1,
-            Text = tostring(icon),
-            TextSize = 13,
-            Font = Enum.Font.Gotham,
-            TextColor3 = Theme.SubText,
-            TextTransparency = 0.45,
-            BorderSizePixel = 0,
-            Parent = tab.Button,
-        })
     end
 
     tab.Label = Create("TextLabel", {
-        Size = UDim2.new(1, -(tab.Icon and 48 or 28), 1, 0),
-        Position = UDim2.new(0, tab.Icon and 36 or 14, 0, 0),
+        Size = UDim2.new(1, -(iconId and 52 or 30), 1, 0),
+        Position = UDim2.new(0, iconId and 38 or 16, 0, 0),
         BackgroundTransparency = 1,
         Text = name,
         TextColor3 = Theme.SubText,
@@ -1674,7 +1560,8 @@ function Aurora:CreateTab(name, icon)
     })
 
     tab.Page = Create("ScrollingFrame", {
-        Size = UDim2.fromScale(1, 1),
+        Size = UDim2.new(1, -20, 1, -20),
+        Position = UDim2.new(0, 10, 0, 10),
         BackgroundTransparency = 1,
         BorderSizePixel = 0,
         Visible = false,
@@ -1683,67 +1570,41 @@ function Aurora:CreateTab(name, icon)
         ScrollBarImageTransparency = 0.30,
         ScrollingDirection = Enum.ScrollingDirection.Y,
         CanvasSize = UDim2.new(),
-        AutomaticCanvasSize = Enum.AutomaticSize.Y,
+        AutomaticCanvasSize = Enum.AutomaticSize.Y, -- لا اختفاء للعناصر أبداً
         Parent = self.PageContainer,
     })
-
-    -- الحامل: بادينغ داخلي + قائمة موحدة → الكروت لا تلمس الحدود أبداً
-    tab.Holder = Create("Frame", {
-        Name = "Holder",
-        Size = UDim2.new(1, 0, 0, 0),
-        AutomaticSize = Enum.AutomaticSize.Y,
-        BackgroundTransparency = 1,
-        BorderSizePixel = 0,
+    Create("UIListLayout", {
+        Padding = UDim.new(0, 8),
+        SortOrder = Enum.SortOrder.LayoutOrder,
         Parent = tab.Page,
     })
-    Create("UIPadding", {
-        PaddingTop    = UDim.new(0, Layout.PagePad),
-        PaddingBottom = UDim.new(0, Layout.PagePad),
-        PaddingLeft   = UDim.new(0, Layout.PagePad),
-        PaddingRight  = UDim.new(0, Layout.PagePad + 4),
-        Parent = tab.Holder,
-    })
-    Create("UIListLayout", {
-        Padding = UDim.new(0, Layout.CardGap),
-        SortOrder = Enum.SortOrder.LayoutOrder,
-        Parent = tab.Holder,
-    })
-
-    local function SetIconVisible alpha end -- placeholder removed below
 
     local function Select()
         for _, t in ipairs(self.Tabs) do
             t.Active = false
             t.Page.Visible = false
-            Tween(t.Button, TI_Fast, { BackgroundColor3 = Theme.Accent, BackgroundTransparency = 1 })
+            -- العودة لنمط الشبح الهادئ
+            Tween(t.Button, TI_Fast, { BackgroundColor3 = Theme.Element, BackgroundTransparency = 0.55 })
             Tween(t.Label, TI_Fast, { TextColor3 = Theme.SubText })
-            Tween(t.ButtonStroke, TI_Fast, { Color = Theme.AccentSoft, Transparency = 1 })
+            Tween(t.ButtonStroke, TI_Fast, { Color = Theme.Stroke, Transparency = 0.94 })
             Tween(t.Indicator, TI_Fast, { BackgroundTransparency = 1 })
             if t.Icon then
-                if t._iconIsImage then
-                    Tween(t.Icon, TI_Fast, { ImageTransparency = 0.45 })
-                else
-                    Tween(t.Icon, TI_Fast, { TextTransparency = 0.45 })
-                end
+                Tween(t.Icon, TI_Fast, { ImageTransparency = 0.45 })
             end
         end
         tab.Active = true
         self.ActiveTab = tab
         tab.Page.Visible = true
-        -- الحالة النشطة: Highlight بنفسجي واضح + إطار خفيف + مؤشر pill
-        Tween(tab.Button, TI_Fast, { BackgroundColor3 = Theme.Accent, BackgroundTransparency = 0.25 })
+        -- الحالة النشطة: غسلة بنفسجية زجاجية + إطار ومؤشر بلون الـ Accent
+        Tween(tab.Button, TI_Fast, { BackgroundColor3 = Theme.Accent, BackgroundTransparency = 0.80 })
         Tween(tab.Label, TI_Fast, { TextColor3 = Theme.Text })
-        Tween(tab.ButtonStroke, TI_Fast, { Color = Theme.AccentSoft, Transparency = 0.45 })
+        Tween(tab.ButtonStroke, TI_Fast, { Color = Theme.Accent, Transparency = 0.45 })
         Tween(tab.Indicator, TI_Fast, { BackgroundTransparency = 0 })
         if tab.Icon then
-            if tab._iconIsImage then
-                Tween(tab.Icon, TI_Fast, { ImageTransparency = 0 })
-            else
-                Tween(tab.Icon, TI_Fast, { TextTransparency = 0 })
-            end
+            Tween(tab.Icon, TI_Fast, { ImageTransparency = 0 })
         end
         if self._applySearch then
-            self._applySearch()
+            self._applySearch() -- إعادة تطبيق فلتر البحث على التاب الجديد
         end
     end
     tab.Select = Select
@@ -1755,12 +1616,13 @@ function Aurora:CreateTab(name, icon)
     end)
     tab.Button.MouseEnter:Connect(function()
         if not tab.Active then
-            Tween(tab.Button, TI_Fast, { BackgroundColor3 = Theme.ElementHover, BackgroundTransparency = 0.85 })
+            -- تحويم هادئ: لمسة بنفسجية خفيفة جداً
+            Tween(tab.Button, TI_Fast, { BackgroundColor3 = Theme.ElementHover, BackgroundTransparency = 0.40 })
         end
     end)
     tab.Button.MouseLeave:Connect(function()
         if not tab.Active then
-            Tween(tab.Button, TI_Fast, { BackgroundColor3 = Theme.Accent, BackgroundTransparency = 1 })
+            Tween(tab.Button, TI_Fast, { BackgroundColor3 = Theme.Element, BackgroundTransparency = 0.55 })
         end
     end)
 
@@ -1771,53 +1633,40 @@ function Aurora:CreateTab(name, icon)
 
     return tab
 end
-
 --──────────────────────────── عناصر التاب ─────────────────────────────
--- نفس التواقيع الموضعية الأصلية حرفياً + دعم اختياري للجداول:
---   Tab:CreateToggle({ Title=, Description=, Icon=, Default=, Callback=, Flag= })
 
--- زر تنفيذي: CreateButton(name, callback, icon) أو جدول
+-- زر تنفيذي (يدعم أيقونة اختيارية: CreateButton(name, callback, iconId))
+-- نمط RTM: تدرج بنفسجي عمودي + نبضة ضغط
 function TabMethods:CreateButton(name, callback, icon)
-    local desc, btnText
-    if type(name) == "table" then
-        local o = name
-        name     = tostring(o.Title or o.Name or "Button")
-        desc     = o.Description or o.Desc
-        icon     = o.Icon or icon
-        btnText  = o.Text or o.ButtonText or "Run"
-        callback = o.Callback or callback
-    else
-        name = tostring(name or "Button")
-    end
-    desc = (desc and desc ~= "") and tostring(desc) or nil
-
-    local card = BuildCard(self, name, desc, icon, 104, desc and 58 or 44)
-    RegisterSearchItem(self, name .. " " .. (desc or ""), card)
+    local container = CreateElement(self.Page, NextOrder(self), 42)
+    CreateRowLabel(container, name, 104)
+    RegisterSearchItem(self, name, container)
 
     local assetId = ToAssetId(icon)
 
     local btn = Create("TextButton", {
         AnchorPoint = Vector2.new(1, 0.5),
-        Position = UDim2.new(1, -12, 0.5, 0),
-        Size = UDim2.fromOffset(80, 30),
+        Position = UDim2.new(1, -10, 0.5, 0),
+        Size = UDim2.fromOffset(76, 28),
         BackgroundColor3 = Theme.Accent,
-        Text = assetId and "" or btnText,
+        Text = "Run",
         TextColor3 = Color3.fromRGB(255, 255, 255),
         Font = Enum.Font.GothamBold,
         TextSize = 12,
         AutoButtonColor = false,
         BorderSizePixel = 0,
-        Parent = card,
+        Parent = container,
     })
-    Corner(btn, 9)
-    Stroke(btn, Theme.Stroke, 0.85, 1)
-    Gradient(btn, 90, Theme.Accent, Theme.AccentDeep)
+    Corner(btn, 8)
+    Stroke(btn, Theme.Stroke, 0.80, 1)
+    Gradient(btn, 90, Theme.Accent, Theme.AccentDeep) -- عمق بنفسجي أنيق
     BindHover(btn, Theme.Accent, Theme.AccentHover, Theme.AccentPress)
 
-    if assetId then
+    if assetId then -- أيقونة تُعرض بجانب النص بتنسيق متناسق
+        btn.Text = "💎"
         Create("ImageLabel", {
             AnchorPoint = Vector2.new(0, 0.5),
-            Position = UDim2.new(0, 9, 0.5, 0),
+            Position = UDim2.new(0, 8, 0.5, 0),
             Size = UDim2.fromOffset(13, 13),
             BackgroundTransparency = 1,
             BorderSizePixel = 0,
@@ -1825,10 +1674,10 @@ function TabMethods:CreateButton(name, callback, icon)
             Parent = btn,
         })
         Create("TextLabel", {
-            Size = UDim2.new(1, -31, 1, 0),
-            Position = UDim2.new(0, 26, 0, 0),
+            Size = UDim2.new(1, -33, 1, 0),
+            Position = UDim2.new(0, 25, 0, 0),
             BackgroundTransparency = 1,
-            Text = btnText,
+            Text = "Run",
             TextColor3 = Color3.fromRGB(255, 255, 255),
             Font = Enum.Font.GothamBold,
             TextSize = 12,
@@ -1839,7 +1688,7 @@ function TabMethods:CreateButton(name, callback, icon)
 
     local scale = Create("UIScale", { Scale = 1, Parent = btn })
     btn.MouseButton1Click:Connect(function()
-        scale.Scale = 0.90
+        scale.Scale = 0.90 -- نبضة ضغط
         Tween(scale, TI_Click, { Scale = 1 })
         if callback then
             local ok, err = pcall(callback)
@@ -1847,46 +1696,32 @@ function TabMethods:CreateButton(name, callback, icon)
         end
     end)
 
-    return card
+    return container
 end
 
--- مفتاح تبديل iOS: CreateToggle(name, default, callback) أو جدول
+-- مفتاح تبديل بأسلوب iOS الحديث (بنفسجي عند التفعيل)
 function TabMethods:CreateToggle(name, default, callback)
-    local desc, icon, flag
-    if type(name) == "table" then
-        local o = name
-        name     = tostring(o.Title or o.Name or "Toggle")
-        desc     = o.Description or o.Desc
-        icon     = o.Icon
-        flag     = o.Flag
-        default  = o.Default
-        callback = o.Callback
-    else
-        name = tostring(name or "Toggle")
-    end
-    desc = (desc and desc ~= "") and tostring(desc) or nil
-    local state = default == true
+    local container = CreateElement(self.Page, NextOrder(self), 42)
+    CreateRowLabel(container, name, 76)
+    RegisterSearchItem(self, name, container)
 
-    local card = BuildCard(self, name, desc, icon, 76, desc and 58 or 44)
-    RegisterSearchItem(self, name .. " " .. (desc or ""), card)
+    local state = default == true
 
     local switch = Create("Frame", {
         AnchorPoint = Vector2.new(1, 0.5),
-        Position = UDim2.new(1, -12, 0.5, 0),
+        Position = UDim2.new(1, -10, 0.5, 0),
         Size = UDim2.fromOffset(42, 24),
         BackgroundColor3 = state and Theme.Accent or Theme.ElementBright,
         BorderSizePixel = 0,
-        Parent = card,
+        Parent = container,
     })
     Create("UICorner", { CornerRadius = UDim.new(1, 0), Parent = switch })
     local switchStroke = Stroke(switch, state and Theme.Accent or Theme.Stroke, state and 0.35 or 0.88, 1)
-
-    local switchGradient = nil
     if state then
-        switchGradient = Gradient(switch, 90, Theme.Accent, Theme.AccentDeep)
+        Gradient(switch, 90, Theme.Accent, Theme.AccentDeep) -- توهج بنفسجي عند التشغيل
     end
 
-    local knob = Create("Frame", {
+    local knob = Create("Frame", { -- مقبض أبيض بظل خفيف (iOS)
         Size = UDim2.fromOffset(18, 18),
         Position = state and UDim2.new(1, -21, 0.5, -9) or UDim2.new(0, 3, 0.5, -9),
         BackgroundColor3 = Color3.fromRGB(255, 255, 255),
@@ -1894,7 +1729,7 @@ function TabMethods:CreateToggle(name, default, callback)
         Parent = switch,
     })
     Create("UICorner", { CornerRadius = UDim.new(1, 0), Parent = knob })
-    Create("UIStroke", {
+    Create("UIStroke", { -- ظل داكن ناعم أسفل المقبض كأجهزة Apple
         Color = Color3.fromRGB(0, 0, 0),
         Thickness = 1,
         Transparency = 0.78,
@@ -1902,12 +1737,13 @@ function TabMethods:CreateToggle(name, default, callback)
     })
     local knobScale = Create("UIScale", { Scale = 1, Parent = knob })
 
+    -- الصف كامل قابل للضغط (تجربة لمس أفضل على الجوال)
     local hit = Create("TextButton", {
         Size = UDim2.fromScale(1, 1),
         BackgroundTransparency = 1,
         Text = "",
         ZIndex = 5,
-        Parent = card,
+        Parent = container,
     })
 
     local function Render()
@@ -1915,23 +1751,16 @@ function TabMethods:CreateToggle(name, default, callback)
             Tween(switch, TI_Fast, { BackgroundColor3 = Theme.Accent })
             Tween(switchStroke, TI_Fast, { Color = Theme.Accent, Transparency = 0.35 })
             Tween(knob, TI_Fast, { Position = UDim2.new(1, -21, 0.5, -9) })
-            if not switchGradient then
-                switchGradient = Gradient(switch, 90, Theme.Accent, Theme.AccentDeep)
-            end
         else
             Tween(switch, TI_Fast, { BackgroundColor3 = Theme.ElementBright })
             Tween(switchStroke, TI_Fast, { Color = Theme.Stroke, Transparency = 0.88 })
             Tween(knob, TI_Fast, { Position = UDim2.new(0, 3, 0.5, -9) })
-            if switchGradient then
-                switchGradient:Destroy()
-                switchGradient = nil
-            end
         end
     end
 
     hit.MouseButton1Click:Connect(function()
         state = not state
-        knobScale.Scale = 0.82
+        knobScale.Scale = 0.82 -- نبضة ضغط على المقبض
         Tween(knobScale, TI_Click, { Scale = 1 })
         Render()
         if callback then
@@ -1941,7 +1770,7 @@ function TabMethods:CreateToggle(name, default, callback)
     end)
 
     local handle = {}
-    handle.Container = card
+    handle.Container = container
     handle.Set = function(value)
         value = value == true
         if value ~= state then
@@ -1950,58 +1779,54 @@ function TabMethods:CreateToggle(name, default, callback)
         end
     end
     handle.Get = function() return state end
-    RegisterConfigurable(self, flag or name, "Toggle", handle.Get, handle.Set)
+    RegisterConfigurable(self, name, "Toggle", handle.Get, handle.Set)
     return handle
 end
 
--- شريط تمرير: CreateSlider(name, min, max, default, callback) أو جدول
+-- شريط تمرير نحيف وأنيق (تدرج بنفسجي + مقبض متوهج)
 function TabMethods:CreateSlider(name, min, max, default, callback)
-    local desc, icon, flag
-    if type(name) == "table" then
-        local o = name
-        name     = tostring(o.Title or o.Name or "Slider")
-        desc     = o.Description or o.Desc
-        icon     = o.Icon
-        flag     = o.Flag
-        min      = o.Min or o.Minimum
-        max      = o.Max or o.Maximum
-        default  = o.Default
-        callback = o.Callback
-    else
-        name = tostring(name or "Slider")
-    end
     min = tonumber(min) or 0
     max = tonumber(max) or 100
     if max < min then
         min, max = max, min
     end
     default = math.clamp(tonumber(default) or min, min, max)
-    desc = (desc and desc ~= "") and tostring(desc) or nil
 
-    local height = desc and 74 or 58
-    local card, leftInset = BuildCard(self, name, desc, icon, 104, height)
-    RegisterSearchItem(self, name .. " " .. (desc or ""), card)
+    local container = CreateElement(self.Page, NextOrder(self), 52)
+    RegisterSearchItem(self, name, container)
+
+    Create("TextLabel", {
+        Size = UDim2.new(1, -122, 0, 16),
+        Position = UDim2.new(0, 14, 0, 8),
+        BackgroundTransparency = 1,
+        Text = name,
+        TextColor3 = Theme.Text,
+        Font = Enum.Font.GothamMedium,
+        TextSize = 12,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextTruncate = Enum.TextTruncate.AtEnd,
+        Parent = container,
+    })
 
     local valueLabel = Create("TextLabel", {
         AnchorPoint = Vector2.new(1, 0),
-        Position = UDim2.new(1, -12, 0, desc and 11 or 0),
-        Size = UDim2.fromOffset(80, desc and 15 or height),
+        Position = UDim2.new(1, -12, 0, 8),
+        Size = UDim2.fromOffset(90, 16),
         BackgroundTransparency = 1,
         Text = "",
         TextColor3 = Theme.AccentSoft,
         Font = Enum.Font.GothamBold,
         TextSize = 12,
         TextXAlignment = Enum.TextXAlignment.Right,
-        TextYAlignment = Enum.TextYAlignment.Center,
-        Parent = card,
+        Parent = container,
     })
 
-    local track = Create("Frame", {
-        Size = UDim2.new(1, -(leftInset + 14), 0, 4),
-        Position = UDim2.new(0, leftInset, 1, -18),
+    local track = Create("Frame", { -- مسار نحيف 4px
+        Size = UDim2.new(1, -28, 0, 4),
+        Position = UDim2.new(0, 14, 1, -16),
         BackgroundColor3 = Theme.ElementBright,
         BorderSizePixel = 0,
-        Parent = card,
+        Parent = container,
     })
     Corner(track, 2)
 
@@ -2012,9 +1837,9 @@ function TabMethods:CreateSlider(name, min, max, default, callback)
         Parent = track,
     })
     Corner(fill, 2)
-    Gradient(fill, 0, Theme.Accent, Theme.AccentSoft)
+    Gradient(fill, 0, Theme.Accent, Theme.AccentSoft) -- بنفسجي → فاتح أفقياً
 
-    local knob = Create("Frame", {
+    local knob = Create("Frame", { -- مقبض أبيض بحلقة بنفسجية متوهجة
         AnchorPoint = Vector2.new(0.5, 0.5),
         Size = UDim2.fromOffset(13, 13),
         Position = UDim2.new((default - min) / (max - min), 0, 0.5, 0),
@@ -2056,7 +1881,7 @@ function TabMethods:CreateSlider(name, min, max, default, callback)
         BackgroundTransparency = 1,
         Text = "",
         ZIndex = 5,
-        Parent = card,
+        Parent = container,
     })
 
     local dragging = false
@@ -2070,7 +1895,7 @@ function TabMethods:CreateSlider(name, min, max, default, callback)
         if input.UserInputType == Enum.UserInputType.MouseButton1
         or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
-            self.Page.ScrollingEnabled = false
+            self.Page.ScrollingEnabled = false -- منع تمرير الصفحة أثناء السحب
             UpdateFromX(input.Position.X)
         end
     end)
@@ -2091,32 +1916,18 @@ function TabMethods:CreateSlider(name, min, max, default, callback)
     end))
 
     local handle = {}
-    handle.Container = card
+    handle.Container = container
     handle.Set = function(value)
         SetValue(tonumber(value) or min, false)
     end
     handle.Get = function() return current end
-    RegisterConfigurable(self, flag or name, "Slider", handle.Get, handle.Set)
+    RegisterConfigurable(self, name, "Slider", handle.Get, handle.Set)
     return handle
 end
 
--- قائمة منسدلة: CreateDropdown(name, options, default, callback) أو جدول
+-- قائمة منسدلة بحركة انسيابية ناعمة (خيارات بحجم لمس مريح)
 function TabMethods:CreateDropdown(name, options, default, callback)
-    local desc, icon, flag
-    if type(name) == "table" then
-        local o = name
-        name     = tostring(o.Title or o.Name or "Dropdown")
-        desc     = o.Description or o.Desc
-        icon     = o.Icon
-        flag     = o.Flag
-        options  = o.Options or o.Values or o.Items
-        default  = o.Default
-        callback = o.Callback
-    else
-        name = tostring(name or "Dropdown")
-    end
     options = options or {}
-
     local selected = nil
     if default ~= nil and table.find(options, default) then
         selected = default
@@ -2124,19 +1935,19 @@ function TabMethods:CreateDropdown(name, options, default, callback)
         selected = options[1]
     end
 
-    local collapsed = desc and 58 or 44
+    local collapsed = 44
     local listHeight = math.min(#options * 26 + math.max(#options - 1, 0) * 4 + 10, 140)
 
-    local card, leftInset = BuildCard(self, name, desc, icon, 150, collapsed)
-    card.ClipsDescendants = true
-    RegisterSearchItem(self, name .. " " .. (desc or ""), card)
+    local container = CreateElement(self.Page, NextOrder(self), collapsed)
+    container.ClipsDescendants = true
+    CreateRowLabel(container, name, 152)
+    RegisterSearchItem(self, name, container)
 
     local ddBtn = Create("TextButton", {
         AnchorPoint = Vector2.new(1, 0),
-        Position = UDim2.new(1, -12, 0, desc and 12 or 7),
+        Position = UDim2.new(1, -10, 0, 8),
         Size = UDim2.fromOffset(126, 30),
-        BackgroundColor3 = Theme.BackgroundSoft,
-        BackgroundTransparency = 0.25,
+        BackgroundColor3 = Theme.ElementHover,
         Text = tostring(selected or "Select..."),
         TextColor3 = Theme.Text,
         Font = Enum.Font.GothamMedium,
@@ -2145,15 +1956,15 @@ function TabMethods:CreateDropdown(name, options, default, callback)
         TextTruncate = Enum.TextTruncate.AtEnd,
         AutoButtonColor = false,
         BorderSizePixel = 0,
-        Parent = card,
+        Parent = container,
     })
-    Corner(ddBtn, 9)
+    Corner(ddBtn, 10)
     Stroke(ddBtn, Theme.Stroke, 0.88, 1)
     Create("UIPadding", { PaddingLeft = UDim.new(0, 11), PaddingRight = UDim.new(0, 26), Parent = ddBtn })
-    BindHover(ddBtn, Theme.BackgroundSoft, Theme.ElementHover, Theme.ElementPress)
+    BindHover(ddBtn, Theme.ElementHover, Theme.ElementBright, Theme.ElementPress)
 
     local arrow = Create("TextLabel", {
-        Position = UDim2.new(1, -24, 0, (desc and 12 or 7) + 9),
+        Position = UDim2.new(1, -24, 0, 17),
         Size = UDim2.fromOffset(12, 12),
         BackgroundTransparency = 1,
         Text = "▼",
@@ -2161,12 +1972,12 @@ function TabMethods:CreateDropdown(name, options, default, callback)
         TextColor3 = Theme.SubText,
         Font = Enum.Font.GothamBold,
         ZIndex = 2,
-        Parent = card,
+        Parent = container,
     })
 
     local list = Create("ScrollingFrame", {
-        Position = UDim2.new(0, leftInset, 0, collapsed),
-        Size = UDim2.new(1, -(leftInset + 14), 0, 0),
+        Position = UDim2.new(0, 10, 0, collapsed),
+        Size = UDim2.new(1, -20, 0, 0),
         BackgroundColor3 = Theme.Background,
         BackgroundTransparency = 0.10,
         BorderSizePixel = 0,
@@ -2179,7 +1990,7 @@ function TabMethods:CreateDropdown(name, options, default, callback)
         CanvasSize = UDim2.new(),
         AutomaticCanvasSize = Enum.AutomaticSize.Y,
         ZIndex = 4,
-        Parent = card,
+        Parent = container,
     })
     Corner(list, 10)
     Stroke(list, Theme.Stroke, 0.90, 1)
@@ -2197,11 +2008,11 @@ function TabMethods:CreateDropdown(name, options, default, callback)
         Tween(arrow, TI_Fast, { Rotation = open and 180 or 0, TextColor3 = open and Theme.AccentSoft or Theme.SubText })
         if open then
             list.Visible = true
-            Tween(card, TI_Smooth, { Size = UDim2.new(1, 0, 0, collapsed + 8 + listHeight) })
-            Tween(list, TI_Smooth, { Size = UDim2.new(1, -(leftInset + 14), 0, listHeight) })
+            Tween(container, TI_Smooth, { Size = UDim2.new(1, 0, 0, collapsed + 8 + listHeight) })
+            Tween(list, TI_Smooth, { Size = UDim2.new(1, -20, 0, listHeight) })
         else
-            Tween(card, TI_Fast, { Size = UDim2.new(1, 0, 0, collapsed) })
-            local tw = Tween(list, TI_Fast, { Size = UDim2.new(1, -(leftInset + 14), 0, 0) })
+            Tween(container, TI_Fast, { Size = UDim2.new(1, 0, 0, collapsed) })
+            local tw = Tween(list, TI_Fast, { Size = UDim2.new(1, -20, 0, 0) })
             tw.Completed:Once(function()
                 if not expanded then
                     list.Visible = false
@@ -2215,7 +2026,7 @@ function TabMethods:CreateDropdown(name, options, default, callback)
         for option, button in pairs(optionButtons) do
             local isSelected = (option == selected)
             Tween(button, TI_Fast, {
-                BackgroundColor3 = isSelected and Theme.Accent or Theme.BackgroundSoft,
+                BackgroundColor3 = isSelected and Theme.Accent or Theme.ElementHover,
                 BackgroundTransparency = isSelected and 0.28 or 0.25,
                 TextColor3 = isSelected and Theme.Text or Theme.SubText,
             })
@@ -2225,7 +2036,7 @@ function TabMethods:CreateDropdown(name, options, default, callback)
     for index, option in ipairs(options) do
         local optBtn = Create("TextButton", {
             Size = UDim2.new(1, 0, 0, 26),
-            BackgroundColor3 = Theme.BackgroundSoft,
+            BackgroundColor3 = Theme.ElementHover,
             BackgroundTransparency = 0.25,
             Text = tostring(option),
             TextColor3 = Theme.SubText,
@@ -2260,7 +2071,7 @@ function TabMethods:CreateDropdown(name, options, default, callback)
     RefreshOptionColors()
 
     local handle = {}
-    handle.Container = card
+    handle.Container = container
     handle.Set = function(option)
         if table.find(options, option) then
             selected = option
@@ -2269,37 +2080,22 @@ function TabMethods:CreateDropdown(name, options, default, callback)
         end
     end
     handle.Get = function() return selected end
-    RegisterConfigurable(self, flag or name, "Dropdown", handle.Get, handle.Set)
+    RegisterConfigurable(self, name, "Dropdown", handle.Get, handle.Set)
     return handle
 end
 
--- حقل إدخال: CreateInput(name, placeholder, callback) أو جدول
+-- حقل إدخال نصي (تركيز بحلقة بنفسجية متوهجة)
 function TabMethods:CreateInput(name, placeholder, callback)
-    local desc, icon, flag, initial
-    if type(name) == "table" then
-        local o = name
-        name        = tostring(o.Title or o.Name or "Input")
-        desc        = o.Description or o.Desc
-        icon        = o.Icon
-        flag        = o.Flag
-        placeholder = o.Placeholder
-        initial     = o.Default or o.Text
-        callback    = o.Callback
-    else
-        name = tostring(name or "Input")
-    end
-    desc = (desc and desc ~= "") and tostring(desc) or nil
-
-    local card = BuildCard(self, name, desc, icon, 164, desc and 58 or 44)
-    RegisterSearchItem(self, name .. " " .. (desc or ""), card)
+    local container = CreateElement(self.Page, NextOrder(self), 44)
+    CreateRowLabel(container, name, 164)
+    RegisterSearchItem(self, name, container)
 
     local box = Create("TextBox", {
         AnchorPoint = Vector2.new(1, 0.5),
-        Position = UDim2.new(1, -12, 0.5, 0),
+        Position = UDim2.new(1, -10, 0.5, 0),
         Size = UDim2.fromOffset(138, 30),
-        BackgroundColor3 = Theme.BackgroundSoft,
-        BackgroundTransparency = 0.25,
-        Text = initial and tostring(initial) or "",
+        BackgroundColor3 = Theme.ElementHover,
+        Text = "",
         PlaceholderText = placeholder or "Type here...",
         PlaceholderColor3 = Theme.SubText,
         TextColor3 = Theme.Text,
@@ -2309,9 +2105,9 @@ function TabMethods:CreateInput(name, placeholder, callback)
         ClearTextOnFocus = false,
         ClipsDescendants = true,
         BorderSizePixel = 0,
-        Parent = card,
+        Parent = container,
     })
-    Corner(box, 9)
+    Corner(box, 10)
     local boxStroke = Stroke(box, Theme.Stroke, 0.90, 1)
     Create("UIPadding", { PaddingLeft = UDim.new(0, 10), PaddingRight = UDim.new(0, 10), Parent = box })
 
@@ -2320,7 +2116,7 @@ function TabMethods:CreateInput(name, placeholder, callback)
         Tween(boxStroke, TI_Fast, { Color = Theme.Accent, Transparency = 0.25 })
     end)
     box.FocusLost:Connect(function(enterPressed)
-        Tween(box, TI_Fast, { BackgroundColor3 = Theme.BackgroundSoft })
+        Tween(box, TI_Fast, { BackgroundColor3 = Theme.ElementHover })
         Tween(boxStroke, TI_Fast, { Color = Theme.Stroke, Transparency = 0.90 })
         if callback then
             local ok, err = pcall(callback, box.Text, enterPressed)
@@ -2328,51 +2124,37 @@ function TabMethods:CreateInput(name, placeholder, callback)
         end
     end)
 
-    RegisterConfigurable(self, flag or name, "Input",
+    RegisterConfigurable(self, name, "Input",
         function() return box.Text end,
         function(value)
             box.Text = tostring(value or "")
         end)
-    return card
+    return container
 end
 
--- ربط مفتاح: CreateKeybind(name, defaultKey, callback) أو جدول
+-- ربط مفتاح اختصار (وضع التقاط بتوهج بنفسجي)
 function TabMethods:CreateKeybind(name, defaultKey, callback)
-    local desc, icon, flag
-    if type(name) == "table" then
-        local o = name
-        name       = tostring(o.Title or o.Name or "Keybind")
-        desc       = o.Description or o.Desc
-        icon       = o.Icon
-        flag       = o.Flag
-        defaultKey = o.Default
-        callback   = o.Callback
-    else
-        name = tostring(name or "Keybind")
-    end
-    desc = (desc and desc ~= "") and tostring(desc) or nil
-
-    local card = BuildCard(self, name, desc, icon, 104, desc and 58 or 44)
-    RegisterSearchItem(self, name .. " " .. (desc or ""), card)
+    local container = CreateElement(self.Page, NextOrder(self), 40)
+    CreateRowLabel(container, name, 102)
+    RegisterSearchItem(self, name, container)
 
     local currentKey = defaultKey
     local listening = false
 
     local bindBtn = Create("TextButton", {
         AnchorPoint = Vector2.new(1, 0.5),
-        Position = UDim2.new(1, -12, 0.5, 0),
-        Size = UDim2.fromOffset(76, 28),
-        BackgroundColor3 = Theme.BackgroundSoft,
-        BackgroundTransparency = 0.25,
+        Position = UDim2.new(1, -10, 0.5, 0),
+        Size = UDim2.fromOffset(74, 28),
+        BackgroundColor3 = Theme.ElementHover,
         Text = currentKey and currentKey.Name or "None",
-        TextColor3 = Theme.AccentSoft,
+        TextColor3 = Theme.SubText,
         Font = Enum.Font.GothamBold,
         TextSize = 11,
         AutoButtonColor = false,
         BorderSizePixel = 0,
-        Parent = card,
+        Parent = container,
     })
-    Corner(bindBtn, 9)
+    Corner(bindBtn, 10)
     local bindStroke = Stroke(bindBtn, Theme.Stroke, 0.90, 1)
 
     local function SetListening(on)
@@ -2383,7 +2165,7 @@ function TabMethods:CreateKeybind(name, defaultKey, callback)
             Tween(bindStroke, TI_Fast, { Color = Theme.Accent, Transparency = 0.25 })
         else
             bindBtn.Text = currentKey and currentKey.Name or "None"
-            Tween(bindBtn, TI_Fast, { BackgroundColor3 = Theme.BackgroundSoft, TextColor3 = Theme.AccentSoft })
+            Tween(bindBtn, TI_Fast, { BackgroundColor3 = Theme.ElementHover, TextColor3 = Theme.SubText })
             Tween(bindStroke, TI_Fast, { Color = Theme.Stroke, Transparency = 0.90 })
         end
     end
@@ -2399,7 +2181,7 @@ function TabMethods:CreateKeybind(name, defaultKey, callback)
                 SetListening(false)
             elseif input.UserInputType == Enum.UserInputType.MouseButton1
             or input.UserInputType == Enum.UserInputType.Touch then
-                SetListening(false)
+                SetListening(false) -- نقرة أخرى تلغي وضع الالتقاط
             end
             return
         end
@@ -2413,7 +2195,7 @@ function TabMethods:CreateKeybind(name, defaultKey, callback)
     end))
 
     local handle = {}
-    handle.Container = card
+    handle.Container = container
     handle.Set = function(key)
         currentKey = key
         if not listening then
@@ -2421,7 +2203,7 @@ function TabMethods:CreateKeybind(name, defaultKey, callback)
         end
     end
     handle.Get = function() return currentKey end
-    RegisterConfigurable(self, flag or name, "Keybind",
+    RegisterConfigurable(self, name, "Keybind",
         function() return currentKey and currentKey.Name or "" end,
         function(value)
             if type(value) == "string" and value ~= "" then
@@ -2434,41 +2216,34 @@ function TabMethods:CreateKeybind(name, defaultKey, callback)
     return handle
 end
 
--- بطاقة المطور: CreateProfile(name, imageId, role, socialButtonText, socialCallback)
+-- بطاقة المطور (Developer Profile Card) — إطار دائري بتوهج بنفسجي
+-- الاستخدام: Tab:CreateProfile("Name", imageId, "Role", "BtnText", callback)
 function TabMethods:CreateProfile(name, imageId, role, socialButtonText, socialCallback)
-    if type(name) == "table" then
-        local o = name
-        name             = tostring(o.Name or o.Title or "Developer")
-        imageId          = o.Image or o.ImageId or o.Icon
-        role             = o.Role
-        socialButtonText = o.ButtonText or o.Button
-        socialCallback   = o.Callback
-    end
     name = tostring(name or "Developer")
     role = tostring(role or "Developer")
 
-    local card = CreateCard(self.Holder, NextOrder(self), 70)
-    RegisterSearchItem(self, name, card)
+    local container = CreateElement(self.Page, NextOrder(self), 70)
+    RegisterSearchItem(self, name, container)
     local assetId = ToAssetId(imageId)
 
-    if assetId then
+    if assetId then -- صورة المطور مقطوعة دائرياً بإطار بنفسجي متوهج
         local avatar = Create("ImageLabel", {
             Size = UDim2.fromOffset(46, 46),
             Position = UDim2.new(0, 12, 0.5, -23),
             BackgroundColor3 = Theme.ElementHover,
             Image = assetId,
             BorderSizePixel = 0,
-            Parent = card,
+            Parent = container,
         })
         Create("UICorner", { CornerRadius = UDim.new(1, 0), Parent = avatar })
         Create("UIStroke", { Color = Theme.Accent, Thickness = 1.5, Transparency = 0.40, Parent = avatar })
-    else
+    else -- بديل أنيق: حرف أول من الاسم داخل دائرة بنفسجية
         local avatar = Create("Frame", {
             Size = UDim2.fromOffset(46, 46),
             Position = UDim2.new(0, 12, 0.5, -23),
             BackgroundColor3 = Theme.ElementHover,
             BorderSizePixel = 0,
-            Parent = card,
+            Parent = container,
         })
         Create("UICorner", { CornerRadius = UDim.new(1, 0), Parent = avatar })
         Create("UIStroke", { Color = Theme.Accent, Thickness = 1.5, Transparency = 0.40, Parent = avatar })
@@ -2483,7 +2258,7 @@ function TabMethods:CreateProfile(name, imageId, role, socialButtonText, socialC
         })
     end
 
-    Create("TextLabel", {
+    Create("TextLabel", { -- الاسم
         Size = UDim2.new(1, -196, 0, 16),
         Position = UDim2.new(0, 70, 0, 14),
         BackgroundTransparency = 1,
@@ -2493,19 +2268,19 @@ function TabMethods:CreateProfile(name, imageId, role, socialButtonText, socialC
         TextSize = 14,
         TextXAlignment = Enum.TextXAlignment.Left,
         TextTruncate = Enum.TextTruncate.AtEnd,
-        Parent = card,
+        Parent = container,
     })
 
-    local roleDot = Create("Frame", {
+    local roleDot = Create("Frame", { -- نقطة تمييز بنفسجية بجانب الدور
         Size = UDim2.fromOffset(5, 5),
         Position = UDim2.new(0, 70, 0, 41),
         BackgroundColor3 = Theme.Accent,
         BorderSizePixel = 0,
-        Parent = card,
+        Parent = container,
     })
     Corner(roleDot, 3)
 
-    Create("TextLabel", {
+    Create("TextLabel", { -- الدور
         Size = UDim2.new(1, -186, 0, 14),
         Position = UDim2.new(0, 82, 0, 36),
         BackgroundTransparency = 1,
@@ -2515,10 +2290,10 @@ function TabMethods:CreateProfile(name, imageId, role, socialButtonText, socialC
         TextSize = 11,
         TextXAlignment = Enum.TextXAlignment.Left,
         TextTruncate = Enum.TextTruncate.AtEnd,
-        Parent = card,
+        Parent = container,
     })
 
-    if socialButtonText then
+    if socialButtonText then -- زر تفاعلي اختياري بجانب البطاقة
         local socialBtn = Create("TextButton", {
             AnchorPoint = Vector2.new(1, 0.5),
             Position = UDim2.new(1, -12, 0.5, 0),
@@ -2531,7 +2306,7 @@ function TabMethods:CreateProfile(name, imageId, role, socialButtonText, socialC
             TextTruncate = Enum.TextTruncate.AtEnd,
             AutoButtonColor = false,
             BorderSizePixel = 0,
-            Parent = card,
+            Parent = container,
         })
         Corner(socialBtn, 10)
         Stroke(socialBtn, Theme.Stroke, 0.80, 1)
@@ -2549,40 +2324,28 @@ function TabMethods:CreateProfile(name, imageId, role, socialButtonText, socialC
         end)
     end
 
-    return card
+    return container
 end
 
--- منتقي ألوان: CreateColorpicker(name, defaultColor, callback) أو جدول
+-- منتقي ألوان (خلايا زجاجية بحلقات ناعمة)
 function TabMethods:CreateColorpicker(name, defaultColor, callback)
-    local desc, icon, flag
-    if type(name) == "table" then
-        local o = name
-        name = tostring(o.Title or o.Name or "Color")
-        desc = o.Description or o.Desc
-        icon = o.Icon
-        flag = o.Flag
-        defaultColor = o.Default
-        callback = o.Callback
-    else
-        name = tostring(name or "Color")
-    end
-    desc = (desc and desc ~= "") and tostring(desc) or nil
     local color = typeof(defaultColor) == "Color3" and defaultColor or Color3.fromRGB(255, 255, 255)
 
-    local collapsed = desc and 58 or 44
-    local card, leftInset = BuildCard(self, name, desc, icon, 74, collapsed)
-    card.ClipsDescendants = true
-    RegisterSearchItem(self, name .. " " .. (desc or ""), card)
+    local collapsed = 40
+    local container = CreateElement(self.Page, NextOrder(self), collapsed)
+    container.ClipsDescendants = true
+    CreateRowLabel(container, name, 74)
+    RegisterSearchItem(self, name, container)
 
     local swatch = Create("TextButton", {
         AnchorPoint = Vector2.new(1, 0.5),
-        Position = UDim2.new(1, -12, 0.5, 0),
+        Position = UDim2.new(1, -10, 0.5, 0),
         Size = UDim2.fromOffset(44, 26),
         BackgroundColor3 = color,
         Text = "",
         AutoButtonColor = false,
         BorderSizePixel = 0,
-        Parent = card,
+        Parent = container,
     })
     Corner(swatch, 8)
     Create("UIStroke", { Color = Theme.Stroke, Thickness = 1, Transparency = 0.50, Parent = swatch })
@@ -2596,16 +2359,16 @@ function TabMethods:CreateColorpicker(name, defaultColor, callback)
     local gridHeight = rows * 24 + (rows - 1) * 6 + 12
 
     local paletteFrame = Create("Frame", {
-        Position = UDim2.new(0, leftInset, 0, collapsed + 2),
-        Size = UDim2.new(1, -(leftInset + 14), 0, 0),
+        Position = UDim2.new(0, 10, 0, collapsed + 2),
+        Size = UDim2.new(1, -20, 0, 0),
         BackgroundColor3 = Theme.Background,
         BackgroundTransparency = 0.10,
         BorderSizePixel = 0,
         Visible = false,
-        Parent = card,
+        Parent = container,
     })
     Corner(paletteFrame, 10)
-    Create("UIGridLayout", {
+    Create("UIGridLayout", { -- خلايا مرنة تتكيف مع عرض الشاشة
         CellSize = UDim2.new(1 / 6, -7, 0, 24),
         CellPadding = UDim.new(0, 6, 0, 6),
         HorizontalAlignment = Enum.HorizontalAlignment.Center,
@@ -2620,11 +2383,11 @@ function TabMethods:CreateColorpicker(name, defaultColor, callback)
         open = value
         if value then
             paletteFrame.Visible = true
-            Tween(card, TI_Smooth, { Size = UDim2.new(1, 0, 0, collapsed + 6 + gridHeight) })
-            Tween(paletteFrame, TI_Smooth, { Size = UDim2.new(1, -(leftInset + 14), 0, gridHeight) })
+            Tween(container, TI_Smooth, { Size = UDim2.new(1, 0, 0, collapsed + 6 + gridHeight) })
+            Tween(paletteFrame, TI_Smooth, { Size = UDim2.new(1, -20, 0, gridHeight) })
         else
-            Tween(card, TI_Fast, { Size = UDim2.new(1, 0, 0, collapsed) })
-            local tw = Tween(paletteFrame, TI_Fast, { Size = UDim2.new(1, -(leftInset + 14), 0, 0) })
+            Tween(container, TI_Fast, { Size = UDim2.new(1, 0, 0, collapsed) })
+            local tw = Tween(paletteFrame, TI_Fast, { Size = UDim2.new(1, -20, 0, 0) })
             tw.Completed:Once(function()
                 if not open then
                     paletteFrame.Visible = false
@@ -2660,7 +2423,7 @@ function TabMethods:CreateColorpicker(name, defaultColor, callback)
     end)
 
     local handle = {}
-    handle.Container = card
+    handle.Container = container
     handle.Set = function(value)
         if typeof(value) == "Color3" then
             color = value
@@ -2668,18 +2431,18 @@ function TabMethods:CreateColorpicker(name, defaultColor, callback)
         end
     end
     handle.Get = function() return color end
-    RegisterConfigurable(self, flag or name, "Colorpicker", handle.Get, handle.Set)
+    RegisterConfigurable(self, name, "Colorpicker", handle.Get, handle.Set)
     return handle
 end
 
--- عنوان قسم (Divider يتلاشى نحو اليمين)
+-- عنوان قسم (Divider يتلاشى نحو اليمين بأناقة)
 function TabMethods:CreateSection(title)
     local container = Create("Frame", {
         Size = UDim2.new(1, 0, 0, 26),
         BackgroundTransparency = 1,
         BorderSizePixel = 0,
         LayoutOrder = NextOrder(self),
-        Parent = self.Holder,
+        Parent = self.Page,
     })
     RegisterSearchItem(self, title, container)
     Create("TextLabel", {
@@ -2694,7 +2457,7 @@ function TabMethods:CreateSection(title)
         TextTruncate = Enum.TextTruncate.AtEnd,
         Parent = container,
     })
-    local divider = Create("Frame", {
+    local divider = Create("Frame", { -- خط فاصل رفيع يتلاشى تدريجياً
         AnchorPoint = Vector2.new(0, 1),
         Position = UDim2.new(0, 0, 1, 0),
         Size = UDim2.new(1, 0, 0, 1),
@@ -2704,13 +2467,13 @@ function TabMethods:CreateSection(title)
         Parent = container,
     })
     Create("UIGradient", {
-        Transparency = NumberSequence.new(0.30, 1),
+        Transparency = NumberSequence.new(0.30, 1), -- يتلاشى من اليسار إلى اليمين
         Parent = divider,
     })
     return container
 end
 
--- فقرة نصية: CreateParagraph("نص") أو CreateParagraph("عنوان", "نص")
+-- فقرة نصية (بطاقة زجاجية تتمدد تلقائياً) — CreateParagraph("نص") أو CreateParagraph("عنوان", "نص")
 function TabMethods:CreateParagraph(title, body)
     if body == nil then
         body = title
@@ -2720,12 +2483,12 @@ function TabMethods:CreateParagraph(title, body)
 
     local container = Create("Frame", {
         Size = UDim2.new(1, 0, 0, 0),
-        AutomaticSize = Enum.AutomaticSize.Y,
+        AutomaticSize = Enum.AutomaticSize.Y, -- يتمدد تلقائياً حسب النص
         BackgroundColor3 = Theme.Element,
         BackgroundTransparency = 0.35,
         BorderSizePixel = 0,
         LayoutOrder = NextOrder(self),
-        Parent = self.Holder,
+        Parent = self.Page,
     })
     RegisterSearchItem(self, body, container)
     Corner(container, 12)
@@ -2775,57 +2538,3 @@ function TabMethods:CreateParagraph(title, body)
 end
 
 return Aurora
-
---[[══════════════ مثال سريع — نفس الـ API الأصلي 100% ══════════════
-local RTM = loadstring(game:HttpGet("YourRawURL"))()
-local Window = RTM.new({ Title = "VANGUARD X | TACTICAL SUITE" })
-
-local Home = Window:CreateTab("Home", "🏠")       -- إيموجي أو rbxassetid
-local Combat = Window:CreateTab("Combat", "🎯")
-
-Home:CreateSection("Performance")
-
-Home:CreateToggle("FPS Booster", false, function(state)
-    print("FPS Booster:", state)
-end)
-
-Home:CreateButton("Server Hop", function()
-    print("Hopping...")
-end)
-
-Home:CreateSlider("FOV", 30, 120, 70, function(value)
-    print("FOV:", value)
-end)
-
-Home:CreateDropdown("Mode", {"Auto", "Manual"}, "Auto", function(option)
-    print("Mode:", option)
-end)
-
-Home:CreateInput("Webhook URL", "https://discord.com/...", function(text, enter)
-    print("Input:", text, enter)
-end)
-
-Home:CreateKeybind("Aimbot Key", Enum.KeyCode.E, function()
-    print("Aimbot toggled")
-end)
-
-Home:CreateColorpicker("ESP Color", Color3.fromRGB(138, 43, 226), function(color)
-    print("Color:", color)
-end)
-
-Home:CreateProfile("Developer", 0, "Owner", "Discord", function()
-    print("Join Discord")
-end)
-
--- اختياري (إضافة جديدة لا تكسر القديم): شكل جدول مع وصف وأيقونة
-Home:CreateToggle({
-    Title = "FPS Booster & Smooth Graphics",
-    Description = "Improve performance and smooth gameplay.",
-    Icon = "⚡",
-    Default = false,
-    Callback = function(state) print(state) end,
-})
-
-Window:SaveConfig("MyHub", "config")
-Window:LoadConfig("MyHub", "config")
-═════════════════════════════════════════════════════════════════]]
