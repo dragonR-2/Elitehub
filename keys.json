@@ -803,5 +803,10 @@
         "discord_id": "700977200215752754",
         "hwid": "6a50da8c-6424-4024-b8bc-bad2c188464f",
         "expires_at": 1790977244
+    },
+    "VGX-X3SA-OKM3-2026": {
+        "discord_id": "1328712783067353148",
+        "hwid": null,
+        "expires_at": 1790980450
     }
 }
