@@ -813,5 +813,10 @@
         "discord_id": "859568604051144724",
         "hwid": "A22C8CD6-34D7-4958-9956-B07F9FDDE33D",
         "expires_at": 1790982503
+    },
+    "VGX-J56S-3XI2-2026": {
+        "discord_id": "1346489031474548796",
+        "hwid": null,
+        "expires_at": 1790983660
     }
 }
