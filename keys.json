@@ -768,5 +768,10 @@
         "discord_id": "1505945281206816889",
         "hwid": "ae123886-2c77-4a4a-8ab0-45847ec9744f",
         "expires_at": 1790954052
+    },
+    "VGX-LYYO-GGE3-2026": {
+        "discord_id": "1317121351684722701",
+        "hwid": null,
+        "expires_at": 1790954423
     }
 }
