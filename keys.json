@@ -753,5 +753,10 @@
         "discord_id": "1436060738581172445",
         "hwid": null,
         "expires_at": 1790950566
+    },
+    "VGX-75HB-WW3B-2026": {
+        "discord_id": "1003826765522804737",
+        "hwid": null,
+        "expires_at": 1790950923
     }
 }
