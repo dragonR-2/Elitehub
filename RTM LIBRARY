@@ -109,14 +109,15 @@ local function NextOrder(tab)
     return tab._order
 end
 
--- تم إضافة ClipsDescendants لضمان عدم تجاوز أي عنصر لحدود الكرت
+-- [1] إصلاح المشكلة الجذرية: إضافة ClipsDescendants 
+-- العنصر يأخذ 1, 0 ليعتمد على UIPadding الخاص بالـ Page
 local function CreateElement(page, order, height)
     local container = Create("Frame", {
         Size = UDim2.new(1, 0, 0, height),
         BackgroundColor3 = Theme.Element,
         BackgroundTransparency = 0.25,
         BorderSizePixel = 0,
-        ClipsDescendants = true,
+        ClipsDescendants = true, -- يضمن عدم خروج أي زر خارج حدود هذا الكرت
         LayoutOrder = order,
         Parent = page,
     })
@@ -125,7 +126,6 @@ local function CreateElement(page, order, height)
     return container
 end
 
--- تم تصحيح حسابات المحاذاة لتتوقف النصوص قبل الأزرار بمسافة صحيحة
 local function CreateRowLabel(container, text, rightReserve)
     return Create("TextLabel", {
         Size = UDim2.new(1, -(rightReserve or 90), 1, 0),
@@ -1563,6 +1563,9 @@ function Aurora:CreateTab(name, icon)
         Parent = tab.Button,
     })
 
+    -- [2] إصلاح مشكلة الـ Layout من المصدر:
+    -- إضافة UIPadding لضمان هامش أفقي وعدم ملامسة الحدود، 
+    -- وإضافة ScrollBarInset لحجز مساحة الـ Scrollbar ومنع تداخل العناصر معه.
     tab.Page = Create("ScrollingFrame", {
         Size = UDim2.new(1, -20, 1, -20),
         Position = UDim2.new(0, 10, 0, 10),
@@ -1572,13 +1575,21 @@ function Aurora:CreateTab(name, icon)
         ScrollBarThickness = 3,
         ScrollBarImageColor3 = Theme.Accent,
         ScrollBarImageTransparency = 0.30,
+        ScrollBarInset = Enum.ScrollBarInset.ScrollBar, -- يمنع تداخل العناصر مع شريط التمرير
         ScrollingDirection = Enum.ScrollingDirection.Y,
         CanvasSize = UDim2.new(),
         AutomaticCanvasSize = Enum.AutomaticSize.Y, -- لا اختفاء للعناصر أبداً
         Parent = self.PageContainer,
     })
+    Create("UIPadding", {
+        PaddingTop = UDim.new(0, 4), 
+        PaddingBottom = UDim.new(0, 4),
+        PaddingLeft = UDim.new(0, 4), -- هامش يسار صغير
+        PaddingRight = UDim.new(0, 4), -- هامش يمين صغير (بجانب السكرول بار)
+        Parent = tab.Page,
+    })
     Create("UIListLayout", {
-        Padding = UDim.new(0, 8), -- مسافة صغيرة ومنظمة بين الخيارات
+        Padding = UDim.new(0, 8), -- مسافة عمودية صغيرة ومنظمة بين العناصر
         SortOrder = Enum.SortOrder.LayoutOrder,
         Parent = tab.Page,
     })
@@ -1643,7 +1654,6 @@ end
 -- نمط RTM: تدرج بنفسجي عمودي + نبضة ضغط
 function TabMethods:CreateButton(name, callback, icon)
     local container = CreateElement(self.Page, NextOrder(self), 42)
-    -- تم تعديل rightReserve بدقة ليتوقف النص قبل الزر بمسافة صغيرة (Gap)
     CreateRowLabel(container, name, 90)
     RegisterSearchItem(self, name, container)
 
@@ -1652,7 +1662,7 @@ function TabMethods:CreateButton(name, callback, icon)
     local btn = Create("TextButton", {
         AnchorPoint = Vector2.new(1, 0.5),
         Position = UDim2.new(1, -10, 0.5, 0),
-        Size = UDim2.fromOffset(70, 28), -- تم تعديل العرض ليتناسب بشكل أدق
+        Size = UDim2.fromOffset(70, 28),
         BackgroundColor3 = Theme.Accent,
         Text = "Run",
         TextColor3 = Color3.fromRGB(255, 255, 255),
@@ -1707,7 +1717,6 @@ end
 -- مفتاح تبديل بأسلوب iOS الحديث (بنفسجي عند التفعيل)
 function TabMethods:CreateToggle(name, default, callback)
     local container = CreateElement(self.Page, NextOrder(self), 42)
-    -- تم تعديل rightReserve بدقة
     CreateRowLabel(container, name, 62)
     RegisterSearchItem(self, name, container)
 
@@ -1801,7 +1810,6 @@ function TabMethods:CreateSlider(name, min, max, default, callback)
     local container = CreateElement(self.Page, NextOrder(self), 52)
     RegisterSearchItem(self, name, container)
 
-    -- تم تصحيح أبعاد النص والمسار لمنع التداخل تماماً
     Create("TextLabel", {
         Size = UDim2.new(1, -106, 0, 16),
         Position = UDim2.new(0, 14, 0, 8),
@@ -1828,7 +1836,7 @@ function TabMethods:CreateSlider(name, min, max, default, callback)
         Parent = container,
     })
 
-    local track = Create("Frame", { -- مسار نحيف 4px تم إصلاح طوله ليتوقف قبل القيمة
+    local track = Create("Frame", { -- مسار نحيف 4px
         Size = UDim2.new(1, -106, 0, 4),
         Position = UDim2.new(0, 14, 1, -16),
         BackgroundColor3 = Theme.ElementBright,
@@ -1947,14 +1955,13 @@ function TabMethods:CreateDropdown(name, options, default, callback)
 
     local container = CreateElement(self.Page, NextOrder(self), collapsed)
     container.ClipsDescendants = true
-    -- تم تعديل rightReserve ليتناسب مع العرض الجديد للقائمة
     CreateRowLabel(container, name, 140)
     RegisterSearchItem(self, name, container)
 
     local ddBtn = Create("TextButton", {
         AnchorPoint = Vector2.new(1, 0),
         Position = UDim2.new(1, -10, 0, 8),
-        Size = UDim2.fromOffset(120, 30), -- تم تصغير العرض قليلاً لمنع الـ Overflow
+        Size = UDim2.fromOffset(120, 30),
         BackgroundColor3 = Theme.ElementHover,
         Text = tostring(selected or "Select..."),
         TextColor3 = Theme.Text,
@@ -2095,14 +2102,13 @@ end
 -- حقل إدخال نصي (تركيز بحلقة بنفسجية متوهجة)
 function TabMethods:CreateInput(name, placeholder, callback)
     local container = CreateElement(self.Page, NextOrder(self), 44)
-    -- تم تعديل rightReserve ليتناسب مع الحقل
     CreateRowLabel(container, name, 140)
     RegisterSearchItem(self, name, container)
 
     local box = Create("TextBox", {
         AnchorPoint = Vector2.new(1, 0.5),
         Position = UDim2.new(1, -10, 0.5, 0),
-        Size = UDim2.fromOffset(120, 30), -- تم تصغير العرض ليناسب الإطار
+        Size = UDim2.fromOffset(120, 30),
         BackgroundColor3 = Theme.ElementHover,
         Text = "",
         PlaceholderText = placeholder or "Type here...",
@@ -2144,7 +2150,6 @@ end
 -- ربط مفتاح اختصار (وضع التقاط بتوهج بنفسجي)
 function TabMethods:CreateKeybind(name, defaultKey, callback)
     local container = CreateElement(self.Page, NextOrder(self), 40)
-    -- تم تعديل rightReserve بدقة
     CreateRowLabel(container, name, 94)
     RegisterSearchItem(self, name, container)
 
@@ -2268,7 +2273,6 @@ function TabMethods:CreateProfile(name, imageId, role, socialButtonText, socialC
         })
     end
 
-    -- تم إصلاح أبعاد النصوص والزر لمنع التداخل وتنظيم المحاذاة
     Create("TextLabel", { -- الاسم
         Size = UDim2.new(1, -112, 0, 16),
         Position = UDim2.new(0, 70, 0, 14),
@@ -2308,7 +2312,7 @@ function TabMethods:CreateProfile(name, imageId, role, socialButtonText, socialC
         local socialBtn = Create("TextButton", {
             AnchorPoint = Vector2.new(1, 0.5),
             Position = UDim2.new(1, -12, 0.5, 0),
-            Size = UDim2.fromOffset(90, 32), -- تم تصغيره قليلاً ليتناسب مع الإطار
+            Size = UDim2.fromOffset(90, 32),
             BackgroundColor3 = Theme.Accent,
             Text = tostring(socialButtonText),
             TextColor3 = Color3.fromRGB(255, 255, 255),
@@ -2345,7 +2349,6 @@ function TabMethods:CreateColorpicker(name, defaultColor, callback)
     local collapsed = 40
     local container = CreateElement(self.Page, NextOrder(self), collapsed)
     container.ClipsDescendants = true
-    -- تم تعديل rightReserve بدقة
     CreateRowLabel(container, name, 64)
     RegisterSearchItem(self, name, container)
 
