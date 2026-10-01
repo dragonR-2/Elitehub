@@ -708,5 +708,10 @@
         "discord_id": "1249271164128329790",
         "hwid": "a18db311-579e-42c0-bd1e-dd72b6f7e95f",
         "expires_at": 1790923668
+    },
+    "VGX-YT8W-MYPQ-2026": {
+        "discord_id": "1547539707951448145",
+        "hwid": null,
+        "expires_at": 1790925981
     }
 }
