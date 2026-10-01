@@ -788,5 +788,10 @@
         "discord_id": "1230447613275410432",
         "hwid": "9CFB4A4A-D933-420D-A25C-6136C6D588BB",
         "expires_at": 1790959542
+    },
+    "VGX-NUOX-9KK0-2026": {
+        "discord_id": "1370706293047955486",
+        "hwid": null,
+        "expires_at": 1790963385
     }
 }
