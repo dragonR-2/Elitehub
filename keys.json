@@ -788,5 +788,10 @@
         "discord_id": "1230447613275410432",
         "hwid": "9CFB4A4A-D933-420D-A25C-6136C6D588BB",
         "expires_at": 1790959542
+    },
+    "VGX-PTQ3-E9PI-2026": {
+        "discord_id": "1294957718972534786",
+        "hwid": null,
+        "expires_at": 1790969525
     }
 }
