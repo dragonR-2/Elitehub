@@ -773,5 +773,10 @@
         "discord_id": "1317121351684722701",
         "hwid": "0F2E7B26-B8AD-42E8-B0A2-6715566F3FA6",
         "expires_at": 1790954423
+    },
+    "VGX-XO4Q-SJRK-2026": {
+        "discord_id": "1522864140438474963",
+        "hwid": null,
+        "expires_at": 1790954910
     }
 }
