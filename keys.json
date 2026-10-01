@@ -798,5 +798,10 @@
         "discord_id": "1239843841142558761",
         "hwid": null,
         "expires_at": 1790973415
+    },
+    "VGX-A6I0-URKU-2026": {
+        "discord_id": "700977200215752754",
+        "hwid": null,
+        "expires_at": 1790977244
     }
 }
