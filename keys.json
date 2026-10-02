@@ -833,5 +833,10 @@
         "discord_id": "1546115976976801904",
         "hwid": "5da83ae5-5061-4d31-a676-d4f74ac941c7",
         "expires_at": 1790998401
+    },
+    "VGX-JIA2-BBPN-2026": {
+        "discord_id": "1420258856197558302",
+        "hwid": null,
+        "expires_at": 1791006781
     }
 }
