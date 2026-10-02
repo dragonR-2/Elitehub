@@ -928,5 +928,10 @@
         "discord_id": "1344515649950716014",
         "hwid": "c6fc192e-835c-4545-b9ac-c2bdba441019",
         "expires_at": 1791052696
+    },
+    "VGX-BLIF-CF9R-2026": {
+        "discord_id": "929765116398936064",
+        "hwid": null,
+        "expires_at": 1791055249
     }
 }
