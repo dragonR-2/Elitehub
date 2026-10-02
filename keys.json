@@ -918,5 +918,10 @@
         "discord_id": "1346820530812223611",
         "hwid": "688C8453-D2C4-4D8B-BFAD-1B7A32DE659C",
         "expires_at": 1791049731
+    },
+    "VGX-ZMA9-7SUM-2026": {
+        "discord_id": "1355956922817188055",
+        "hwid": null,
+        "expires_at": 1791050288
     }
 }
