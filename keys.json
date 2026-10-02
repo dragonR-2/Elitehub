@@ -863,5 +863,10 @@
         "discord_id": "1555550056784863383",
         "hwid": "61df37a8-13d3-4b60-940e-5ee9e9725a7f",
         "expires_at": 1791029644
+    },
+    "VGX-YX9R-92WN-2026": {
+        "discord_id": "1404279214101889104",
+        "hwid": null,
+        "expires_at": 1791030182
     }
 }
