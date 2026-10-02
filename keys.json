@@ -898,5 +898,10 @@
         "discord_id": "1099375995892547714",
         "hwid": "C107657C-9BC6-44C9-BF0F-B68326AC330D",
         "expires_at": 1791038084
+    },
+    "VGX-LX16-5JSE-2026": {
+        "discord_id": "1288168029393387530",
+        "hwid": null,
+        "expires_at": 1791039130
     }
 }
