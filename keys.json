@@ -903,5 +903,10 @@
         "discord_id": "1198550153154547733",
         "hwid": "f7a42ada-752b-43fc-94c9-799b60f7a85d",
         "expires_at": 1791041780
+    },
+    "VGX-Y02V-FNLB-2026": {
+        "discord_id": "1030406740476440648",
+        "hwid": null,
+        "expires_at": 1791046294
     }
 }
