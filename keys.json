@@ -858,5 +858,10 @@
         "discord_id": "1438743379868520459",
         "hwid": "25AC186C-0AE1-43BC-AF1A-61E60FB3825B",
         "expires_at": 1791026917
+    },
+    "VGX-T9TV-E7IV-2026": {
+        "discord_id": "1555550056784863383",
+        "hwid": null,
+        "expires_at": 1791029644
     }
 }
