@@ -913,5 +913,10 @@
         "discord_id": "1533162110757109926",
         "hwid": "c69cea35-1c71-4c76-b9a5-cd1763d01d36",
         "expires_at": 1791048485
+    },
+    "VGX-GQFH-N73W-2026": {
+        "discord_id": "1346820530812223611",
+        "hwid": null,
+        "expires_at": 1791049731
     }
 }
