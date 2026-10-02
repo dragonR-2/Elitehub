@@ -873,5 +873,10 @@
         "discord_id": "1554492147476992083",
         "hwid": null,
         "expires_at": 1791032443
+    },
+    "VGX-B23S-CT3M-2026": {
+        "discord_id": "1190417153858486456",
+        "hwid": null,
+        "expires_at": 1791034237
     }
 }
