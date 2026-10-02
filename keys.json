@@ -908,5 +908,10 @@
         "discord_id": "1030406740476440648",
         "hwid": "DBBF7ECF-9F8D-4E01-8DEF-68437FA91D53",
         "expires_at": 1791046294
+    },
+    "VGX-USFI-CPG1-2026": {
+        "discord_id": "1533162110757109926",
+        "hwid": null,
+        "expires_at": 1791048485
     }
 }
