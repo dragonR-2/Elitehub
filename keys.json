@@ -838,5 +838,10 @@
         "discord_id": "1420258856197558302",
         "hwid": null,
         "expires_at": 1791006781
+    },
+    "VGX-TB1R-W10Y-2026": {
+        "discord_id": "1400065179953139805",
+        "hwid": null,
+        "expires_at": 1791006868
     }
 }
