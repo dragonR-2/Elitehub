@@ -938,5 +938,10 @@
         "discord_id": "1466340828443054173",
         "hwid": "7f6c734c-03bc-4b53-ad38-11bf14052d17",
         "expires_at": 1791067569
+    },
+    "VGX-14WB-YIBF-2026": {
+        "discord_id": "1182439907747184720",
+        "hwid": null,
+        "expires_at": 1791069256
     }
 }
