@@ -843,5 +843,10 @@
         "discord_id": "1332329184399331394",
         "hwid": "04290BDF-2867-40B6-A1FC-046AEA647D54",
         "expires_at": 1791019854
+    },
+    "VGX-LVTD-DLDI-2026": {
+        "discord_id": "1533342276166877324",
+        "hwid": null,
+        "expires_at": 1791025742
     }
 }
