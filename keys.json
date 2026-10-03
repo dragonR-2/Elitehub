@@ -1093,5 +1093,10 @@
         "discord_id": "1538352187921530981",
         "hwid": "0e810bb1-3c29-4629-bd86-96ebffb167f5",
         "expires_at": 1791127467
+    },
+    "VGX-UATS-W46K-2026": {
+        "discord_id": "1506066537487007776",
+        "hwid": null,
+        "expires_at": 1791129890
     }
 }
