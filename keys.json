@@ -988,5 +988,10 @@
         "discord_id": "1354519466398187670",
         "hwid": "c5e7132b-7997-4e57-b5bc-5658ff8de24c",
         "expires_at": 1791102573
+    },
+    "VGX-VFT9-16WQ-2026": {
+        "discord_id": "1175435950353043486",
+        "hwid": null,
+        "expires_at": 1791102708
     }
 }
