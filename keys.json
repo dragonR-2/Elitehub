@@ -973,5 +973,10 @@
         "discord_id": "637508184721850368",
         "hwid": "6FE2E253-2A0D-4DCB-A0A4-7A4BDC5BD97D",
         "expires_at": 1791097014
+    },
+    "VGX-Z0UK-JRP6-2026": {
+        "discord_id": "1022021027099844688",
+        "hwid": null,
+        "expires_at": 1791098015
     }
 }
