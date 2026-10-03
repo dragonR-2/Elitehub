@@ -1053,5 +1053,10 @@
         "discord_id": "1322258097716068425",
         "hwid": "FFA82FC2-2986-4911-B472-42AE6D2DF966",
         "expires_at": 1791120149
+    },
+    "VGX-B2EW-HBSE-2026": {
+        "discord_id": "838062259774291969",
+        "hwid": null,
+        "expires_at": 1791121673
     }
 }
