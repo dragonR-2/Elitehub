@@ -1113,5 +1113,10 @@
         "discord_id": "1386457845720944680",
         "hwid": "15682964-CC0D-43FA-B6F4-8E8232AF2FAD",
         "expires_at": 1791132296
+    },
+    "VGX-3OKR-1PXR-2026": {
+        "discord_id": "1534538694642499666",
+        "hwid": null,
+        "expires_at": 1791132318
     }
 }
