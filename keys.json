@@ -1108,5 +1108,10 @@
         "discord_id": "1456037385455403258",
         "hwid": "EA17894A-383B-4AF0-9ECD-1BC8061F15AB",
         "expires_at": 1791132068
+    },
+    "VGX-J88R-DHFQ-2026": {
+        "discord_id": "1386457845720944680",
+        "hwid": null,
+        "expires_at": 1791132296
     }
 }
