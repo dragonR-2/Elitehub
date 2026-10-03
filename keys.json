@@ -1103,5 +1103,10 @@
         "discord_id": "799009891104587806",
         "hwid": "a0b06771-c3a7-471e-bc77-5b323a1fdaba",
         "expires_at": 1791131622
+    },
+    "VGX-BKYM-ECLU-2026": {
+        "discord_id": "1456037385455403258",
+        "hwid": null,
+        "expires_at": 1791132068
     }
 }
