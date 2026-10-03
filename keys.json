@@ -1023,5 +1023,10 @@
         "discord_id": "1279049300281655410",
         "hwid": "684BC7CB-DFE7-477B-AC2A-A6FDD8EB7DE0",
         "expires_at": 1791116138
+    },
+    "VGX-XD1I-PBBK-2026": {
+        "discord_id": "1545119118687080541",
+        "hwid": null,
+        "expires_at": 1791116857
     }
 }
