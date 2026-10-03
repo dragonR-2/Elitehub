@@ -983,5 +983,10 @@
         "discord_id": "1391769913269682248",
         "hwid": "a88bd718-b3e4-4ffb-a15a-ea583fbab506",
         "expires_at": 1791098722
+    },
+    "VGX-3PG3-EI3U-2026": {
+        "discord_id": "1354519466398187670",
+        "hwid": null,
+        "expires_at": 1791102573
     }
 }
