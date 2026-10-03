@@ -1018,5 +1018,10 @@
         "discord_id": "1455222269600338000",
         "hwid": "C8CAE54A-B383-4C13-AE42-A686C05A05E4",
         "expires_at": 1791113023
+    },
+    "VGX-BNMJ-CZYU-2026": {
+        "discord_id": "1279049300281655410",
+        "hwid": null,
+        "expires_at": 1791116138
     }
 }
