@@ -943,5 +943,10 @@
         "discord_id": "1182439907747184720",
         "hwid": "1f56c3d4-0770-43bd-b91b-df1cde35b426",
         "expires_at": 1791069256
+    },
+    "VGX-FFSJ-RG5B-2026": {
+        "discord_id": "1553154049291976756",
+        "hwid": null,
+        "expires_at": 1791077474
     }
 }
