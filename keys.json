@@ -963,5 +963,10 @@
         "discord_id": "1486777615489437818",
         "hwid": "7930874a-f3b2-4052-95bd-d7ef0df55bc6",
         "expires_at": 1791091333
+    },
+    "VGX-IWUE-1NNQ-2026": {
+        "discord_id": "1399408143263338576",
+        "hwid": null,
+        "expires_at": 1791091875
     }
 }
