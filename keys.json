@@ -1093,5 +1093,10 @@
         "discord_id": "1040201505103413279",
         "hwid": "A133A1E4-38B6-4BA9-A422-8815C8EBAE8F",
         "expires_at": 1791126520
+    },
+    "VGX-B5PV-SUUV-2026": {
+        "discord_id": "1538352187921530981",
+        "hwid": null,
+        "expires_at": 1791127467
     }
 }
