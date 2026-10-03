@@ -1098,5 +1098,10 @@
         "discord_id": "1506066537487007776",
         "hwid": "23a664f5-2f42-4a1a-bbdd-7bb610a6a721",
         "expires_at": 1791129890
+    },
+    "VGX-MUSR-6UHE-2026": {
+        "discord_id": "799009891104587806",
+        "hwid": null,
+        "expires_at": 1791131622
     }
 }
