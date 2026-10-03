@@ -1123,5 +1123,10 @@
         "discord_id": "1421376311435202612",
         "hwid": "AD2DE9F9-5D37-4AC0-972E-B6848063B9C6",
         "expires_at": 1791146202
+    },
+    "VGX-795F-LGKY-2026": {
+        "discord_id": "1466412375715479585",
+        "hwid": null,
+        "expires_at": 1791154539
     }
 }
