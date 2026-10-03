@@ -953,5 +953,10 @@
         "discord_id": "1288340017332097025",
         "hwid": "98bda427-273d-40fe-a475-5196dd257988",
         "expires_at": 1791082229
+    },
+    "VGX-SSXF-R1JX-2026": {
+        "discord_id": "1505503420583383222",
+        "hwid": null,
+        "expires_at": 1791085249
     }
 }
