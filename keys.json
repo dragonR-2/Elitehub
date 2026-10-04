@@ -1188,5 +1188,10 @@
         "discord_id": "1542118171635355743",
         "hwid": "88d7edf8-f408-40e6-ab4f-2a40d9b2058a",
         "expires_at": 1791195329
+    },
+    "VGX-K3R4-5FBO-2026": {
+        "discord_id": "1006448228058812466",
+        "hwid": null,
+        "expires_at": 1791198017
     }
 }
