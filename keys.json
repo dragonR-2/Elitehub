@@ -899,11 +899,6 @@
         "hwid": "1f56c3d4-0770-43bd-b91b-df1cde35b426",
         "expires_at": 1791069256
     },
-    "VGX-TLVB-K53F-2026": {
-        "discord_id": "1436564302856323243",
-        "hwid": "023fcb90-7754-42f9-87f5-f9d7ecab2709",
-        "expires_at": 1791077663
-    },
     "VGX-U92X-UO3D-2026": {
         "discord_id": "1288340017332097025",
         "hwid": "98bda427-273d-40fe-a475-5196dd257988",
@@ -1168,5 +1163,10 @@
         "discord_id": "1472274500451041413",
         "hwid": "c0cb34fa-ceb4-4247-b783-46b7f14f9894",
         "expires_at": 1791177816
+    },
+    "VGX-9K60-J5RG-2026": {
+        "discord_id": "1436564302856323243",
+        "hwid": null,
+        "expires_at": 1791179720
     }
 }
