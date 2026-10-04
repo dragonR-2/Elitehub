@@ -1128,5 +1128,10 @@
         "discord_id": "1422221460948123738",
         "hwid": "AF0D96CE-FCD3-466F-88BA-9F35D285DC07",
         "expires_at": 1791155631
+    },
+    "VGX-L3RG-RXES-2026": {
+        "discord_id": "1446698331870072906",
+        "hwid": null,
+        "expires_at": 1791165718
     }
 }
