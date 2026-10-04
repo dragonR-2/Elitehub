@@ -1143,5 +1143,10 @@
         "discord_id": "1546202842098827386",
         "hwid": "BA3119EC-F68C-4C9E-AEE6-91CA630442D9",
         "expires_at": 1791169965
+    },
+    "VGX-RY84-J3MC-2026": {
+        "discord_id": "1520297758206984292",
+        "hwid": null,
+        "expires_at": 1791170022
     }
 }
