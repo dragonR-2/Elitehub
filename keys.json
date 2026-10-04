@@ -1178,5 +1178,10 @@
         "discord_id": "987296505574608976",
         "hwid": "5C1F5750-AD86-48CE-ACDA-C7828218CD53",
         "expires_at": 1791188204
+    },
+    "VGX-KBP8-ZEVZ-2026": {
+        "discord_id": "1109844831829766264",
+        "hwid": null,
+        "expires_at": 1791189600
     }
 }
