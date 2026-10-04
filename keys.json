@@ -1138,5 +1138,10 @@
         "discord_id": "1446502924413833278",
         "hwid": "D5E9431C-56A3-49C8-B0A7-1CB1D8F29B66",
         "expires_at": 1791168083
+    },
+    "VGX-PE53-J2XI-2026": {
+        "discord_id": "1546202842098827386",
+        "hwid": null,
+        "expires_at": 1791169965
     }
 }
