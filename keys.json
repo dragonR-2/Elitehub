@@ -1183,5 +1183,10 @@
         "discord_id": "1109844831829766264",
         "hwid": "13B9C005-622D-4F40-8086-49078EBB6FCB",
         "expires_at": 1791189600
+    },
+    "VGX-NXNR-P4ZU-2026": {
+        "discord_id": "1292644766059593729",
+        "hwid": null,
+        "expires_at": 1791192658
     }
 }
