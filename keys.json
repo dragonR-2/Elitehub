@@ -1193,5 +1193,10 @@
         "discord_id": "1127199758562361344",
         "hwid": "977F19E6-D9AA-461D-AB10-F52B49919A97",
         "expires_at": 1791198392
+    },
+    "VGX-ONWS-E37H-2026": {
+        "discord_id": "1407597087725719573",
+        "hwid": null,
+        "expires_at": 1791202561
     }
 }
