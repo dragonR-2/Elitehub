@@ -1263,5 +1263,10 @@
         "discord_id": "1212185980237512735",
         "hwid": "42f90c33-399b-4e26-bc7d-aa7e30fd94d4",
         "expires_at": 1791241584
+    },
+    "VGX-O4UL-KHKZ-2026": {
+        "discord_id": "606951211136188418",
+        "hwid": null,
+        "expires_at": 1791242140
     }
 }
