@@ -1243,5 +1243,10 @@
         "discord_id": "1517811155786272881",
         "hwid": "3737f5f3-255a-4b97-94d4-6cd7fddb322b",
         "expires_at": 1791222412
+    },
+    "VGX-XOAB-CEO3-2026": {
+        "discord_id": "855307482008518688",
+        "hwid": null,
+        "expires_at": 1791226379
     }
 }
