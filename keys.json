@@ -1198,5 +1198,10 @@
         "discord_id": "1529894115947581561",
         "hwid": "1182C9AD-1777-4AD6-B964-E49CCB113797",
         "expires_at": 1791204281
+    },
+    "VGX-WSXZ-7DSA-2026": {
+        "discord_id": "1288340017332097025",
+        "hwid": null,
+        "expires_at": 1791204312
     }
 }
