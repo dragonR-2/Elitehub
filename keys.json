@@ -1218,5 +1218,10 @@
         "discord_id": "1518981117540307185",
         "hwid": "D88D8819-1BEC-4AF9-BF66-9C32FA6940E9",
         "expires_at": 1791207899
+    },
+    "VGX-0ZFR-SVIL-2026": {
+        "discord_id": "1450194371868623029",
+        "hwid": null,
+        "expires_at": 1791217386
     }
 }
