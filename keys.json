@@ -1333,5 +1333,10 @@
         "discord_id": "821966772496367616",
         "hwid": "5B95F578-32ED-4FDF-AE9E-6598BC14E724",
         "expires_at": 1791305356
+    },
+    "VGX-8G41-PDHF-2026": {
+        "discord_id": "1463968789938045132",
+        "hwid": null,
+        "expires_at": 1791305409
     }
 }
