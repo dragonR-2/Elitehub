@@ -1343,5 +1343,10 @@
         "discord_id": "1556698726926651435",
         "hwid": "36b3285c-f0f7-49e0-95bc-3bccdfa30f62",
         "expires_at": 1791305544
+    },
+    "VGX-C9DW-GHSW-2026": {
+        "discord_id": "1496835021124665465",
+        "hwid": null,
+        "expires_at": 1791308526
     }
 }
