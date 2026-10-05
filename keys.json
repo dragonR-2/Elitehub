@@ -1318,5 +1318,10 @@
         "discord_id": "840208880108699718",
         "hwid": "680C69CE-3F97-4CCA-BBA6-1FC46D2F72A1",
         "expires_at": 1791286516
+    },
+    "VGX-SACJ-XGMY-2026": {
+        "discord_id": "1005030275551596584",
+        "hwid": null,
+        "expires_at": 1791292313
     }
 }
