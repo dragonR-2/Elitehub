@@ -1368,5 +1368,10 @@
         "discord_id": "1105923910689632256",
         "hwid": "988b80e5-b454-4bf4-965c-e7dff837a9d0",
         "expires_at": 1791314889
+    },
+    "VGX-662V-SQBS-2026": {
+        "discord_id": "1015947915883184290",
+        "hwid": null,
+        "expires_at": 1791319521
     }
 }
