@@ -1129,11 +1129,6 @@
         "hwid": "d4407183-ec3f-4a20-872e-ca71f6fe1bea",
         "expires_at": 1791175964
     },
-    "VGX-O1E8-AM1Z-2026": {
-        "discord_id": "1472274500451041413",
-        "hwid": "c0cb34fa-ceb4-4247-b783-46b7f14f9894",
-        "expires_at": 1791177816
-    },
     "VGX-9K60-J5RG-2026": {
         "discord_id": "1436564302856323243",
         "hwid": null,
@@ -1353,5 +1348,10 @@
         "discord_id": "1548661946662789143",
         "hwid": "9E23D617-142B-43E3-B669-5A8CE0338CC3",
         "expires_at": 1791310655
+    },
+    "VGX-2715-NJ7N-2026": {
+        "discord_id": "1472274500451041413",
+        "hwid": null,
+        "expires_at": 1791311837
     }
 }
