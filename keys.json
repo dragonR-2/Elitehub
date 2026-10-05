@@ -1313,5 +1313,10 @@
         "discord_id": "1556573631436296223",
         "hwid": "44ba5f54-3668-4a84-b4fc-91372a5f4c51",
         "expires_at": 1791275803
+    },
+    "VGX-HYEO-RYU6-2026": {
+        "discord_id": "962931782330765363",
+        "hwid": null,
+        "expires_at": 1791281737
     }
 }
