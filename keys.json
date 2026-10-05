@@ -154,11 +154,6 @@
         "hwid": "312bfc91-63b3-47f3-9655-9345433c37f2",
         "expires_at": 1790570203
     },
-    "VGX-FRMI-EX3P-2026": {
-        "discord_id": "1253474686545821698",
-        "hwid": "7808d178-b3c3-4133-aab8-4c8e95857a45",
-        "expires_at": 1790570368
-    },
     "VGX-SNLV-T8D5-2026": {
         "discord_id": "1485103085419499701",
         "hwid": "4000bfb3-56e8-486e-94b9-8fb895304ad1",
@@ -1268,5 +1263,10 @@
         "discord_id": "1499588317908303873",
         "hwid": "2bdd46aa-33be-4cda-b6ec-4bb7f6cc010a",
         "expires_at": 1791244837
+    },
+    "VGX-HFHN-K8HH-2026": {
+        "discord_id": "1253474686545821698",
+        "hwid": null,
+        "expires_at": 1791246622
     }
 }
