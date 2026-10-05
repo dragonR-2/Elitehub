@@ -1144,11 +1144,6 @@
         "hwid": "c7ca9b91-8971-4685-95b7-d2286f7310af",
         "expires_at": 1791182913
     },
-    "VGX-0TA6-32DM-2026": {
-        "discord_id": "1022021027099844688",
-        "hwid": "51f02348-2cbb-4a95-a813-c8659c896f57",
-        "expires_at": 1791187142
-    },
     "VGX-GUMS-214R-2026": {
         "discord_id": "987296505574608976",
         "hwid": "5C1F5750-AD86-48CE-ACDA-C7828218CD53",
@@ -1348,5 +1343,10 @@
         "discord_id": "1496835021124665465",
         "hwid": "1CE2D2CA-1ED2-4D78-AFD3-4F61DAEEE1BE",
         "expires_at": 1791308526
+    },
+    "VGX-N5FQ-I6F4-2026": {
+        "discord_id": "1022021027099844688",
+        "hwid": null,
+        "expires_at": 1791309383
     }
 }
