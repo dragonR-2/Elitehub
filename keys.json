@@ -1313,5 +1313,10 @@
         "discord_id": "1392343533410582610",
         "hwid": "e62f8845-247c-442c-be8f-9ff4eaa9f892",
         "expires_at": 1791281824
+    },
+    "VGX-U6HU-5JH1-2026": {
+        "discord_id": "1502892333744783572",
+        "hwid": null,
+        "expires_at": 1791282135
     }
 }
