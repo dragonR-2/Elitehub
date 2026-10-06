@@ -1423,5 +1423,10 @@
         "discord_id": "708514700119375963",
         "hwid": "bc4cfaab-7928-4004-af46-7534c42dabfc",
         "expires_at": 1791378314
+    },
+    "VGX-NODP-OHBD-2026": {
+        "discord_id": "1399510497044205772",
+        "hwid": null,
+        "expires_at": 1791378729
     }
 }
