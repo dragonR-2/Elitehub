@@ -1398,5 +1398,10 @@
         "discord_id": "1555841690357727308",
         "hwid": "567ccaf9-3746-4102-bc17-13ec076e1e90",
         "expires_at": 1791360241
+    },
+    "VGX-MYEB-UKZY-2026": {
+        "discord_id": "1360587851263381647",
+        "hwid": null,
+        "expires_at": 1791370003
     }
 }
