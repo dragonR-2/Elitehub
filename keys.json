@@ -1458,5 +1458,10 @@
         "discord_id": "1259864077774225534",
         "hwid": "2ac0a22b-0ac1-43c7-ba3a-c98f68d7ab9c",
         "expires_at": 1791385094
+    },
+    "VGX-7CAZ-OGJI-2026": {
+        "discord_id": "1431966819358478398",
+        "hwid": null,
+        "expires_at": 1791388691
     }
 }
