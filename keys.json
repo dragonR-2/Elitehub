@@ -1473,5 +1473,10 @@
         "discord_id": "1557121123940831275",
         "hwid": "765AC836-064C-46A8-BD6B-D4FCDB813CB4",
         "expires_at": 1791412331
+    },
+    "VGX-S8HA-42HZ-2026": {
+        "discord_id": "1290527840344735765",
+        "hwid": null,
+        "expires_at": 1791413301
     }
 }
