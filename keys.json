@@ -1393,5 +1393,10 @@
         "discord_id": "1474190741625503775",
         "hwid": "ae9cb18a-3cd5-41e2-a095-e96ef6eedeac",
         "expires_at": 1791343568
+    },
+    "VGX-BCGB-37UC-2026": {
+        "discord_id": "1331200806313005110",
+        "hwid": null,
+        "expires_at": 1791343698
     }
 }
