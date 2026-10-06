@@ -1443,5 +1443,10 @@
         "discord_id": "1376951086019117077",
         "hwid": "96ed423c-a15a-4630-bd50-6aea7b44ef85",
         "expires_at": 1791382046
+    },
+    "VGX-732P-LLGY-2026": {
+        "discord_id": "1313456890633785377",
+        "hwid": null,
+        "expires_at": 1791383808
     }
 }
