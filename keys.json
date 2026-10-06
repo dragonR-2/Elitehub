@@ -1473,5 +1473,10 @@
         "discord_id": "1290527840344735765",
         "hwid": "5919b38f-eafd-449e-829c-4d60b1738649",
         "expires_at": 1791413301
+    },
+    "VGX-EEPN-ZM3M-2026": {
+        "discord_id": "1406206654965612564",
+        "hwid": null,
+        "expires_at": 1791415485
     }
 }
