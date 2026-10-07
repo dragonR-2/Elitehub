@@ -1483,5 +1483,10 @@
         "discord_id": "1013068630088503358",
         "hwid": "d9c9750b-9b13-48e7-abac-92866eb1d974",
         "expires_at": 1791457675
+    },
+    "VGX-GUE2-LAFX-2026": {
+        "discord_id": "1422973516504109229",
+        "hwid": null,
+        "expires_at": 1791457786
     }
 }
