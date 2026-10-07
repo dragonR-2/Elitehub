@@ -1498,5 +1498,10 @@
         "discord_id": "1489983295369384007",
         "hwid": "b453a621-dc45-415e-bfe5-96da3ae6af63",
         "expires_at": 1791467551
+    },
+    "VGX-PSPW-OW19-2026": {
+        "discord_id": "1436834476054413506",
+        "hwid": null,
+        "expires_at": 1791468409
     }
 }
