@@ -1548,5 +1548,10 @@
         "discord_id": "1521468969179942975",
         "hwid": "e3ec55ad-a9aa-43e3-a334-28c8d57b48d6",
         "expires_at": 1791487185
+    },
+    "VGX-ZTTW-P3UI-2026": {
+        "discord_id": "1515580520065663017",
+        "hwid": null,
+        "expires_at": 1791488374
     }
 }
