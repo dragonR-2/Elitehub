@@ -1513,5 +1513,20 @@
         "discord_id": "1523027461636358195",
         "hwid": "232ea91b-b02a-4f4a-a762-9e7bd79ab2f5",
         "expires_at": 1791469887
+    },
+    "VGX-1RW0-Z6U1-2026": {
+        "discord_id": "1529055864311382025",
+        "hwid": "7888CF90-D747-4660-9A22-ACACF0A31E34",
+        "expires_at": 1791472205
+    },
+    "VGX-YQKS-HJTS-2026": {
+        "discord_id": "1223713621264302162",
+        "hwid": null,
+        "expires_at": 1791472428
+    },
+    "VGX-RN8U-JXNE-2026": {
+        "discord_id": "1274037587161382978",
+        "hwid": null,
+        "expires_at": 1791472677
     }
 }
