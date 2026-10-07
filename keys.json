@@ -1553,5 +1553,10 @@
         "discord_id": "1310569377929756705",
         "hwid": "0744bf65-3af2-492e-b4fd-24c65365c01c",
         "expires_at": 1791483872
+    },
+    "VGX-24YQ-PCXC-2026": {
+        "discord_id": "1521468969179942975",
+        "hwid": null,
+        "expires_at": 1791487185
     }
 }
