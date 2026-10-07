@@ -1503,5 +1503,10 @@
         "discord_id": "1370295595280891985",
         "hwid": "AAF2287D-DE3B-40C9-BE8A-A321CE705C37",
         "expires_at": 1791469137
+    },
+    "VGX-DO27-HTA6-2026": {
+        "discord_id": "1465388478333194578",
+        "hwid": null,
+        "expires_at": 1791469381
     }
 }
