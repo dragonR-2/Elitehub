@@ -1478,5 +1478,10 @@
         "discord_id": "1036943940005408798",
         "hwid": "43daf4d7-7f0d-44bf-a045-c38a05c95a4d",
         "expires_at": 1791455926
+    },
+    "VGX-SPIC-QA8A-2026": {
+        "discord_id": "1013068630088503358",
+        "hwid": null,
+        "expires_at": 1791457675
     }
 }
