@@ -1473,5 +1473,10 @@
         "discord_id": "1406206654965612564",
         "hwid": "2308d49c-f3bc-47eb-8a31-05078c5f7f1d",
         "expires_at": 1791415485
+    },
+    "VGX-VPQ9-ME6T-2026": {
+        "discord_id": "1532786163562184735",
+        "hwid": null,
+        "expires_at": 1791417698
     }
 }
