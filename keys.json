@@ -1508,5 +1508,10 @@
         "discord_id": "1465388478333194578",
         "hwid": "a3585431-266e-41e9-b3d5-026ece9ec6eb",
         "expires_at": 1791469381
+    },
+    "VGX-ME3T-REUL-2026": {
+        "discord_id": "1523027461636358195",
+        "hwid": null,
+        "expires_at": 1791469887
     }
 }
