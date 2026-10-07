@@ -1543,5 +1543,10 @@
         "discord_id": "1445390760881950792",
         "hwid": "29393449-f8cf-4d47-bc3f-a2c160ee94a9",
         "expires_at": 1791476001
+    },
+    "VGX-9Y3F-DDLI-2026": {
+        "discord_id": "1182246079178219590",
+        "hwid": null,
+        "expires_at": 1791482851
     }
 }
