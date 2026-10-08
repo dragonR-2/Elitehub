@@ -1583,5 +1583,10 @@
         "discord_id": "1275103981189861428",
         "hwid": "ff72cf4d-a6eb-4af8-a819-3005fd59eb4e",
         "expires_at": 1791553583
+    },
+    "VGX-X3LM-PYQD-2026": {
+        "discord_id": "1340312885502541885",
+        "hwid": null,
+        "expires_at": 1791556768
     }
 }
