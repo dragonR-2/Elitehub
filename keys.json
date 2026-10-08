@@ -1588,5 +1588,10 @@
         "discord_id": "1445390760881950792",
         "hwid": "29393449-f8cf-4d47-bc3f-a2c160ee94a9",
         "expires_at": 1791563398
+    },
+    "VGX-11FT-EILX-2026": {
+        "discord_id": "1529814792150454304",
+        "hwid": null,
+        "expires_at": 1791565207
     }
 }
