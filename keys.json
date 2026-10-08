@@ -1603,5 +1603,10 @@
         "discord_id": "1185239622012383236",
         "hwid": "B51B122E-DD7F-4B3E-ABDB-35712F5F29C7",
         "expires_at": 1791574273
+    },
+    "VGX-VQ1P-P6QZ-2026": {
+        "discord_id": "1468830518995849342",
+        "hwid": null,
+        "expires_at": 1791578729
     }
 }
