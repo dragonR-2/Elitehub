@@ -1588,5 +1588,10 @@
         "discord_id": "1546115976976801904",
         "hwid": null,
         "expires_at": 1791548144
+    },
+    "VGX-8478-HHPH-2026": {
+        "discord_id": "1275103981189861428",
+        "hwid": null,
+        "expires_at": 1791553583
     }
 }
