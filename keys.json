@@ -1593,5 +1593,10 @@
         "discord_id": "1380873589716156487",
         "hwid": "9f636b03-59c1-4b64-92a5-5b29b63dbafd",
         "expires_at": 1791565409
+    },
+    "VGX-OXQK-9YDR-2026": {
+        "discord_id": "1510216649020543167",
+        "hwid": null,
+        "expires_at": 1791566194
     }
 }
