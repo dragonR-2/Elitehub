@@ -1598,5 +1598,10 @@
         "discord_id": "1078043805086912672",
         "hwid": "c39cd2a2-fbaf-4cf8-9ce2-166f3c79e243",
         "expires_at": 1791568104
+    },
+    "VGX-8LQ8-QBKF-2026": {
+        "discord_id": "1520791891560366273",
+        "hwid": null,
+        "expires_at": 1791568299
     }
 }
