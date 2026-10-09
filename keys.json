@@ -1598,5 +1598,10 @@
         "discord_id": "1468830518995849342",
         "hwid": "74de238f-bcf2-48ca-8ac2-87ec168e0bc9",
         "expires_at": 1791578729
+    },
+    "VGX-RR0Y-UM27-2026": {
+        "discord_id": "1515580520065663017",
+        "hwid": null,
+        "expires_at": 1791608412
     }
 }
